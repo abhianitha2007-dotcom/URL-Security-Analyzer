@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Analysis Result</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>URL Security Analyzer</h1>
+
+    <h3>Submitted URL</h3>
+
+    <p>{{ url }}</p>
+
+    <h3>Validation</h3>
+
+    <p>{{ validation }}</p>
+
+    <h3>HTTPS Status</h3>
+
+    <p>{{ https_status }}</p>
+
+    <br>
+
+    <a href="/">Analyze Another URL</a>
+
+</div>
+
+</body>
+
+</html>
