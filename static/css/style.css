@@ -27,3 +27,14 @@ button:hover{
     background:#083b68;
 
 }
+a{
+    text-decoration:none;
+    background:#0b5394;
+    color:white;
+    padding:12px 20px;
+    border-radius:5px;
+}
+
+a:hover{
+    background:#083b68;
+}
