@@ -40,6 +40,22 @@
 
     <hr>
 
+<h3>Suspicious Keywords</h3>
+
+<p>Keywords Found: {{ keyword_count }}</p>
+
+{% if keywords %}
+<ul>
+    {% for keyword in keywords %}
+        <li>{{ keyword }}</li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No suspicious keywords detected.</p>
+{% endif %}
+
+    <hr>
+
     <h3>Risk Score</h3>
 
     <p>{{ risk_score }}%</p>

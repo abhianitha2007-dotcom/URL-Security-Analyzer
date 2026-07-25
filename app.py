@@ -3,6 +3,7 @@ from flask import Flask, render_template, request
 from analyzer.https_checker import check_https
 from analyzer.url_validator import is_valid_url
 from analyzer.ip_checker import contains_ip
+from analyzer.keyword_checker import check_keywords
 
 app = Flask(__name__)
 
@@ -17,7 +18,6 @@ def analyze():
 
     url = request.form["url"]
 
-    # Validate URL
     if not is_valid_url(url):
         return render_template(
             "result.html",
@@ -25,27 +25,24 @@ def analyze():
             validation="❌ Invalid URL",
             https_status="Not Checked",
             ip_status="Not Checked",
+            keyword_count=0,
+            keywords=[],
             risk_score="-",
             verdict="Invalid URL"
         )
 
-    # HTTPS Check
     https = check_https(url)
+    https_result = "✅ HTTPS Detected" if https else "❌ HTTP Detected"
 
-    if https:
-        https_result = "✅ HTTPS Detected"
-    else:
-        https_result = "❌ HTTP Detected"
-
-    # IP Address Check
     ip_found = contains_ip(url)
+    ip_status = (
+        "⚠️ IP Address Detected"
+        if ip_found
+        else "✅ Domain Name Used"
+    )
 
-    if ip_found:
-        ip_status = "⚠️ IP Address Detected"
-    else:
-        ip_status = "✅ Domain Name Used"
+    keyword_count, keywords = check_keywords(url)
 
-    # Risk Score
     risk_score = 0
 
     if not https:
@@ -54,13 +51,14 @@ def analyze():
     if ip_found:
         risk_score += 40
 
-    # Verdict
-    if risk_score == 0:
+    risk_score += keyword_count * 10
+
+    risk_score = min(risk_score, 100)
+
+    if risk_score <= 20:
         verdict = "🟢 Safe"
-
-    elif risk_score <= 40:
+    elif risk_score <= 60:
         verdict = "🟡 Suspicious"
-
     else:
         verdict = "🔴 High Risk"
 
@@ -70,6 +68,8 @@ def analyze():
         validation="✅ Valid URL",
         https_status=https_result,
         ip_status=ip_status,
+        keyword_count=keyword_count,
+        keywords=keywords,
         risk_score=risk_score,
         verdict=verdict
     )
