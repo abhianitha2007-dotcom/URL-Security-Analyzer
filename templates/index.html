@@ -8,149 +8,7 @@
 
 <title>URL Security Analyzer</title>
 
-
-<style>
-
-body {
-
-    margin:0;
-    font-family: Arial, sans-serif;
-    background:#f4f6f8;
-
-}
-
-
-.container {
-
-    width:90%;
-    max-width:900px;
-    margin:60px auto;
-    background:white;
-    padding:35px;
-    border-radius:15px;
-    box-shadow:0 0 20px #ccc;
-
-}
-
-
-h1 {
-
-    text-align:center;
-    color:#222;
-
-}
-
-
-.subtitle {
-
-    text-align:center;
-    color:#555;
-    margin-bottom:30px;
-
-}
-
-
-
-.input-box {
-
-    display:flex;
-    justify-content:center;
-
-}
-
-
-
-input[type="text"] {
-
-    width:70%;
-    padding:15px;
-    font-size:16px;
-    border:1px solid #aaa;
-    border-radius:8px;
-
-}
-
-
-
-button {
-
-    margin-left:10px;
-    padding:15px 25px;
-    border:none;
-    background:#007bff;
-    color:white;
-    font-size:16px;
-    border-radius:8px;
-    cursor:pointer;
-
-}
-
-
-button:hover {
-
-    background:#0056b3;
-
-}
-
-
-
-.features {
-
-    margin-top:40px;
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:20px;
-
-}
-
-
-
-.card {
-
-    background:#eef3f8;
-    padding:20px;
-    border-radius:10px;
-    text-align:center;
-
-}
-
-
-
-.history-btn {
-
-    display:block;
-    width:220px;
-    text-align:center;
-    margin:35px auto 0;
-    padding:12px;
-    background:#28a745;
-    color:white;
-    text-decoration:none;
-    border-radius:8px;
-
-}
-
-
-
-.history-btn:hover {
-
-    background:#1e7e34;
-
-}
-
-
-
-.footer {
-
-    text-align:center;
-    margin-top:30px;
-    color:#777;
-
-}
-
-
-</style>
-
+<link rel="stylesheet" href="/static/style.css">
 
 </head>
 
@@ -167,8 +25,8 @@ button:hover {
 
 
 <p class="subtitle">
-Detect phishing indicators, suspicious URLs,
-domain threats and security risks.
+Analyze URLs for phishing indicators, domain threats,
+and security risks.
 </p>
 
 
@@ -182,15 +40,13 @@ domain threats and security risks.
 <input 
 type="text"
 name="url"
-placeholder="Enter website URL (example.com)"
+placeholder="Enter URL (example.com)"
 required
 >
 
 
 <button type="submit">
-
 Analyze
-
 </button>
 
 
@@ -201,8 +57,7 @@ Analyze
 
 
 
-
-<a href="/history" class="history-btn">
+<a href="/history" class="button history-btn">
 
 📜 View Scan History
 
@@ -219,8 +74,8 @@ Analyze
 <h3>🌐 URL Analysis</h3>
 
 <p>
-Checks HTTPS, IP usage,
-keywords and URL structure.
+HTTPS, IP detection,
+keywords, length and structure.
 </p>
 
 </div>
@@ -232,30 +87,32 @@ keywords and URL structure.
 <h3>🔍 Domain Intelligence</h3>
 
 <p>
-WHOIS, DNS, SSL and
-domain age analysis.
+WHOIS, DNS, SSL certificate
+and domain age analysis.
 </p>
 
 </div>
 
 
 
+
 <div class="card">
 
-<h3>🛡 Risk Detection</h3>
+<h3>🛡 Risk Engine</h3>
 
 <p>
-Generates security score
-using multiple checks.
+Calculates security score
+using multiple indicators.
 </p>
 
 </div>
 
 
 
+
 <div class="card">
 
-<h3>📄 Reports</h3>
+<h3>📄 PDF Reports</h3>
 
 <p>
 Generate downloadable
@@ -269,11 +126,12 @@ security reports.
 
 
 
-<div class="footer">
+<footer>
 
 URL Security Analyzer © 2026
 
-</div>
+</footer>
+
 
 
 </div>

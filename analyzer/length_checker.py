@@ -1,18 +1,88 @@
 def check_url_length(url):
     """
+    Checks URL length.
+
     Returns:
+
         length
         category
-        score
+        risk_score
+
     """
 
-    length = len(url)
+    try:
 
-    if length < 54:
-        return length, "🟢 Short", 0
+        if not url:
 
-    elif length <= 75:
-        return length, "🟡 Medium", 15
+            return (
+                0,
+                "Unknown",
+                0
+            )
 
-    else:
-        return length, "🔴 Long", 30
+
+
+        length = len(url)
+
+
+
+        # Normal URL
+
+        if length <= 60:
+
+            return (
+
+                length,
+
+                "🟢 Short",
+
+                0
+
+            )
+
+
+
+        # Slightly long URL
+
+        elif length <= 100:
+
+            return (
+
+                length,
+
+                "🟡 Medium",
+
+                10
+
+            )
+
+
+
+        # Very long URL
+
+        else:
+
+            return (
+
+                length,
+
+                "🔴 Long",
+
+                20
+
+            )
+
+
+
+    except Exception:
+
+
+        return (
+
+            0,
+
+            "Unknown",
+
+            0
+
+        )

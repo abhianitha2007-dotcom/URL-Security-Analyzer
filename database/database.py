@@ -1,35 +1,72 @@
 import sqlite3
+import os
+
 from datetime import datetime
 
 
-DATABASE = "database/scans.db"
+
+# -------------------------
+# Database Configuration
+# -------------------------
+
+DATABASE_DIR = "database"
+
+DATABASE = os.path.join(
+    DATABASE_DIR,
+    "scans.db"
+)
 
 
+
+# -------------------------
+# Database Connection
+# -------------------------
+
+def get_connection():
+
+    os.makedirs(
+        DATABASE_DIR,
+        exist_ok=True
+    )
+
+    conn = sqlite3.connect(
+        DATABASE,
+        timeout=10
+    )
+
+    return conn
+
+
+
+
+# -------------------------
+# Create Database
+# -------------------------
 
 def create_database():
 
-    conn = sqlite3.connect(DATABASE)
+    conn = get_connection()
 
     cursor = conn.cursor()
 
 
-    cursor.execute("""
-    
-    CREATE TABLE IF NOT EXISTS scans(
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS scans(
 
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
 
-        url TEXT,
+            url TEXT NOT NULL,
 
-        risk_score INTEGER,
+            risk_score INTEGER NOT NULL,
 
-        verdict TEXT,
+            verdict TEXT NOT NULL,
 
-        scan_date TEXT
+            scan_date TEXT NOT NULL
 
+        )
+        """
     )
-
-    """)
 
 
     conn.commit()
@@ -39,11 +76,20 @@ def create_database():
 
 
 
-def save_scan(url, risk_score, verdict):
+# -------------------------
+# Save Scan
+# -------------------------
 
-    conn = sqlite3.connect(DATABASE)
+def save_scan(
+    url,
+    risk_score,
+    verdict
+):
+
+    conn = get_connection()
 
     cursor = conn.cursor()
+
 
 
     scan_date = datetime.now().strftime(
@@ -51,14 +97,16 @@ def save_scan(url, risk_score, verdict):
     )
 
 
+
     cursor.execute(
+
         """
         INSERT INTO scans
         (
-        url,
-        risk_score,
-        verdict,
-        scan_date
+            url,
+            risk_score,
+            verdict,
+            scan_date
         )
 
         VALUES (?,?,?,?)
@@ -82,20 +130,28 @@ def save_scan(url, risk_score, verdict):
 
 
 
+# -------------------------
+# Get Scan History
+# -------------------------
+
 def get_all_scans():
 
-    conn = sqlite3.connect(DATABASE)
+    conn = get_connection()
 
     cursor = conn.cursor()
 
 
+
     cursor.execute(
+
         """
         SELECT *
         FROM scans
         ORDER BY id DESC
         """
+
     )
+
 
 
     scans = cursor.fetchall()

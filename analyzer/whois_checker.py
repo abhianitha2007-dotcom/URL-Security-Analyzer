@@ -1,62 +1,215 @@
+from urllib.parse import urlparse
+
 import whois
 
 
-def get_whois_info(url):
-    """
-    Retrieves WHOIS information for a domain.
 
-    Returns:
-        dict
+def extract_domain(url):
+
+    """
+    Extract domain from URL.
     """
 
     try:
-        domain = (
-            url.replace("https://", "")
-               .replace("http://", "")
-               .split("/")[0]
-        )
 
-        w = whois.whois(domain)
+        parsed = urlparse(url)
 
-        def format_date(value):
-            if isinstance(value, list):
-                value = value[0]
+        hostname = parsed.hostname
 
-            if value is None:
-                return "Unknown"
 
-            return value.strftime("%d-%m-%Y")
+        if hostname is None:
 
-        registrar = w.registrar or "Unknown"
+            return None
 
-        creation_date = format_date(w.creation_date)
 
-        expiration_date = format_date(w.expiration_date)
+        if hostname.startswith("www."):
 
-        updated_date = format_date(w.updated_date)
+            hostname = hostname[4:]
 
-        name_servers = w.name_servers
 
-        if isinstance(name_servers, list):
-            name_servers = ", ".join(sorted(set(name_servers)))
+        return hostname
 
-        if not name_servers:
-            name_servers = "Unknown"
-
-        return {
-            "registrar": registrar,
-            "creation_date": creation_date,
-            "expiration_date": expiration_date,
-            "updated_date": updated_date,
-            "name_servers": name_servers,
-        }
 
     except Exception:
 
+        return None
+
+
+
+
+def format_date(value):
+
+    """
+    Converts WHOIS dates into readable format.
+    """
+
+    try:
+
+        if isinstance(value, list):
+
+            value = value[0]
+
+
+        if value is None:
+
+            return "Unknown"
+
+
+        return value.strftime(
+            "%d-%m-%Y"
+        )
+
+
+    except Exception:
+
+        return "Unknown"
+
+
+
+
+def format_nameservers(value):
+
+    """
+    Formats name servers.
+    """
+
+    try:
+
+        if isinstance(value, list):
+
+            value = list(
+                set(value)
+            )
+
+            return ", ".join(
+                sorted(value)
+            )
+
+
+        if value:
+
+            return str(value)
+
+
+        return "Unknown"
+
+
+    except Exception:
+
+        return "Unknown"
+
+
+
+
+
+def get_whois_info(url):
+
+    """
+    Retrieves WHOIS information.
+
+    Returns:
+        dictionary
+    """
+
+    try:
+
+
+        domain = extract_domain(url)
+
+
+
+        if not domain:
+
+
+            return {
+
+                "registrar": "Unknown",
+
+                "creation_date": "Unknown",
+
+                "expiration_date": "Unknown",
+
+                "updated_date": "Unknown",
+
+                "name_servers": "Unknown"
+
+            }
+
+
+
+        data = whois.whois(domain)
+
+
+
+
         return {
-            "registrar": "Unknown",
-            "creation_date": "Unknown",
-            "expiration_date": "Unknown",
-            "updated_date": "Unknown",
-            "name_servers": "Unknown",
+
+
+            "registrar":
+            data.registrar
+            or "Unknown",
+
+
+
+            "creation_date":
+            format_date(
+                data.creation_date
+            ),
+
+
+
+            "expiration_date":
+            format_date(
+                data.expiration_date
+            ),
+
+
+
+            "updated_date":
+            format_date(
+                data.updated_date
+            ),
+
+
+
+            "name_servers":
+            format_nameservers(
+                data.name_servers
+            )
+
+
+        }
+
+
+
+
+    except Exception:
+
+
+        return {
+
+
+            "registrar":
+            "Unknown",
+
+
+
+            "creation_date":
+            "Unknown",
+
+
+
+            "expiration_date":
+            "Unknown",
+
+
+
+            "updated_date":
+            "Unknown",
+
+
+
+            "name_servers":
+            "Unknown"
+
         }

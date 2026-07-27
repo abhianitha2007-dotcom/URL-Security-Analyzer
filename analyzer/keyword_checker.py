@@ -1,37 +1,134 @@
 from urllib.parse import urlparse
+import re
+
+
+
+# Common phishing-related keywords
 
 SUSPICIOUS_KEYWORDS = [
+
     "login",
+    "signin",
     "verify",
+    "verification",
     "secure",
+    "security",
     "update",
-    "bank",
+    "confirm",
+    "confirmation",
     "account",
     "password",
-    "signin",
-    "confirm"
+    "credential",
+    "bank",
+    "payment",
+    "invoice",
+    "wallet",
+    "crypto",
+    "recover",
+    "unlock",
+    "alert",
+    "auth"
+
 ]
+
+
+
 
 
 def check_keywords(url):
     """
+    Detects suspicious words in URL.
+
+    Checks:
+    - domain
+    - path
+    - query parameters
+
     Returns:
-        count -> number of suspicious keywords
-        found -> list of matched keywords
+
+        count
+        matched keywords
+
     """
 
-    parsed = urlparse(url)
+    try:
 
-    text = (
-        parsed.netloc.lower()
-        + parsed.path.lower()
-        + parsed.query.lower()
-    )
 
-    found = []
+        parsed = urlparse(url)
 
-    for keyword in SUSPICIOUS_KEYWORDS:
-        if keyword in text:
-            found.append(keyword)
 
-    return len(found), found
+
+        text = (
+
+            parsed.netloc
+
+            + " "
+
+            + parsed.path
+
+            + " "
+
+            + parsed.query
+
+        ).lower()
+
+
+
+
+        found = []
+
+
+
+        for keyword in SUSPICIOUS_KEYWORDS:
+
+
+
+            # Match complete words
+
+            pattern = (
+
+                r"\b"
+
+                + re.escape(keyword)
+
+                + r"\b"
+
+            )
+
+
+
+            if re.search(
+                pattern,
+                text
+            ):
+
+                found.append(
+                    keyword
+                )
+
+
+
+
+
+        return (
+
+            len(found),
+
+            found
+
+        )
+
+
+
+
+
+    except Exception:
+
+
+        return (
+
+            0,
+
+            []
+
+        )

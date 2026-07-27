@@ -1,54 +1,173 @@
 from urllib.parse import urlparse
 
-# High-risk TLDs commonly abused in phishing
+
+
+# TLDs frequently abused in phishing campaigns
+
 HIGH_RISK_TLDS = {
-    "xyz",
+
+    "tk",
+    "ml",
+    "ga",
+    "cf",
+    "gq",
+
     "top",
     "click",
-    "gq",
-    "cf",
-    "ml",
-    "tk",
-    "ga"
+    "zip",
+    "country",
+    "stream"
+
 }
 
-# Medium-risk TLDs
+
+
+# TLDs that need moderate attention
+
 MEDIUM_RISK_TLDS = {
-    "work",
-    "buzz",
+
+    "xyz",
     "live",
-    "shop",
+    "buzz",
+    "work",
     "support",
-    "review"
+    "review",
+    "shop"
+
 }
+
+
+
 
 
 def check_tld(url):
     """
-    Checks whether the domain uses a suspicious TLD.
+    Checks domain TLD reputation.
 
     Returns:
+
         tld
         status
         score
+
     """
 
-    hostname = urlparse(url).hostname
+    try:
 
-    if hostname is None:
-        return "Unknown", "Not Checked", 0
 
-    parts = hostname.lower().split(".")
+        hostname = urlparse(url).hostname
 
-    if len(parts) < 2:
-        return "Unknown", "Invalid Domain", 0
 
-    tld = parts[-1]
 
-    if tld in HIGH_RISK_TLDS:
-        return tld, f"🔴 High-Risk TLD (.{tld})", 25
+        if not hostname:
 
-    if tld in MEDIUM_RISK_TLDS:
-        return tld, f"🟡 Medium-Risk TLD (.{tld})", 10
 
-    return tld, f"🟢 Common TLD (.{tld})", 0
+            return (
+
+                "Unknown",
+
+                "Not Checked",
+
+                0
+
+            )
+
+
+
+
+
+        hostname = hostname.lower()
+
+
+
+        parts = hostname.split(".")
+
+
+
+
+        if len(parts) < 2:
+
+
+            return (
+
+                "Unknown",
+
+                "Invalid Domain",
+
+                0
+
+            )
+
+
+
+
+
+        tld = parts[-1]
+
+
+
+
+
+        if tld in HIGH_RISK_TLDS:
+
+
+            return (
+
+                tld,
+
+                f"🔴 High-Risk TLD (.{tld})",
+
+                20
+
+            )
+
+
+
+
+
+        elif tld in MEDIUM_RISK_TLDS:
+
+
+            return (
+
+                tld,
+
+                f"🟡 Medium-Risk TLD (.{tld})",
+
+                10
+
+            )
+
+
+
+
+
+        else:
+
+
+            return (
+
+                tld,
+
+                f"🟢 Common TLD (.{tld})",
+
+                0
+
+            )
+
+
+
+
+
+    except Exception:
+
+
+        return (
+
+            "Unknown",
+
+            "Not Checked",
+
+            0
+
+        )

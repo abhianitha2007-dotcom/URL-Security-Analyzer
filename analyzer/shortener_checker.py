@@ -1,6 +1,9 @@
 from urllib.parse import urlparse
 
-SHORTENERS = [
+
+
+SHORTENERS = {
+
     "bit.ly",
     "tinyurl.com",
     "t.co",
@@ -16,37 +19,107 @@ SHORTENERS = [
     "lnkd.in",
     "trib.al",
     "shorte.st",
-    "adf.ly"
-]
+    "adf.ly",
+    "tiny.one",
+    "t.ly",
+    "s.id",
+    "v.gd",
+    "clck.ru"
+
+}
+
+
 
 
 def check_shortener(url):
     """
-    Detects whether the URL uses a known URL shortening service.
+    Detects known URL shortening services.
 
     Returns:
-        found (bool)
-        status (str)
-        score (int)
+
+        found
+        status
+        score
+
     """
 
-    hostname = urlparse(url).hostname
+    try:
 
-    if hostname is None:
-        return False, "Not Checked", 0
 
-    hostname = hostname.lower()
+        hostname = urlparse(url).hostname
 
-    # Remove www. if present
-    if hostname.startswith("www."):
-        hostname = hostname[4:]
 
-    for service in SHORTENERS:
-        if hostname == service:
+
+        if not hostname:
+
+
             return (
-                True,
-                f"⚠️ URL Shortener Detected ({service})",
-                20
+
+                False,
+
+                "Not Checked",
+
+                0
+
             )
 
-    return False, "✅ No URL Shortener", 0
+
+
+
+        hostname = hostname.lower()
+
+
+
+        # Remove www
+
+        if hostname.startswith("www."):
+
+            hostname = hostname[4:]
+
+
+
+
+
+        if hostname in SHORTENERS:
+
+
+            return (
+
+                True,
+
+                f"⚠️ URL Shortener Detected ({hostname})",
+
+                20
+
+            )
+
+
+
+
+
+        return (
+
+            False,
+
+            "✅ No URL Shortener",
+
+            0
+
+        )
+
+
+
+
+
+    except Exception:
+
+
+        return (
+
+            False,
+
+            "Not Checked",
+
+            0
+
+        )

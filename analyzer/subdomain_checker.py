@@ -1,40 +1,186 @@
 from urllib.parse import urlparse
 
 
-def count_subdomains(url):
+
+# Common multi-level TLDs
+
+MULTI_LEVEL_TLDS = {
+
+    "co.uk",
+    "org.uk",
+    "gov.uk",
+
+    "co.in",
+    "firm.in",
+    "net.in",
+
+    "com.au",
+    "net.au",
+
+    "co.jp"
+
+}
+
+
+
+
+
+def get_domain_parts(hostname):
+
     """
-    Counts the number of subdomains.
-
-    Returns:
-        subdomain_count
-        status
-        score
+    Removes TLD correctly.
     """
-
-    hostname = urlparse(url).hostname
-
-    if not hostname:
-        return 0, "Not Checked", 0
-
-    hostname = hostname.lower()
-
-    # Ignore common www prefix
-    if hostname.startswith("www."):
-        hostname = hostname[4:]
 
     parts = hostname.split(".")
 
-    # Domain + TLD are not subdomains
-    subdomain_count = max(0, len(parts) - 2)
 
-    if subdomain_count == 0:
-        return subdomain_count, "🟢 Normal", 0
+    if len(parts) < 2:
 
-    elif subdomain_count == 1:
-        return subdomain_count, "🟢 One Subdomain", 5
+        return parts
 
-    elif subdomain_count == 2:
-        return subdomain_count, "🟡 Multiple Subdomains", 15
 
-    else:
-        return subdomain_count, "🔴 Too Many Subdomains", 30
+
+    last_two = ".".join(
+        parts[-2:]
+    )
+
+
+    if last_two in MULTI_LEVEL_TLDS:
+
+        return parts[:-2]
+
+
+
+    return parts[:-1]
+
+
+
+
+
+def count_subdomains(url):
+    """
+    Counts URL subdomains.
+
+    Returns:
+
+        count
+        status
+        score
+
+    """
+
+    try:
+
+
+        hostname = urlparse(url).hostname
+
+
+
+        if not hostname:
+
+            return (
+                0,
+                "Not Checked",
+                0
+            )
+
+
+
+        hostname = hostname.lower()
+
+
+
+        # Remove www
+
+        if hostname.startswith("www."):
+
+            hostname = hostname[4:]
+
+
+
+
+        domain_parts = get_domain_parts(
+            hostname
+        )
+
+
+
+        subdomain_count = len(
+            domain_parts
+        ) - 1
+
+
+
+
+        if subdomain_count <= 0:
+
+
+            return (
+
+                0,
+
+                "🟢 Normal",
+
+                0
+
+            )
+
+
+
+        elif subdomain_count == 1:
+
+
+            return (
+
+                1,
+
+                "🟢 One Subdomain",
+
+                5
+
+            )
+
+
+
+        elif subdomain_count == 2:
+
+
+            return (
+
+                2,
+
+                "🟡 Multiple Subdomains",
+
+                15
+
+            )
+
+
+
+        else:
+
+
+            return (
+
+                subdomain_count,
+
+                "🔴 Too Many Subdomains",
+
+                30
+
+            )
+
+
+
+    except Exception:
+
+
+        return (
+
+            0,
+
+            "Not Checked",
+
+            0
+
+        )

@@ -11,56 +11,132 @@ def calculate_risk(
     tld_score
 ):
     """
-    Calculates the overall risk score.
+    Calculates URL security risk score.
 
     Returns:
-        score (0-100)
+        risk_score (0-100)
         verdict
     """
 
+
     score = 0
 
-    # HTTP instead of HTTPS
+
+    # -------------------------
+    # HTTPS Check
+    # -------------------------
+
     if not https:
-        score += 40
+        score += 15
 
-    # IP address used instead of domain
+
+
+    # -------------------------
+    # IP Address Detection
+    # -------------------------
+
     if ip_found:
-        score += 40
+        score += 25
 
-    # Suspicious keywords
-    score += keyword_count * 10
 
-    # URL length
+
+    # -------------------------
+    # Suspicious Keywords
+    # -------------------------
+
+    keyword_risk = keyword_count * 8
+
+    # Maximum keyword contribution
+    score += min(
+        keyword_risk,
+        20
+    )
+
+
+
+    # -------------------------
+    # URL Length
+    # -------------------------
+
     score += length_score
 
-    # Too many subdomains
+
+
+    # -------------------------
+    # Subdomain Risk
+    # -------------------------
+
     score += subdomain_score
 
-    # @ symbol
+
+
+    # -------------------------
+    # @ Symbol
+    # -------------------------
+
     score += at_score
 
-    # URL shortener
+
+
+    # -------------------------
+    # URL Shortener
+    # -------------------------
+
     score += shortener_score
 
-    # Hyphens
+
+
+    # -------------------------
+    # Hyphen Usage
+    # -------------------------
+
     score += hyphen_score
 
-    # Domain age
+
+
+    # -------------------------
+    # Domain Age
+    # -------------------------
+
     score += domain_age_score
+
+
+
+    # -------------------------
+    # TLD Reputation
+    # -------------------------
 
     score += tld_score
 
-    # Maximum score = 100
-    score = min(score, 100)
 
-    if score <= 20:
+
+    # Keep range 0-100
+
+    score = min(
+        score,
+        100
+    )
+
+
+
+    # -------------------------
+    # Verdict
+    # -------------------------
+
+    if score <= 25:
+
         verdict = "🟢 Safe"
 
+
     elif score <= 60:
+
         verdict = "🟡 Suspicious"
 
+
     else:
+
         verdict = "🔴 High Risk"
+
+
 
     return score, verdict

@@ -1,14 +1,33 @@
 from urllib.parse import urlparse
 
 
+
 def check_https(url):
     """
-    Checks whether a URL uses HTTPS.
+    Checks whether URL uses HTTPS.
+
     Returns:
         True  -> HTTPS
-        False -> HTTP
+        False -> HTTP or invalid
     """
 
-    parsed_url = urlparse(url)
+    try:
 
-    return parsed_url.scheme == "https"
+        parsed = urlparse(url)
+
+
+        scheme = parsed.scheme.lower()
+
+
+        if scheme == "https":
+
+            return True
+
+
+        return False
+
+
+
+    except Exception:
+
+        return False
