@@ -4,6 +4,9 @@ from analyzer.https_checker import check_https
 from analyzer.url_validator import is_valid_url
 from analyzer.ip_checker import contains_ip
 from analyzer.keyword_checker import check_keywords
+from analyzer.length_checker import check_url_length
+from analyzer.subdomain_checker import count_subdomains
+from analyzer.at_symbol_checker import check_at_symbol
 
 app = Flask(__name__)
 
@@ -16,8 +19,13 @@ def home():
 @app.route("/analyze", methods=["POST"])
 def analyze():
 
-    url = request.form["url"]
+    url = request.form["url"].strip()
 
+    # Automatically add HTTPS if missing
+    if not url.startswith(("http://", "https://")):
+        url = "https://" + url
+
+    # Validate URL
     if not is_valid_url(url):
         return render_template(
             "result.html",
@@ -27,22 +35,36 @@ def analyze():
             ip_status="Not Checked",
             keyword_count=0,
             keywords=[],
+            url_length="-",
+            length_category="Not Checked",
+            subdomain_count="-",
+            subdomain_status="Not Checked",
+            at_status="Not Checked",
             risk_score="-",
             verdict="Invalid URL"
         )
 
+    # HTTPS
     https = check_https(url)
     https_result = "✅ HTTPS Detected" if https else "❌ HTTP Detected"
 
+    # IP
     ip_found = contains_ip(url)
-    ip_status = (
-        "⚠️ IP Address Detected"
-        if ip_found
-        else "✅ Domain Name Used"
-    )
+    ip_status = "⚠️ IP Address Detected" if ip_found else "✅ Domain Name Used"
 
+    # Keywords
     keyword_count, keywords = check_keywords(url)
 
+    # URL Length
+    url_length, length_category, length_score = check_url_length(url)
+
+    # Subdomains
+    subdomain_count, subdomain_status, subdomain_score = count_subdomains(url)
+
+    # '@' Symbol
+    at_found, at_status, at_score = check_at_symbol(url)
+
+    # Risk Score
     risk_score = 0
 
     if not https:
@@ -52,9 +74,13 @@ def analyze():
         risk_score += 40
 
     risk_score += keyword_count * 10
+    risk_score += length_score
+    risk_score += subdomain_score
+    risk_score += at_score
 
     risk_score = min(risk_score, 100)
 
+    # Verdict
     if risk_score <= 20:
         verdict = "🟢 Safe"
     elif risk_score <= 60:
@@ -70,6 +96,11 @@ def analyze():
         ip_status=ip_status,
         keyword_count=keyword_count,
         keywords=keywords,
+        url_length=url_length,
+        length_category=length_category,
+        subdomain_count=subdomain_count,
+        subdomain_status=subdomain_status,
+        at_status=at_status,
         risk_score=risk_score,
         verdict=verdict
     )

@@ -40,19 +40,49 @@
 
     <hr>
 
-<h3>Suspicious Keywords</h3>
+    <h3>Suspicious Keywords</h3>
 
-<p>Keywords Found: {{ keyword_count }}</p>
+    <p>Keywords Found: {{ keyword_count }}</p>
 
-{% if keywords %}
-<ul>
-    {% for keyword in keywords %}
+    {% if keywords %}
+
+    <ul>
+
+        {% for keyword in keywords %}
+
         <li>{{ keyword }}</li>
-    {% endfor %}
-</ul>
-{% else %}
-<p>No suspicious keywords detected.</p>
-{% endif %}
+
+        {% endfor %}
+
+    </ul>
+
+    {% else %}
+
+    <p>No suspicious keywords detected.</p>
+
+    {% endif %}
+
+    <hr>
+
+    <h3>URL Length Analysis</h3>
+
+    <p>Length: {{ url_length }} characters</p>
+
+    <p>Status: {{ length_category }}</p>
+
+    <hr>
+
+    <h3>Subdomain Analysis</h3>
+
+    <p>Subdomains: {{ subdomain_count }}</p>
+
+    <p>Status: {{ subdomain_status }}</p>
+
+    <hr>
+
+<h3>@ Symbol Detection</h3>
+
+<p>{{ at_status }}</p>
 
     <hr>
 
