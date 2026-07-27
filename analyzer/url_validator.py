@@ -3,10 +3,34 @@ from urllib.parse import urlparse
 
 def is_valid_url(url):
     """
-    Returns True if the URL has
-    a valid scheme and domain.
+    Validates whether the URL has:
+    - http or https scheme
+    - a valid hostname
+    - at least one dot in the domain
+
+    Returns:
+        True / False
     """
 
-    parsed = urlparse(url)
+    try:
+        parsed = urlparse(url)
 
-    return all([parsed.scheme, parsed.netloc])
+        if parsed.scheme not in ("http", "https"):
+            return False
+
+        if not parsed.netloc:
+            return False
+
+        hostname = parsed.hostname
+
+        if hostname is None:
+            return False
+
+        # Require at least one dot
+        if "." not in hostname:
+            return False
+
+        return True
+
+    except Exception:
+        return False

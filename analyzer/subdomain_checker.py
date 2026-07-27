@@ -3,6 +3,8 @@ from urllib.parse import urlparse
 
 def count_subdomains(url):
     """
+    Counts the number of subdomains.
+
     Returns:
         subdomain_count
         status
@@ -14,8 +16,15 @@ def count_subdomains(url):
     if not hostname:
         return 0, "Not Checked", 0
 
+    hostname = hostname.lower()
+
+    # Ignore common www prefix
+    if hostname.startswith("www."):
+        hostname = hostname[4:]
+
     parts = hostname.split(".")
 
+    # Domain + TLD are not subdomains
     subdomain_count = max(0, len(parts) - 2)
 
     if subdomain_count == 0:

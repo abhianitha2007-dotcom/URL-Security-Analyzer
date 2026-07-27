@@ -9,6 +9,10 @@ from analyzer.subdomain_checker import count_subdomains
 from analyzer.at_symbol_checker import check_at_symbol
 from analyzer.shortener_checker import check_shortener
 from analyzer.hyphen_checker import check_hyphen
+from analyzer.domain_age_checker import check_domain_age
+from analyzer.risk_engine import calculate_risk
+from analyzer.whois_checker import get_whois_info
+from analyzer.dns_checker import get_dns_records
 
 app = Flask(__name__)
 
@@ -45,20 +49,21 @@ def analyze():
             shortener_status="Not Checked",
             hyphen_count="-",
             hyphen_status="Not Checked",
+            domain_age="Unknown",
+            domain_age_status="Not Checked",
             risk_score="-",
             verdict="Invalid URL"
-            
         )
 
     # HTTPS
     https = check_https(url)
     https_status = "✅ HTTPS Detected" if https else "❌ HTTP Detected"
 
-    # IP
+    # IP Address
     ip_found = contains_ip(url)
     ip_status = "⚠️ IP Address Detected" if ip_found else "✅ Domain Name Used"
 
-    # Keywords
+    # Suspicious Keywords
     keyword_count, keywords = check_keywords(url)
 
     # URL Length
@@ -76,31 +81,25 @@ def analyze():
     # Hyphen Detection
     hyphen_count, hyphen_status, hyphen_score = check_hyphen(url)
 
-    # Risk Score
-    risk_score = 0
+    # Domain Age
+    domain_age = check_domain_age(url)
+    whois_info = get_whois_info(url)
+    dns_records = get_dns_records(url)
+    domain_age_status = domain_age["message"]
+    domain_age_score = 20 if domain_age["risk"] else 0
 
-    if not https:
-        risk_score += 40
-
-    if ip_found:
-        risk_score += 40
-
-    risk_score += keyword_count * 10
-    risk_score += length_score
-    risk_score += subdomain_score
-    risk_score += at_score
-    risk_score += shortener_score
-    risk_score += hyphen_score
-
-    risk_score = min(risk_score, 100)
-
-    # Verdict
-    if risk_score <= 20:
-        verdict = "🟢 Safe"
-    elif risk_score <= 60:
-        verdict = "🟡 Suspicious"
-    else:
-        verdict = "🔴 High Risk"
+    # Calculate Risk
+    risk_score, verdict = calculate_risk(
+        https,
+        ip_found,
+        keyword_count,
+        length_score,
+        subdomain_score,
+        at_score,
+        shortener_score,
+        hyphen_score,
+        domain_age_score
+    )
 
     return render_template(
         "result.html",
@@ -118,6 +117,10 @@ def analyze():
         shortener_status=shortener_status,
         hyphen_count=hyphen_count,
         hyphen_status=hyphen_status,
+        domain_age=domain_age["age"],
+        domain_age_status=domain_age_status,
+        whois_info=whois_info,
+        dns_records=dns_records,
         risk_score=risk_score,
         verdict=verdict
     )

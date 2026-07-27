@@ -11,21 +11,23 @@ SHORTENERS = [
     "rebrand.ly",
     "cutt.ly",
     "shorturl.at",
-    "tiny.cc"
-    "rb.gy"
-    "lnkd.in"
-    "trib.al"
-    "shorte.st"
+    "tiny.cc",
+    "rb.gy",
+    "lnkd.in",
+    "trib.al",
+    "shorte.st",
     "adf.ly"
 ]
 
 
 def check_shortener(url):
     """
+    Detects whether the URL uses a known URL shortening service.
+
     Returns:
-        found
-        status
-        score
+        found (bool)
+        status (str)
+        score (int)
     """
 
     hostname = urlparse(url).hostname
@@ -35,8 +37,16 @@ def check_shortener(url):
 
     hostname = hostname.lower()
 
+    # Remove www. if present
+    if hostname.startswith("www."):
+        hostname = hostname[4:]
+
     for service in SHORTENERS:
         if hostname == service:
-            return True, f"⚠️ URL Shortener Detected ({service})", 20
+            return (
+                True,
+                f"⚠️ URL Shortener Detected ({service})",
+                20
+            )
 
     return False, "✅ No URL Shortener", 0

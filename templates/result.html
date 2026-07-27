@@ -80,33 +80,92 @@
 
     <hr>
 
-<h3>@ Symbol Detection</h3>
+    <h3>@ Symbol Detection</h3>
 
-<p>{{ at_status }}</p>
-
-<hr>
-
-<h3>URL Shortener Detection</h3>
-
-<p>{{ shortener_status }}</p>
-
-<hr>
-
-<h3>Hyphen Detection</h3>
-
-<p>Hyphens: {{ hyphen_count }}</p>
-
-<p>Status: {{ hyphen_status }}</p>
+    <p>{{ at_status }}</p>
 
     <hr>
 
-    <h3>Risk Score</h3>
+    <h3>URL Shortener Detection</h3>
 
-    <p>{{ risk_score }}%</p>
+    <p>{{ shortener_status }}</p>
 
-    <h3>Verdict</h3>
+    <hr>
 
-    <p>{{ verdict }}</p>
+    <h3>Hyphen Detection</h3>
+
+    <p>Hyphens: {{ hyphen_count }}</p>
+
+    <p>Status: {{ hyphen_status }}</p>
+
+    <hr>
+
+    <h3>Domain Age Analysis</h3>
+
+    <p><strong>Domain Age:</strong> {{ domain_age }}</p>
+
+    <p><strong>Status:</strong> {{ domain_age_status }}</p>
+
+    <hr>
+
+<h3>WHOIS Information</h3>
+
+<p><strong>Registrar:</strong> {{ whois_info.registrar }}</p>
+
+<p><strong>Creation Date:</strong> {{ whois_info.creation_date }}</p>
+
+<p><strong>Expiration Date:</strong> {{ whois_info.expiration_date }}</p>
+
+<p><strong>Updated Date:</strong> {{ whois_info.updated_date }}</p>
+
+<p><strong>Name Servers:</strong></p>
+
+<p>{{ whois_info.name_servers }}</p>
+
+<h3>DNS Records</h3>
+
+{% for record_type, values in dns_records.items() %}
+
+<h4>{{ record_type }} Records</h4>
+
+{% if values %}
+<ul>
+    {% for value in values %}
+        <li>{{ value }}</li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>None</p>
+{% endif %}
+
+{% endfor %}
+    <hr>
+
+    <h2>Security Report</h2>
+
+    <p><strong>Risk Score:</strong> {{ risk_score }}%</p>
+
+    <p><strong>Verdict:</strong> {{ verdict }}</p>
+
+    <hr>
+
+    <h2>Summary</h2>
+
+    <ul>
+
+        <li>{{ https_status }}</li>
+
+        <li>{{ ip_status }}</li>
+
+        <li>{{ at_status }}</li>
+
+        <li>{{ shortener_status }}</li>
+
+        <li>{{ hyphen_status }}</li>
+
+        <li>{{ domain_age_status }}</li>
+
+    </ul>
 
     <hr>
 

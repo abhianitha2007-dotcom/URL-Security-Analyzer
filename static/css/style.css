@@ -1,40 +1,162 @@
-input{
-
-    width:70%;
-    padding:12px;
-    font-size:18px;
-
+body{
+    margin:0;
+    padding:0;
+    background:#f4f7fb;
+    font-family:Arial, Helvetica, sans-serif;
 }
 
-button{
+.container{
+    width:80%;
+    max-width:900px;
+    margin:40px auto;
+    background:white;
+    padding:30px;
+    border-radius:12px;
+    box-shadow:0 4px 10px rgba(0,0,0,.15);
+}
 
-    padding:12px 25px;
+h1{
+    text-align:center;
+    color:#1d3557;
+    margin-bottom:10px;
+}
+
+h2{
+    color:#1d3557;
+    margin-top:30px;
+}
+
+h3{
+    color:#0b5394;
+}
+
+p{
     font-size:18px;
+    line-height:1.6;
+}
 
-    cursor:pointer;
+hr{
+    margin:20px 0;
+}
 
-    background:#0b5394;
+ul{
+    text-align:left;
+}
+
+li{
+    margin:8px 0;
+}
+
+/* -------------------- */
+/* Input Box */
+/* -------------------- */
+
+input[type="text"]{
+    width:95%;
+    padding:12px;
+    font-size:16px;
+    border:1px solid #ccc;
+    border-radius:6px;
+    margin-top:10px;
+    margin-bottom:20px;
+}
+
+/* -------------------- */
+/* Button */
+/* -------------------- */
+
+button{
+    background:#007bff;
     color:white;
-
     border:none;
-
-    border-radius:5px;
-
+    padding:12px 24px;
+    font-size:16px;
+    border-radius:6px;
+    cursor:pointer;
 }
 
 button:hover{
-
-    background:#083b68;
-
+    background:#0056b3;
 }
+
+/* -------------------- */
+/* Link Button */
+/* -------------------- */
+
 a{
-    text-decoration:none;
-    background:#0b5394;
+    display:inline-block;
+    margin-top:20px;
+    padding:10px 18px;
+    background:#007bff;
     color:white;
-    padding:12px 20px;
-    border-radius:5px;
+    text-decoration:none;
+    border-radius:6px;
 }
 
 a:hover{
-    background:#083b68;
+    background:#0056b3;
+}
+
+/* -------------------- */
+/* Status Colors */
+/* -------------------- */
+
+.safe{
+    color:green;
+    font-weight:bold;
+}
+
+.warning{
+    color:orange;
+    font-weight:bold;
+}
+
+.danger{
+    color:red;
+    font-weight:bold;
+}
+
+/* -------------------- */
+/* Security Report */
+/* -------------------- */
+
+.report-box{
+    background:#eef5ff;
+    border-left:6px solid #007bff;
+    padding:15px;
+    border-radius:8px;
+    margin-top:20px;
+}
+
+/* -------------------- */
+/* Summary */
+/* -------------------- */
+
+.summary-box{
+    background:#f8f9fa;
+    border-radius:8px;
+    padding:15px;
+    margin-top:20px;
+}
+
+/* -------------------- */
+/* Table (Future Weeks) */
+/* -------------------- */
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+}
+
+table th,
+table td{
+    border:1px solid #ddd;
+    padding:10px;
+    text-align:left;
+}
+
+table th{
+    background:#1d3557;
+    color:white;
 }
