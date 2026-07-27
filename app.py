@@ -1,7 +1,20 @@
-from flask import Flask, render_template, request
+from flask import (
+    Flask,
+    render_template,
+    request,
+    send_file,
+    session
+)
+from database.database import (
+    create_database,
+    save_scan,
+    get_all_scans
+)
 
-from analyzer.https_checker import check_https
+import os
+
 from analyzer.url_validator import is_valid_url
+from analyzer.https_checker import check_https
 from analyzer.ip_checker import contains_ip
 from analyzer.keyword_checker import check_keywords
 from analyzer.length_checker import check_url_length
@@ -10,11 +23,19 @@ from analyzer.at_symbol_checker import check_at_symbol
 from analyzer.shortener_checker import check_shortener
 from analyzer.hyphen_checker import check_hyphen
 from analyzer.domain_age_checker import check_domain_age
-from analyzer.risk_engine import calculate_risk
 from analyzer.whois_checker import get_whois_info
 from analyzer.dns_checker import get_dns_records
+from analyzer.ssl_checker import get_ssl_info
+from analyzer.tld_checker import check_tld
+from analyzer.risk_engine import calculate_risk
+from analyzer.pdf_generator import generate_pdf
+
 
 app = Flask(__name__)
+
+# Change this before deployment
+app.secret_key = "url-security-analyzer-secret-key"
+create_database()
 
 
 @app.route("/")
@@ -27,12 +48,13 @@ def analyze():
 
     url = request.form["url"].strip()
 
-    # Automatically add HTTPS if missing
+    # Automatically prepend HTTPS
     if not url.startswith(("http://", "https://")):
         url = "https://" + url
 
     # Validate URL
     if not is_valid_url(url):
+
         return render_template(
             "result.html",
             url=url,
@@ -49,46 +71,86 @@ def analyze():
             shortener_status="Not Checked",
             hyphen_count="-",
             hyphen_status="Not Checked",
-            domain_age="Unknown",
-            domain_age_status="Not Checked",
+            domain_age={
+                "age": "-",
+                "message": "Not Checked"
+            },
+            whois_info={
+                "registrar": "-",
+                "creation_date": "-",
+                "expiration_date": "-",
+                "updated_date": "-",
+                "name_servers": "-"
+            },
+            dns_records={
+                "A": [],
+                "AAAA": [],
+                "MX": [],
+                "NS": [],
+                "CNAME": []
+            },
+            ssl_info={
+                "issuer": "-",
+                "valid_from": "-",
+                "valid_to": "-",
+                "days_remaining": "-",
+                "status": "-"
+            },
+            tld="-",
+            tld_status="Not Checked",
             risk_score="-",
             verdict="Invalid URL"
         )
 
-    # HTTPS
+    # -------------------------
+    # URL Checks
+    # -------------------------
+
     https = check_https(url)
-    https_status = "✅ HTTPS Detected" if https else "❌ HTTP Detected"
+    https_status = (
+        "✅ HTTPS Detected"
+        if https
+        else "❌ HTTP Detected"
+    )
 
-    # IP Address
     ip_found = contains_ip(url)
-    ip_status = "⚠️ IP Address Detected" if ip_found else "✅ Domain Name Used"
+    ip_status = (
+        "⚠️ IP Address Detected"
+        if ip_found
+        else "✅ Domain Name Used"
+    )
 
-    # Suspicious Keywords
     keyword_count, keywords = check_keywords(url)
 
-    # URL Length
     url_length, length_category, length_score = check_url_length(url)
 
-    # Subdomains
     subdomain_count, subdomain_status, subdomain_score = count_subdomains(url)
 
-    # @ Symbol
     at_found, at_status, at_score = check_at_symbol(url)
 
-    # URL Shortener
     shortener_found, shortener_status, shortener_score = check_shortener(url)
 
-    # Hyphen Detection
     hyphen_count, hyphen_status, hyphen_score = check_hyphen(url)
 
-    # Domain Age
     domain_age = check_domain_age(url)
-    whois_info = get_whois_info(url)
-    dns_records = get_dns_records(url)
-    domain_age_status = domain_age["message"]
-    domain_age_score = 20 if domain_age["risk"] else 0
 
-    # Calculate Risk
+    if domain_age["risk"]:
+        domain_age_score = 20
+    else:
+        domain_age_score = 0
+
+    whois_info = get_whois_info(url)
+
+    dns_records = get_dns_records(url)
+
+    ssl_info = get_ssl_info(url)
+
+    tld, tld_status, tld_score = check_tld(url)
+
+    # -------------------------
+    # Risk Calculation
+    # -------------------------
+
     risk_score, verdict = calculate_risk(
         https,
         ip_found,
@@ -98,33 +160,198 @@ def analyze():
         at_score,
         shortener_score,
         hyphen_score,
-        domain_age_score
+        domain_age_score,
+        tld_score
     )
+
+    # -------------------------
+    # Store report for PDF
+    # -------------------------
+
+    report_data = {
+
+        "url": url,
+
+        "risk_score": risk_score,
+
+        "verdict": verdict,
+
+        "https_status": https_status,
+
+        "ip_status": ip_status,
+
+        "keyword_count": keyword_count,
+
+        "url_length": url_length,
+
+        "subdomain_count": subdomain_count,
+
+        "at_status": at_status,
+
+        "shortener_status": shortener_status,
+
+        "hyphen_count": hyphen_count,
+
+        "domain_age": domain_age["age"],
+
+        "tld_status": tld_status,
+
+        "whois": whois_info,
+
+        "dns": dns_records,
+
+        "ssl": ssl_info
+    }
+
+    session["report_data"] = report_data
+
+    save_scan(
+        url,
+        risk_score,
+        verdict
+    )
+    
+    # -------------------------
+    # Generate PDF
+    # -------------------------
+    
+    reports_dir = "reports"
+
+    os.makedirs(
+        reports_dir,
+        exist_ok=True
+    )
+
+    pdf_path = os.path.join(
+        reports_dir,
+        "security_report.pdf"
+    )
+
+    generate_pdf(
+        report_data,
+        pdf_path
+    )
+
+
+    # -------------------------
+    # Display Result
+    # -------------------------
 
     return render_template(
         "result.html",
+
         url=url,
+
         validation="✅ Valid URL",
+
         https_status=https_status,
+
         ip_status=ip_status,
+
         keyword_count=keyword_count,
+
         keywords=keywords,
+
         url_length=url_length,
+
         length_category=length_category,
+
         subdomain_count=subdomain_count,
+
         subdomain_status=subdomain_status,
+
         at_status=at_status,
+
         shortener_status=shortener_status,
+
         hyphen_count=hyphen_count,
+
         hyphen_status=hyphen_status,
-        domain_age=domain_age["age"],
-        domain_age_status=domain_age_status,
+
+        domain_age=domain_age,
+
         whois_info=whois_info,
+
         dns_records=dns_records,
+
+        ssl_info=ssl_info,
+
+        tld=tld,
+
+        tld_status=tld_status,
+
         risk_score=risk_score,
+
         verdict=verdict
     )
 
 
+
+# --------------------------------
+# Download Security Report
+# --------------------------------
+
+@app.route("/download-report")
+def download_report():
+
+    report_data = session.get(
+        "report_data"
+    )
+    
+
+
+    if not report_data:
+
+        return (
+            "No report available. "
+            "Please analyze a URL first.",
+            400
+        )
+
+
+    reports_dir = "reports"
+
+    os.makedirs(
+        reports_dir,
+        exist_ok=True
+    )
+
+
+    output_path = os.path.join(
+        reports_dir,
+        "security_report.pdf"
+    )
+
+
+    generate_pdf(
+        report_data,
+        output_path
+    )
+
+
+    return send_file(
+        output_path,
+        as_attachment=True,
+        download_name="security_report.pdf"
+    )
+
+@app.route("/history")
+def history():
+
+    scans = get_all_scans()
+
+    return render_template(
+        "history.html",
+        scans=scans
+    )
+
+
+# --------------------------------
+# Run Application
+# --------------------------------
+
 if __name__ == "__main__":
-    app.run(debug=True)
+
+    app.run(
+        debug=True
+    )

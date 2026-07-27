@@ -7,7 +7,8 @@ def calculate_risk(
     at_score,
     shortener_score,
     hyphen_score,
-    domain_age_score
+    domain_age_score,
+    tld_score
 ):
     """
     Calculates the overall risk score.
@@ -47,6 +48,8 @@ def calculate_risk(
 
     # Domain age
     score += domain_age_score
+
+    score += tld_score
 
     # Maximum score = 100
     score = min(score, 100)

@@ -1,7 +1,14 @@
 __pycache__/
 *.pyc
-*.pyo
-*.db
+
 .env
-venv/
+
+database/scans.db
+
+reports/*.pdf
+
 .vscode/
+
+venv/
+
+.idea/
