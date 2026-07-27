@@ -7,6 +7,7 @@ from analyzer.keyword_checker import check_keywords
 from analyzer.length_checker import check_url_length
 from analyzer.subdomain_checker import count_subdomains
 from analyzer.at_symbol_checker import check_at_symbol
+from analyzer.shortener_checker import check_shortener
 
 app = Flask(__name__)
 
@@ -40,13 +41,14 @@ def analyze():
             subdomain_count="-",
             subdomain_status="Not Checked",
             at_status="Not Checked",
+            shortener_status="Not Checked",
             risk_score="-",
             verdict="Invalid URL"
         )
 
     # HTTPS
     https = check_https(url)
-    https_result = "✅ HTTPS Detected" if https else "❌ HTTP Detected"
+    https_status = "✅ HTTPS Detected" if https else "❌ HTTP Detected"
 
     # IP
     ip_found = contains_ip(url)
@@ -61,8 +63,11 @@ def analyze():
     # Subdomains
     subdomain_count, subdomain_status, subdomain_score = count_subdomains(url)
 
-    # '@' Symbol
+    # @ Symbol
     at_found, at_status, at_score = check_at_symbol(url)
+
+    # URL Shortener
+    shortener_found, shortener_status, shortener_score = check_shortener(url)
 
     # Risk Score
     risk_score = 0
@@ -77,6 +82,7 @@ def analyze():
     risk_score += length_score
     risk_score += subdomain_score
     risk_score += at_score
+    risk_score += shortener_score
 
     risk_score = min(risk_score, 100)
 
@@ -92,7 +98,7 @@ def analyze():
         "result.html",
         url=url,
         validation="✅ Valid URL",
-        https_status=https_result,
+        https_status=https_status,
         ip_status=ip_status,
         keyword_count=keyword_count,
         keywords=keywords,
@@ -101,6 +107,7 @@ def analyze():
         subdomain_count=subdomain_count,
         subdomain_status=subdomain_status,
         at_status=at_status,
+        shortener_status=shortener_status,
         risk_score=risk_score,
         verdict=verdict
     )
