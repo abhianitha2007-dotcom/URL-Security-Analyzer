@@ -1,441 +1,437 @@
-/* =========================
-   Global Style
-========================= */
-
-* {
-    box-sizing: border-box;
+*{
+    box-sizing:border-box;
 }
 
 
-body {
-
-    margin: 0;
-
-    padding: 30px;
-
-    background: #f4f7fb;
-
-    font-family: Arial, Helvetica, sans-serif;
-
-    color: #333;
-
-}
-
-
-
-.container {
-
-    width: 90%;
-
-    max-width: 1000px;
-
-    margin: auto;
-
-    background: white;
-
-    padding: 35px;
-
-    border-radius: 15px;
-
-    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-
-}
-
-
-
-/* =========================
-   Headings
-========================= */
-
-
-h1 {
-
-    text-align: center;
-
-    color: #1d3557;
-
-}
-
-
-h2 {
-
-    color: #1d3557;
-
-    margin-top: 35px;
-
-}
-
-
-h3 {
-
-    color: #0b5394;
-
-}
-
-
-
-.subtitle {
-
-    text-align: center;
-
-    color: #666;
-
-    font-size: 18px;
-
-    margin-bottom: 30px;
-
-}
-
-
-
-/* =========================
-   Input Area
-========================= */
-
-
-.input-box {
-
-    display: flex;
-
-    justify-content: center;
-
-    gap: 10px;
-
-}
-
-
-
-input[type="text"] {
-
-    width: 75%;
-
-    padding: 15px;
-
-    font-size: 16px;
-
-    border: 1px solid #ccc;
-
-    border-radius: 8px;
-
-}
-
-
-
-button {
-
-    padding: 15px 25px;
-
-    background: #007bff;
-
-    color: white;
-
-    border: none;
-
-    border-radius: 8px;
-
-    cursor: pointer;
-
-    font-size: 16px;
-
-}
-
-
-
-button:hover {
-
-    background: #0056b3;
-
-}
-
-
-
-/* =========================
-   Buttons
-========================= */
-
-
-.button {
-
-    display: inline-block;
-
-    margin-top: 25px;
-
-    padding: 12px 20px;
-
-    background: #007bff;
-
-    color: white;
-
-    text-decoration: none;
-
-    border-radius: 8px;
-
-}
-
-
-
-.button:hover {
-
-    background: #0056b3;
-
-}
-
-
-
-.history-btn {
-
-    display: block;
-
-    width: 220px;
-
-    text-align: center;
-
-    margin: 35px auto;
-
-    background: #28a745;
-
-}
-
-
-
-.history-btn:hover {
-
-    background: #1e7e34;
-
-}
-
-
-
-/* =========================
-   Feature Cards
-========================= */
-
-
-.features {
-
-    margin-top: 40px;
-
-    display: grid;
-
-    grid-template-columns: repeat(
-        auto-fit,
-        minmax(220px,1fr)
+body{
+
+    margin:0;
+    padding:30px;
+
+    font-family:
+    "Segoe UI",
+    Arial,
+    sans-serif;
+
+    background:
+    linear-gradient(
+        135deg,
+        #0f172a,
+        #1e3a8a
     );
 
-    gap: 20px;
+    min-height:100vh;
 
 }
 
 
 
-.card {
+.container{
 
-    background: #eef3f8;
+    max-width:1100px;
 
-    padding: 20px;
+    margin:auto;
 
-    border-radius: 12px;
+    background:
+    rgba(255,255,255,0.95);
 
-    text-align: center;
+    padding:40px;
 
-}
+    border-radius:20px;
 
-
-
-/* =========================
-   URL Box
-========================= */
-
-
-.url-box {
-
-    background: #eef2f7;
-
-    padding: 15px;
-
-    border-radius: 8px;
-
-    word-break: break-word;
+    box-shadow:
+    0 20px 50px rgba(0,0,0,0.25);
 
 }
 
 
 
-/* =========================
-   Risk Box
-========================= */
+/* Headings */
 
 
-.risk-box {
+h1{
 
-    margin-top: 25px;
+    text-align:center;
 
-    padding: 20px;
+    color:#0f172a;
 
-    text-align: center;
+    font-size:36px;
 
-    border-radius: 10px;
+    margin-bottom:10px;
 
-    background: #f8f9fa;
+}
+
+
+h2{
+
+    color:#1e3a8a;
+
+    margin-top:35px;
 
 }
 
 
 
-.safe {
+h3{
 
-    background: #d4edda;
-
-    color: #155724;
+    color:#2563eb;
 
 }
 
 
 
-.warning {
+.subtitle{
 
-    background: #fff3cd;
+    text-align:center;
 
-    color: #856404;
+    color:#64748b;
 
-}
-
-
-
-.danger {
-
-    background: #f8d7da;
-
-    color: #721c24;
+    font-size:18px;
 
 }
 
 
 
-/* =========================
-   Tables
-========================= */
+/* Home Input */
 
 
-table {
+form{
 
-    width: 100%;
+    margin-top:35px;
 
-    border-collapse: collapse;
-
-    margin-top: 20px;
+    text-align:center;
 
 }
 
 
 
-th {
+input[type="text"]{
 
-    background: #1d3557;
+    width:70%;
 
-    color: white;
+    padding:16px;
 
-    padding: 12px;
+    border-radius:12px;
 
-}
+    border:
+    2px solid #cbd5e1;
 
+    font-size:16px;
 
-
-td {
-
-    padding: 12px;
-
-    border: 1px solid #ddd;
-
-    word-break: break-word;
+    outline:none;
 
 }
 
 
 
-tr:nth-child(even) {
+input[type="text"]:focus{
 
-    background: #f8f9fa;
-
-}
-
-
-
-/* =========================
-   Footer
-========================= */
-
-
-footer {
-
-    text-align: center;
-
-    margin-top: 35px;
-
-    color: #777;
+    border-color:#2563eb;
 
 }
 
 
 
-/* =========================
-   Mobile Responsive
-========================= */
+/* Buttons */
+
+
+button,
+.btn{
+
+    display:inline-block;
+
+    padding:
+    14px 25px;
+
+    margin:10px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#2563eb;
+
+    color:white;
+
+    text-decoration:none;
+
+    font-size:16px;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+
+
+button:hover,
+.btn:hover{
+
+    transform:translateY(-3px);
+
+    background:#1d4ed8;
+
+}
+
+
+
+.history{
+
+    background:#16a34a;
+
+}
+
+
+
+.history:hover{
+
+    background:#15803d;
+
+}
+
+
+
+/* Feature Cards */
+
+
+.features,
+.cards{
+
+
+    margin-top:40px;
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(
+    auto-fit,
+    minmax(230px,1fr)
+    );
+
+    gap:25px;
+
+}
+
+
+
+.card{
+
+    background:white;
+
+    padding:25px;
+
+    border-radius:18px;
+
+    text-align:center;
+
+    box-shadow:
+
+    0 8px 20px
+    rgba(0,0,0,.12);
+
+    transition:.3s;
+
+}
+
+
+
+.card:hover{
+
+    transform:translateY(-8px);
+
+}
+
+
+
+/* URL */
+
+
+.url-box{
+
+    background:#eff6ff;
+
+    padding:20px;
+
+    border-radius:12px;
+
+    word-break:break-all;
+
+    border-left:
+    6px solid #2563eb;
+
+}
+
+
+
+/* Risk */
+
+
+.risk,
+.risk-card{
+
+    margin-top:30px;
+
+    padding:25px;
+
+    text-align:center;
+
+    border-radius:18px;
+
+    font-size:22px;
+
+    font-weight:bold;
+
+}
+
+
+
+.safe{
+
+    background:#dcfce7;
+
+    color:#166534;
+
+}
+
+
+
+.medium,
+.warning{
+
+    background:#fef3c7;
+
+    color:#92400e;
+
+}
+
+
+
+.high,
+.danger{
+
+    background:#fee2e2;
+
+    color:#991b1b;
+
+}
+
+
+
+/* Tables */
+
+
+table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    margin-top:20px;
+
+    overflow:hidden;
+
+    border-radius:12px;
+
+}
+
+
+
+th{
+
+    background:#1e3a8a;
+
+    color:white;
+
+    padding:15px;
+
+}
+
+
+
+td{
+
+    padding:14px;
+
+    border-bottom:
+    1px solid #e2e8f0;
+
+}
+
+
+
+tr:hover{
+
+    background:#f8fafc;
+
+}
+
+
+
+/* Footer */
+
+
+.footer,
+footer{
+
+    text-align:center;
+
+    margin-top:35px;
+
+    color:#64748b;
+
+}
+
+
+
+/* Responsive */
 
 
 @media(max-width:700px){
 
 
-    body {
+body{
 
-        padding: 15px;
+    padding:15px;
 
-    }
-
-
-
-    .container {
-
-        width:100%;
-
-        padding:20px;
-
-    }
+}
 
 
+.container{
 
-    .input-box {
+    padding:20px;
 
-        flex-direction: column;
-
-    }
-
+}
 
 
-    input[type="text"] {
+h1{
 
-        width:100%;
+    font-size:28px;
 
-    }
+}
 
 
+input[type="text"]{
 
-    button {
+    width:100%;
 
-        width:100%;
+}
 
-        margin-top:10px;
 
-    }
+button,
+.btn{
+
+    width:90%;
+
+}
 
 
 
-    table {
+table{
 
-        font-size:14px;
+    font-size:14px;
 
-    }
-
+}
 
 
 }

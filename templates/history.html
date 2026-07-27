@@ -4,11 +4,110 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Scan History</title>
 
-<link rel="stylesheet" href="/static/style.css">
+
+<style>
+
+body {
+
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+    padding: 30px;
+
+}
+
+
+.container {
+
+    max-width: 1000px;
+    margin:auto;
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 0 15px #ccc;
+
+}
+
+
+h1 {
+
+    text-align:center;
+
+}
+
+
+
+table {
+
+    width:100%;
+    border-collapse:collapse;
+
+}
+
+
+
+th {
+
+    background:#222;
+    color:white;
+    padding:12px;
+
+}
+
+
+
+td {
+
+    padding:10px;
+    border:1px solid #ddd;
+
+}
+
+
+
+.safe {
+
+    color:green;
+    font-weight:bold;
+
+}
+
+
+
+.medium {
+
+    color:orange;
+    font-weight:bold;
+
+}
+
+
+
+.high {
+
+    color:red;
+    font-weight:bold;
+
+}
+
+
+
+.back {
+
+    display:inline-block;
+    margin-top:20px;
+    padding:10px 20px;
+    background:#007bff;
+    color:white;
+    text-decoration:none;
+    border-radius:8px;
+
+}
+
+
+</style>
 
 </head>
 
@@ -20,7 +119,7 @@
 
 
 <h1>
-📜 Scan History
+🔍 URL Scan History
 </h1>
 
 
@@ -31,9 +130,13 @@
 <tr>
 
 <th>ID</th>
+
 <th>URL</th>
+
 <th>Risk Score</th>
+
 <th>Verdict</th>
+
 <th>Date</th>
 
 </tr>
@@ -44,6 +147,7 @@
 
 
 <tr>
+
 
 <td>
 {{ scan[0] }}
@@ -62,15 +166,35 @@
 
 <td>
 
+{% if "Safe" in scan[3] %}
+
+<span class="safe">
 {{ scan[3] }}
+</span>
+
+
+{% elif "Medium" in scan[3] %}
+
+<span class="medium">
+{{ scan[3] }}
+</span>
+
+
+{% else %}
+
+<span class="high">
+{{ scan[3] }}
+</span>
+
+
+{% endif %}
+
 
 </td>
 
 
 <td>
-
 {{ scan[4] }}
-
 </td>
 
 
@@ -80,15 +204,13 @@
 {% endfor %}
 
 
+
 </table>
 
 
 
-
-<a href="/" class="button">
-
+<a href="/" class="back">
 ← Analyze New URL
-
 </a>
 
 

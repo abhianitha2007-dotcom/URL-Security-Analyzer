@@ -481,5 +481,6 @@ def history():
 if __name__ == "__main__":
 
     app.run(
-        debug=True
+        debug=True,
+        use_reloader=False
     )
