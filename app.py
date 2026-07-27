@@ -8,6 +8,7 @@ from analyzer.length_checker import check_url_length
 from analyzer.subdomain_checker import count_subdomains
 from analyzer.at_symbol_checker import check_at_symbol
 from analyzer.shortener_checker import check_shortener
+from analyzer.hyphen_checker import check_hyphen
 
 app = Flask(__name__)
 
@@ -42,8 +43,11 @@ def analyze():
             subdomain_status="Not Checked",
             at_status="Not Checked",
             shortener_status="Not Checked",
+            hyphen_count="-",
+            hyphen_status="Not Checked",
             risk_score="-",
             verdict="Invalid URL"
+            
         )
 
     # HTTPS
@@ -69,6 +73,9 @@ def analyze():
     # URL Shortener
     shortener_found, shortener_status, shortener_score = check_shortener(url)
 
+    # Hyphen Detection
+    hyphen_count, hyphen_status, hyphen_score = check_hyphen(url)
+
     # Risk Score
     risk_score = 0
 
@@ -83,6 +90,7 @@ def analyze():
     risk_score += subdomain_score
     risk_score += at_score
     risk_score += shortener_score
+    risk_score += hyphen_score
 
     risk_score = min(risk_score, 100)
 
@@ -108,6 +116,8 @@ def analyze():
         subdomain_status=subdomain_status,
         at_status=at_status,
         shortener_status=shortener_status,
+        hyphen_count=hyphen_count,
+        hyphen_status=hyphen_status,
         risk_score=risk_score,
         verdict=verdict
     )

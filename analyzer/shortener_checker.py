@@ -12,6 +12,11 @@ SHORTENERS = [
     "cutt.ly",
     "shorturl.at",
     "tiny.cc"
+    "rb.gy"
+    "lnkd.in"
+    "trib.al"
+    "shorte.st"
+    "adf.ly"
 ]
 
 
