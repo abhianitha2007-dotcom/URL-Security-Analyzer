@@ -3,531 +3,951 @@
 
 <head>
 
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
 
-<title>Security Result</title>
+    <title>Analysis Result | URL Security Analyzer</title>
 
+    <!-- Bootstrap -->
 
-<style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
 
+    <!-- Font Awesome -->
 
-body {
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
-    font-family:Arial,sans-serif;
-    background:#f4f6f8;
-    padding:30px;
+    <!-- Google Font -->
 
-}
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
 
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
 
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
 
-.container {
-
-    max-width:1000px;
-    margin:auto;
-    background:white;
-    padding:30px;
-    border-radius:15px;
-    box-shadow:0 0 20px #ccc;
-
-}
-
-
-
-h1 {
-
-    text-align:center;
-
-}
-
-
-
-.url-box {
-
-    background:#eef2f7;
-    padding:15px;
-    border-radius:8px;
-    word-break:break-all;
-
-}
-
-
-
-.risk {
-
-    margin:25px 0;
-    padding:20px;
-    text-align:center;
-    font-size:22px;
-    font-weight:bold;
-    border-radius:10px;
-
-}
-
-
-
-.safe {
-
-    background:#d4edda;
-    color:#155724;
-
-}
-
-
-
-.medium {
-
-    background:#fff3cd;
-    color:#856404;
-
-}
-
-
-
-.high {
-
-    background:#f8d7da;
-    color:#721c24;
-
-}
-
-
-
-table {
-
-    width:100%;
-    border-collapse:collapse;
-    margin-top:20px;
-
-}
-
-
-
-th {
-
-    background:#222;
-    color:white;
-
-}
-
-
-
-td,th {
-
-    border:1px solid #ddd;
-    padding:12px;
-
-}
-
-
-
-.section {
-
-    margin-top:35px;
-
-}
-
-
-
-.btn {
-
-    display:inline-block;
-    margin-top:25px;
-    padding:12px 20px;
-    color:white;
-    text-decoration:none;
-    border-radius:8px;
-
-}
-
-
-
-.download {
-
-    background:#007bff;
-
-}
-
-
-
-.history {
-
-    background:#28a745;
-
-}
-
-
-
-.home {
-
-    background:#555;
-
-}
-
-
-</style>
-
+    <link rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}">
 
 </head>
 
-
 <body>
 
+<!-- ========================================= -->
+<!-- NAVBAR -->
+<!-- ========================================= -->
 
-<div class="container">
+<nav class="navbar navbar-expand-lg navbar-dark custom-navbar shadow-lg">
 
+    <div class="container">
 
-<h1>
-🔐 Security Analysis Report
-</h1>
+        <a class="navbar-brand fw-bold"
+           href="/">
 
+            <i class="fa-solid fa-shield-halved text-info"></i>
 
+            URL Security Analyzer
 
-<div class="url-box">
+        </a>
 
-<b>URL:</b>
+        <button class="navbar-toggler"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarNav">
 
-{{ url }}
+            <span class="navbar-toggler-icon"></span>
 
-</div>
+        </button>
 
+        <div class="collapse navbar-collapse"
+             id="navbarNav">
 
+            <ul class="navbar-nav ms-auto">
 
+                <li class="nav-item">
 
-<div class="risk
+                    <a class="nav-link"
+                       href="/">
 
-{% if 'Safe' in verdict %}
+                        Home
 
-safe
+                    </a>
 
-{% elif 'Medium' in verdict %}
+                </li>
 
-medium
+                <li class="nav-item">
 
-{% else %}
+                    <a class="nav-link"
+                       href="/history">
 
-high
+                        Scan History
 
-{% endif %}
+                    </a>
 
-">
+                </li>
 
+            </ul>
 
-Risk Score:
+        </div>
 
-{{ risk_score }}/100
+    </div>
 
+</nav>
 
-<br>
+<!-- ========================================= -->
+<!-- HEADER -->
+<!-- ========================================= -->
 
+<section class="py-5 mt-5">
 
-{{ verdict }}
+    <div class="container">
 
+        <div class="row">
 
-</div>
+            <div class="col-lg-12">
 
+                <div class="glass-card p-4">
 
+                    <div class="d-flex justify-content-between align-items-center flex-wrap">
 
+                        <div>
 
+                            <h2 class="fw-bold mb-2">
 
-<div class="section">
+                                <i class="fa-solid fa-chart-line text-info"></i>
 
+                                Security Analysis Report
 
-<h2>
-Security Checks
-</h2>
+                            </h2>
 
+                            <p class="text-muted mb-0">
 
+                                Comprehensive security analysis for the submitted URL.
 
-<table>
+                            </p>
 
+                        </div>
 
-<tr>
+                        <div class="mt-3 mt-lg-0">
 
-<th>Check</th>
+                            <a href="/"
+                               class="btn btn-outline-light me-2">
 
-<th>Status</th>
+                                <i class="fa-solid fa-arrow-left"></i>
 
-</tr>
+                                Scan Another
 
+                            </a>
 
+                            <a href="/download-report"
+                               class="btn btn-info">
 
-<tr>
+                                <i class="fa-solid fa-file-pdf"></i>
 
-<td>HTTPS</td>
+                                Download PDF
 
-<td>{{ https_status }}</td>
+                            </a>
 
-</tr>
+                        </div>
 
+                    </div>
 
+                </div>
 
-<tr>
+            </div>
 
-<td>IP Address</td>
+        </div>
 
-<td>{{ ip_status }}</td>
+<!-- ========================================= -->
+<!-- RISK SCORE -->
+<!-- ========================================= -->
 
-</tr>
+        <div class="row mt-4">
 
+            <div class="col-lg-4">
 
+                <div class="glass-card p-4 text-center h-100">
 
-<tr>
+                    <h5 class="mb-4">
 
-<td>Keywords</td>
+                        Overall Risk Score
 
-<td>
+                    </h5>
 
-{{ keyword_count }}
+                    {% if risk_score != "-" %}
 
-{% if keywords %}
+                        {% if risk_score < 30 %}
 
-<br>
+                            {% set color="success" %}
 
-{{ keywords }}
+                        {% elif risk_score < 70 %}
 
-{% endif %}
+                            {% set color="warning" %}
 
-</td>
+                        {% else %}
 
-</tr>
+                            {% set color="danger" %}
 
+                        {% endif %}
 
+                        <div class="display-2 fw-bold text-{{ color }}">
 
-<tr>
+                            {{ risk_score }}
 
-<td>URL Length</td>
+                        </div>
 
-<td>
+                        <div class="progress mt-4"
+                             style="height:18px;">
 
-{{ url_length }}
+                            <div class="progress-bar bg-{{ color }}"
+                            role="progressbar"
+                            aria-valuenow="{{ risk_score|int }}"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                            data-width="{{ risk_score|int }}">
+                          </div>
 
-<br>
+                        </div>
 
-{{ length_category }}
+                    {% else %}
 
-</td>
+                        <div class="display-4 text-danger">
 
-</tr>
+                            -
 
+                        </div>
 
+                    {% endif %}
 
-<tr>
+                    <h4 class="mt-4">
 
-<td>Subdomains</td>
+                        {{ verdict }}
 
-<td>
+                    </h4>
 
-{{ subdomain_count }}
+                </div>
 
-<br>
+            </div>
 
-{{ subdomain_status }}
+<!-- ========================================= -->
+<!-- URL DETAILS -->
+<!-- ========================================= -->
 
-</td>
+            <div class="col-lg-8">
 
-</tr>
+                <div class="glass-card p-4 h-100">
 
+                    <h5 class="mb-4">
 
+                        <i class="fa-solid fa-link text-info"></i>
 
-<tr>
+                        URL Information
 
-<td>@ Symbol</td>
+                    </h5>
 
-<td>
+                    <table class="table table-dark table-hover align-middle">
 
-{{ at_status }}
+                        <tbody>
 
-</td>
+                            <tr>
 
-</tr>
+                                <th width="220">
 
+                                    Submitted URL
 
+                                </th>
 
-<tr>
+                                <td>
 
-<td>URL Shortener</td>
+                                    {{ url }}
 
-<td>
+                                </td>
 
-{{ shortener_status }}
+                            </tr>
 
-</td>
+                            <tr>
 
-</tr>
+                                <th>
 
+                                    Validation
 
+                                </th>
 
-<tr>
+                                <td>
 
-<td>Hyphen Count</td>
+                                    {{ validation }}
 
-<td>
+                                </td>
 
-{{ hyphen_count }}
+                            </tr>
 
-<br>
+                            <tr>
 
-{{ hyphen_status }}
+                                <th>
 
-</td>
+                                    Verdict
 
-</tr>
+                                </th>
 
+                                <td>
 
+                                    <strong>
 
-<tr>
+                                        {{ verdict }}
 
-<td>TLD</td>
+                                    </strong>
 
-<td>
+                                </td>
 
-{{ tld }}
+                            </tr>
 
-<br>
+                            <tr>
 
-{{ tld_status }}
+                                <th>
 
-</td>
+                                    Risk Score
 
-</tr>
+                                </th>
 
+                                <td>
 
-</table>
+                                    {{ risk_score }}
 
+                                </td>
 
-</div>
+                            </tr>
 
+                        </tbody>
 
+                    </table>
 
+                </div>
 
+            </div>
 
+        </div>
 
-<div class="section">
+<!-- ========================================= -->
+<!-- SECURITY CHECKS -->
+<!-- ========================================= -->
 
+        <div class="row mt-4">
+                        <!-- HTTPS -->
 
-<h2>
-Domain Information
-</h2>
+            <div class="col-md-6 col-xl-3 mb-4">
 
+                <div class="feature-card h-100">
 
-<table>
+                    <i class="fa-solid fa-lock"></i>
 
+                    <h5>HTTPS</h5>
 
-<tr>
-<th>Property</th>
-<th>Value</th>
-</tr>
+                    <p class="mt-3">
 
+                        {{ https_status }}
 
-<tr>
-<td>Domain Age</td>
-<td>{{ domain_age.age }}</td>
-</tr>
+                    </p>
 
+                </div>
 
-<tr>
-<td>Registrar</td>
-<td>{{ whois_info.registrar }}</td>
-</tr>
+            </div>
 
+            <!-- IP Address -->
 
-<tr>
-<td>Created</td>
-<td>{{ whois_info.creation_date }}</td>
-</tr>
+            <div class="col-md-6 col-xl-3 mb-4">
 
+                <div class="feature-card h-100">
 
-<tr>
-<td>Expires</td>
-<td>{{ whois_info.expiration_date }}</td>
-</tr>
+                    <i class="fa-solid fa-network-wired"></i>
 
+                    <h5>IP Address</h5>
 
-</table>
+                    <p class="mt-3">
 
+                        {{ ip_status }}
 
-</div>
+                    </p>
 
+                </div>
 
+            </div>
 
+            <!-- Keywords -->
 
+            <div class="col-md-6 col-xl-3 mb-4">
 
-<div class="section">
+                <div class="feature-card h-100">
 
+                    <i class="fa-solid fa-triangle-exclamation"></i>
 
-<h2>
-SSL Certificate
-</h2>
+                    <h5>Keywords</h5>
 
+                    <p>
 
-<table>
+                        Suspicious Keywords
 
+                    </p>
 
-<tr>
-<th>Field</th>
-<th>Value</th>
-</tr>
+                    <h3 class="text-info">
 
+                        {{ keyword_count }}
 
-<tr>
-<td>Issuer</td>
-<td>{{ ssl_info.issuer }}</td>
-</tr>
+                    </h3>
 
+                    {% if keywords %}
 
-<tr>
-<td>Status</td>
-<td>{{ ssl_info.status }}</td>
-</tr>
+                        <div class="mt-3">
 
+                            {% for word in keywords %}
 
-<tr>
-<td>Valid Until</td>
-<td>{{ ssl_info.valid_to }}</td>
-</tr>
+                                <span class="badge bg-warning text-dark m-1">
 
+                                    {{ word }}
 
-</table>
+                                </span>
 
+                            {% endfor %}
 
-</div>
+                        </div>
 
+                    {% else %}
 
+                        <span class="badge bg-success mt-2">
 
+                            None Found
 
+                        </span>
 
-<a href="/download-report" class="btn download">
+                    {% endif %}
 
-📄 Download PDF Report
+                </div>
 
-</a>
+            </div>
 
+            <!-- URL Length -->
 
+            <div class="col-md-6 col-xl-3 mb-4">
 
-<a href="/history" class="btn history">
+                <div class="feature-card h-100">
 
-📜 Scan History
+                    <i class="fa-solid fa-ruler-horizontal"></i>
 
-</a>
+                    <h5>URL Length</h5>
 
+                    <h3 class="text-info">
 
+                        {{ url_length }}
 
-<a href="/" class="btn home">
+                    </h3>
 
-🏠 Home
+                    <p>
 
-</a>
+                        characters
 
+                    </p>
 
+                    <span class="badge bg-secondary">
 
+                        {{ length_category }}
 
-</div>
+                    </span>
 
+                </div>
+
+            </div>
+
+            <!-- Subdomains -->
+
+            <div class="col-md-6 col-xl-3 mb-4">
+
+                <div class="feature-card h-100">
+
+                    <i class="fa-solid fa-code-branch"></i>
+
+                    <h5>Subdomains</h5>
+
+                    <h3 class="text-info">
+
+                        {{ subdomain_count }}
+
+                    </h3>
+
+                    <p class="mt-2">
+
+                        {{ subdomain_status }}
+
+                    </p>
+
+                </div>
+
+            </div>
+
+            <!-- @ Symbol -->
+
+            <div class="col-md-6 col-xl-3 mb-4">
+
+                <div class="feature-card h-100">
+
+                    <i class="fa-solid fa-at"></i>
+
+                    <h5>@ Symbol</h5>
+
+                    <p class="mt-3">
+
+                        {{ at_status }}
+
+                    </p>
+
+                </div>
+
+            </div>
+
+            <!-- URL Shortener -->
+
+            <div class="col-md-6 col-xl-3 mb-4">
+
+                <div class="feature-card h-100">
+
+                    <i class="fa-solid fa-link-slash"></i>
+
+                    <h5>Shortened URL</h5>
+
+                    <p class="mt-3">
+
+                        {{ shortener_status }}
+
+                    </p>
+
+                </div>
+
+            </div>
+
+            <!-- Hyphen -->
+
+            <div class="col-md-6 col-xl-3 mb-4">
+
+                <div class="feature-card h-100">
+
+                    <i class="fa-solid fa-minus"></i>
+
+                    <h5>Hyphens</h5>
+
+                    <h3 class="text-info">
+
+                        {{ hyphen_count }}
+
+                    </h3>
+
+                    <p class="mt-2">
+
+                        {{ hyphen_status }}
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- DOMAIN INFORMATION -->
+
+        <div class="row mt-2">
+                        <!-- Domain Age -->
+
+            <div class="col-lg-6 mb-4">
+
+                <div class="glass-card p-4 h-100">
+
+                    <h5 class="mb-4">
+
+                        <i class="fa-solid fa-calendar-days text-info"></i>
+
+                        Domain Age
+
+                    </h5>
+
+                    {% if domain_age %}
+
+                    <table class="table table-dark table-hover">
+
+                        <tbody>
+
+                            {% for key, value in domain_age.items() %}
+
+                            <tr>
+
+                                <th>{{ key.replace("_"," ").title() }}</th>
+
+                                <td>{{ value }}</td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                    {% else %}
+
+                    <p class="text-muted">
+
+                        Domain age information unavailable.
+
+                    </p>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            <!-- TLD -->
+
+            <div class="col-lg-6 mb-4">
+
+                <div class="glass-card p-4 h-100">
+
+                    <h5 class="mb-4">
+
+                        <i class="fa-solid fa-earth-americas text-info"></i>
+
+                        Top Level Domain
+
+                    </h5>
+
+                    <table class="table table-dark">
+
+                        <tr>
+
+                            <th width="180">
+
+                                TLD
+
+                            </th>
+
+                            <td>
+
+                                {{ tld }}
+
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <th>
+
+                                Status
+
+                            </th>
+
+                            <td>
+
+                                {{ tld_status }}
+
+                            </td>
+
+                        </tr>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- WHOIS + DNS -->
+
+        <div class="row">
+
+            <div class="col-lg-6 mb-4">
+
+                <div class="glass-card p-4 h-100">
+
+                    <h5 class="mb-4">
+
+                        <i class="fa-solid fa-circle-info text-info"></i>
+
+                        WHOIS Information
+
+                    </h5>
+
+                    {% if whois_info %}
+
+                    <table class="table table-dark table-hover">
+
+                        <tbody>
+
+                        {% for key, value in whois_info.items() %}
+
+                            <tr>
+
+                                <th>
+
+                                    {{ key.replace("_"," ").title() }}
+
+                                </th>
+
+                                <td>
+
+                                    {{ value }}
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                    {% else %}
+
+                    <p class="text-muted">
+
+                        WHOIS information unavailable.
+
+                    </p>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-6 mb-4">
+
+                <div class="glass-card p-4 h-100">
+
+                    <h5 class="mb-4">
+
+                        <i class="fa-solid fa-server text-info"></i>
+
+                        DNS Records
+
+                    </h5>
+
+                    {% if dns_records %}
+
+                    <table class="table table-dark table-hover">
+
+                        <tbody>
+
+                        {% for key, value in dns_records.items() %}
+
+                            <tr>
+
+                                <th>
+
+                                    {{ key }}
+
+                                </th>
+
+                                <td>
+
+                                    {{ value }}
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                    {% else %}
+
+                    <p class="text-muted">
+
+                        DNS records unavailable.
+
+                    </p>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- SSL -->
+
+        <div class="row">
+
+            <div class="col-lg-12 mb-4">
+
+                <div class="glass-card p-4">
+
+                    <h5 class="mb-4">
+
+                        <i class="fa-solid fa-certificate text-info"></i>
+
+                        SSL Certificate
+
+                    </h5>
+
+                    {% if ssl_info %}
+
+                    <table class="table table-dark table-hover">
+
+                        <tbody>
+
+                        {% for key, value in ssl_info.items() %}
+
+                            <tr>
+
+                                <th width="260">
+
+                                    {{ key.replace("_"," ").title() }}
+
+                                </th>
+
+                                <td>
+
+                                    {{ value }}
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                    {% else %}
+
+                    <p class="text-muted">
+
+                        SSL information unavailable.
+
+                    </p>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- SUMMARY -->
+
+        <div class="row">
+
+            <div class="col-lg-12">
+
+                <div class="glass-card p-4 text-center">
+
+                    <h3 class="mb-3">
+
+                        Analysis Summary
+
+                    </h3>
+
+                    <p class="text-muted">
+
+                        This report combines HTTPS validation, phishing indicators,
+                        URL structure analysis, WHOIS lookup, DNS information,
+                        SSL certificate verification, domain age analysis,
+                        and TLD inspection to estimate the overall security risk.
+
+                    </p>
+
+                    <div class="mt-4">
+
+                        <a href="/"
+                           class="btn btn-info me-2">
+
+                            <i class="fa-solid fa-magnifying-glass"></i>
+
+                            Analyze Another URL
+
+                        </a>
+
+                        <a href="/download-report"
+                           class="btn btn-outline-light">
+
+                            <i class="fa-solid fa-file-pdf"></i>
+
+                            Download Report
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<footer class="footer">
+
+    <div class="container text-center">
+
+        <p class="mb-2">
+
+            <i class="fa-solid fa-shield-halved text-info"></i>
+
+            URL Security Analyzer
+
+        </p>
+
+        <small>
+
+            Built with Flask, Bootstrap 5, SQLite and Python
+
+        </small>
+
+    </div>
+
+</footer>
+
+<button id="backToTop"
+        class="btn btn-info rounded-circle shadow-lg">
+
+    <i class="fa-solid fa-arrow-up"></i>
+
+</button>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+document.querySelectorAll(".progress-bar").forEach(function(bar){
+
+    const width = bar.dataset.width;
+
+    if(width){
+
+        bar.style.width = width + "%";
+
+    }
+
+});
+
+</script>
+
+</script>
 
 </body>
-
 
 </html>
