@@ -161,3 +161,183 @@ def get_all_scans():
 
 
     return scans
+
+# -------------------------
+# Get Scan By ID
+# -------------------------
+
+def get_scan_by_id(scan_id):
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute(
+
+        """
+        SELECT *
+        FROM scans
+        WHERE id = ?
+        """,
+
+        (scan_id,)
+
+    )
+
+    scan = cursor.fetchone()
+
+    conn.close()
+
+    return scan
+
+# -------------------------
+# Delete Scan
+# -------------------------
+
+def delete_scan(scan_id):
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute(
+
+        """
+        DELETE FROM scans
+        WHERE id = ?
+        """,
+
+        (scan_id,)
+
+    )
+
+    conn.commit()
+
+    conn.close()
+
+    # -------------------------
+# Clear History
+# -------------------------
+
+def clear_history():
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute(
+
+        """
+        DELETE FROM scans
+        """
+
+    )
+
+    conn.commit()
+
+    conn.close()
+
+    # -------------------------
+# Total Scans
+# -------------------------
+
+def get_total_scans():
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute(
+
+        """
+        SELECT COUNT(*)
+        FROM scans
+        """
+
+    )
+
+    total = cursor.fetchone()[0]
+
+    conn.close()
+
+    return total
+
+# -------------------------
+# Average Risk Score
+# -------------------------
+
+def get_average_risk():
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute(
+
+        """
+        SELECT AVG(risk_score)
+        FROM scans
+        """
+
+    )
+
+    average = cursor.fetchone()[0]
+
+    conn.close()
+
+    if average is None:
+
+        return 0
+
+    return round(average, 2)
+
+# -------------------------
+# Highest Risk
+# -------------------------
+
+def get_highest_risk():
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute(
+
+        """
+        SELECT MAX(risk_score)
+        FROM scans
+        """
+
+    )
+
+    highest = cursor.fetchone()[0]
+
+    conn.close()
+
+    return highest if highest is not None else 0
+
+# -------------------------
+# Lowest Risk
+# -------------------------
+
+def get_lowest_risk():
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute(
+
+        """
+        SELECT MIN(risk_score)
+        FROM scans
+        """
+
+    )
+
+    lowest = cursor.fetchone()[0]
+
+    conn.close()
+
+    return lowest if lowest is not None else 0
+

@@ -3,7 +3,8 @@ from flask import (
     render_template,
     request,
     send_file,
-    session
+    session,
+    redirect
 )
 
 import os
@@ -11,7 +12,14 @@ import os
 from database.database import (
     create_database,
     save_scan,
-    get_all_scans
+    get_all_scans,
+    get_scan_by_id,
+    delete_scan,
+    clear_history,
+    get_total_scans,
+    get_average_risk,
+    get_highest_risk,
+    get_lowest_risk
 )
 
 from analyzer.url_validator import is_valid_url
@@ -465,18 +473,43 @@ def history():
 
     scans = get_all_scans()
 
+    total_scans = get_total_scans()
+
+    average_risk = get_average_risk()
+
+    highest_risk = get_highest_risk()
+
+    lowest_risk = get_lowest_risk()
 
     return render_template(
 
         "history.html",
 
-        scans=scans
+        scans=scans,
+
+        total_scans=total_scans,
+
+        average_risk=average_risk,
+
+        highest_risk=highest_risk,
+
+        lowest_risk=lowest_risk
 
     )
 
+@app.route("/delete-scan/<int:scan_id>")
+def delete_scan_route(scan_id):
 
+    delete_scan(scan_id)
 
+    return redirect("/history")
 
+@app.route("/clear-history")
+def clear_history_route():
+
+    clear_history()
+
+    return redirect("/history")
 
 if __name__ == "__main__":
 
