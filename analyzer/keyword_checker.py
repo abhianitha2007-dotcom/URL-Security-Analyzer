@@ -2,113 +2,133 @@ from urllib.parse import urlparse
 import re
 
 
+# Login / Authentication
 
-# Common phishing-related keywords
-
-SUSPICIOUS_KEYWORDS = [
+LOGIN_KEYWORDS = {
 
     "login",
     "signin",
+    "sign-in",
+    "authenticate",
+    "auth",
     "verify",
     "verification",
-    "secure",
-    "security",
-    "update",
-    "confirm",
-    "confirmation",
-    "account",
     "password",
     "credential",
+    "otp",
+    "2fa"
+
+}
+
+
+# Banking / Payment
+
+BANKING_KEYWORDS = {
+
     "bank",
     "payment",
-    "invoice",
     "wallet",
-    "crypto",
+    "invoice",
+    "billing",
+    "upi",
+    "credit",
+    "debit",
+    "refund",
+    "transaction"
+
+}
+
+
+# Account Related
+
+ACCOUNT_KEYWORDS = {
+
+    "account",
+    "update",
+    "confirm",
+    "recovery",
     "recover",
     "unlock",
+    "reset",
+    "activate"
+
+}
+
+
+# Urgency / Threat
+
+URGENCY_KEYWORDS = {
+
     "alert",
-    "auth"
+    "warning",
+    "expired",
+    "expire",
+    "blocked",
+    "suspended",
+    "limited",
+    "security"
 
-]
+}
 
 
+# Cryptocurrency
 
+CRYPTO_KEYWORDS = {
+
+    "crypto",
+    "bitcoin",
+    "btc",
+    "ethereum",
+    "eth",
+    "usdt"
+
+}
+
+
+SUSPICIOUS_KEYWORDS = (
+
+    LOGIN_KEYWORDS
+    | BANKING_KEYWORDS
+    | ACCOUNT_KEYWORDS
+    | URGENCY_KEYWORDS
+    | CRYPTO_KEYWORDS
+
+)
 
 
 def check_keywords(url):
+
     """
-    Detects suspicious words in URL.
+    Returns
 
-    Checks:
-    - domain
-    - path
-    - query parameters
-
-    Returns:
-
-        count
-        matched keywords
+        keyword_count,
+        matched_keywords
 
     """
 
     try:
 
-
         parsed = urlparse(url)
 
+        text = " ".join([
 
+            parsed.netloc,
 
-        text = (
+            parsed.path,
 
-            parsed.netloc
+            parsed.query
 
-            + " "
-
-            + parsed.path
-
-            + " "
-
-            + parsed.query
-
-        ).lower()
-
-
-
+        ]).lower()
 
         found = []
 
+        for keyword in sorted(SUSPICIOUS_KEYWORDS):
 
+            pattern = rf"\b{re.escape(keyword)}\b"
 
-        for keyword in SUSPICIOUS_KEYWORDS:
+            if re.search(pattern, text):
 
-
-
-            # Match complete words
-
-            pattern = (
-
-                r"\b"
-
-                + re.escape(keyword)
-
-                + r"\b"
-
-            )
-
-
-
-            if re.search(
-                pattern,
-                text
-            ):
-
-                found.append(
-                    keyword
-                )
-
-
-
-
+                found.append(keyword)
 
         return (
 
@@ -118,12 +138,7 @@ def check_keywords(url):
 
         )
 
-
-
-
-
     except Exception:
-
 
         return (
 

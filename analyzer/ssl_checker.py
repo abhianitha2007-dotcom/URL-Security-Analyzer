@@ -2,38 +2,21 @@ import socket
 import ssl
 
 from datetime import datetime, timezone
-
 from urllib.parse import urlparse
-
-
 
 
 def extract_hostname(url):
 
-    """
-    Extract hostname from URL.
-    """
-
     try:
 
-        hostname = urlparse(url).hostname
-
-        return hostname
-
+        return urlparse(url).hostname
 
     except Exception:
 
         return None
 
 
-
-
-
 def parse_certificate_date(date_string):
-
-    """
-    Converts SSL certificate date.
-    """
 
     try:
 
@@ -49,44 +32,37 @@ def parse_certificate_date(date_string):
 
         )
 
-
     except Exception:
 
         return None
 
 
-
-
-
 def get_ssl_info(url):
 
     """
-    Retrieves SSL certificate information.
+    Returns
 
-    Returns:
-        dictionary
+    {
+        issuer,
+        valid_from,
+        valid_to,
+        days_remaining,
+        protocol,
+        cipher,
+        status
+    }
+
     """
 
     try:
 
-
         hostname = extract_hostname(url)
-
-
 
         if not hostname:
 
-
-            raise Exception(
-                "Invalid hostname"
-            )
-
-
-
+            raise Exception("Invalid hostname")
 
         context = ssl.create_default_context()
-
-
 
         with socket.create_connection(
 
@@ -96,8 +72,6 @@ def get_ssl_info(url):
 
         ) as sock:
 
-
-
             with context.wrap_socket(
 
                 sock,
@@ -106,23 +80,15 @@ def get_ssl_info(url):
 
             ) as secure_socket:
 
+                certificate = secure_socket.getpeercert()
 
+                protocol = secure_socket.version()
 
-                certificate = (
-                    secure_socket
-                    .getpeercert()
-                )
-
-
-
-
+                cipher = secure_socket.cipher()[0]
 
         issuer = "Unknown"
 
-
-
         if "issuer" in certificate:
-
 
             issuer_data = dict(
 
@@ -132,173 +98,102 @@ def get_ssl_info(url):
 
             )
 
-
             issuer = (
 
-                issuer_data.get(
-                    "organizationName"
-                )
+                issuer_data.get("organizationName")
 
                 or "Unknown"
 
             )
 
-
-
-
-
         valid_from = parse_certificate_date(
 
-            certificate.get(
-                "notBefore"
-            )
+            certificate.get("notBefore")
 
         )
-
-
 
         valid_to = parse_certificate_date(
 
-            certificate.get(
-                "notAfter"
-            )
+            certificate.get("notAfter")
 
         )
 
-
-
-
-
         if valid_to:
-
 
             days_remaining = (
 
-                valid_to
+                valid_to -
 
-                -
-
-                datetime.now(
-                    timezone.utc
-                )
+                datetime.now(timezone.utc)
 
             ).days
 
-
         else:
-
 
             days_remaining = "-"
 
-
-
-
-
         if days_remaining == "-":
 
+            status = "⚠️ Certificate information unavailable"
 
-            status = (
-                "⚠️ Certificate date unavailable"
-            )
+        elif days_remaining < 0:
 
+            status = "❌ SSL Certificate Expired"
 
-        elif days_remaining >= 0:
+        elif days_remaining <= 30:
 
-
-            status = (
-                "✅ Valid Certificate"
-            )
-
+            status = "🟡 SSL Certificate Expiring Soon"
 
         else:
 
-
-            status = (
-                "❌ Expired Certificate"
-            )
-
-
-
-
+            status = "✅ Valid SSL Certificate"
 
         return {
 
-
-            "issuer":
-            issuer,
-
-
+            "issuer": issuer,
 
             "valid_from":
 
-            valid_from.strftime(
-                "%d-%m-%Y"
-            )
+            valid_from.strftime("%d-%m-%Y")
 
             if valid_from
 
             else "Unknown",
 
-
-
-
             "valid_to":
 
-            valid_to.strftime(
-                "%d-%m-%Y"
-            )
+            valid_to.strftime("%d-%m-%Y")
 
             if valid_to
 
             else "Unknown",
 
+            "days_remaining": days_remaining,
 
+            "protocol": protocol,
 
+            "cipher": cipher,
 
-            "days_remaining":
-
-            days_remaining,
-
-
-
-
-            "status":
-
-            status
+            "status": status
 
         }
 
-
-
-
-
     except Exception:
-
 
         return {
 
+            "issuer": "Unknown",
 
-            "issuer":
-            "Unknown",
+            "valid_from": "Unknown",
 
+            "valid_to": "Unknown",
 
+            "days_remaining": "-",
 
-            "valid_from":
-            "Unknown",
+            "protocol": "Unknown",
 
+            "cipher": "Unknown",
 
-
-            "valid_to":
-            "Unknown",
-
-
-
-            "days_remaining":
-            "-",
-
-
-
-            "status":
-            "Could not retrieve SSL certificate"
+            "status": "Could not retrieve SSL certificate"
 
         }

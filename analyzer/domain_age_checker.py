@@ -1,228 +1,134 @@
 from datetime import datetime
-
 from urllib.parse import urlparse
 
 import whois
 
 
-
-
 def extract_domain(url):
 
-    """
-    Extract clean domain name.
-    """
+    hostname = urlparse(url).hostname
 
-    parsed = urlparse(url)
-
-    hostname = parsed.hostname
-
-
-    if hostname is None:
-
+    if not hostname:
         return None
 
-
-    # Remove www prefix
+    hostname = hostname.lower()
 
     if hostname.startswith("www."):
-
         hostname = hostname[4:]
-
 
     return hostname
 
 
-
-
-
 def get_creation_date(value):
 
-    """
-    Handles different WHOIS date formats.
-    """
-
     if isinstance(value, list):
-
         value = value[0]
 
-
-    if value is None:
-
-        return None
-
-
     if not isinstance(value, datetime):
-
         return None
-
-
-    # Remove timezone
 
     if value.tzinfo:
-
-        value = value.replace(
-            tzinfo=None
-        )
-
+        value = value.replace(tzinfo=None)
 
     return value
 
 
+def unknown_result(message):
 
+    return {
+        "age": "Unknown",
+        "risk": False,
+        "confirmed_new": False,
+        "message": message
+    }
 
 
 def check_domain_age(url):
 
     """
-    Checks domain age using WHOIS.
-
     Returns:
-
-    {
-        age,
-        risk,
-        message
-    }
-
+        {
+            age,
+            risk,
+            confirmed_new,
+            message
+        }
     """
 
-
     try:
-
-
         domain = extract_domain(url)
 
-
         if not domain:
-
-
-            return {
-
-                "age": "Unknown",
-
-                "risk": True,
-
-                "message":
+            return unknown_result(
                 "Invalid domain."
-
-            }
-
-
+            )
 
         data = whois.whois(domain)
 
-
-
         creation_date = get_creation_date(
-
             data.creation_date
-
         )
 
-
-
         if not creation_date:
-
-
-            return {
-
-                "age": "Unknown",
-
-                "risk": True,
-
-                "message":
-                "Could not determine domain age."
-
-            }
-
-
-
+            return unknown_result(
+                "Domain age could not be verified."
+            )
 
         age_days = (
-
-            datetime.now()
-
-            - creation_date
-
+            datetime.now() - creation_date
         ).days
 
+        age_years = round(
+            age_days / 365.25,
+            1
+        )
 
-
+        if age_days < 30:
+            return {
+                "age": f"{age_days} days",
+                "risk": True,
+                "confirmed_new": True,
+                "message": (
+                    "🔴 Domain registered within "
+                    "the last 30 days."
+                )
+            }
 
         if age_days < 180:
-
-
             return {
-
-                "age":
-                f"{age_days} days",
-
-
+                "age": f"{age_days} days",
                 "risk": True,
-
-
-                "message":
-                "⚠️ Very new domain."
-
+                "confirmed_new": True,
+                "message": "🟠 Very new domain."
             }
 
-
-
-        elif age_days < 365:
-
-
+        if age_days < 365:
             return {
-
-                "age":
-                f"{age_days} days",
-
-
+                "age": f"{age_days} days",
                 "risk": True,
-
-
-                "message":
-                "⚠️ Domain is less than one year old."
-
+                "confirmed_new": True,
+                "message": (
+                    "🟡 Domain is less than "
+                    "one year old."
+                )
             }
 
-
-
-
-        else:
-
-
+        if age_days < 1095:
             return {
-
-                "age":
-                f"{age_days} days",
-
-
+                "age": f"{age_years} years",
                 "risk": False,
-
-
-                "message":
-                "✅ Old domain."
-
+                "confirmed_new": False,
+                "message": "🟢 Established domain."
             }
-
-
-
-
-    except Exception:
-
 
         return {
-
-            "age":
-            "Unknown",
-
-
-            "risk":
-            True,
-
-
-            "message":
-            "WHOIS lookup failed."
-
+            "age": f"{age_years} years",
+            "risk": False,
+            "confirmed_new": False,
+            "message": "✅ Well-established domain."
         }
+
+    except Exception:
+        return unknown_result(
+            "WHOIS lookup failed."
+        )

@@ -3,64 +3,52 @@ import dns.resolver
 from urllib.parse import urlparse
 
 
-
 DNS_RECORD_TYPES = [
 
     "A",
     "AAAA",
     "MX",
     "NS",
-    "CNAME"
+    "CNAME",
+    "TXT"
 
 ]
 
 
-
-
 def get_hostname(url):
-
-    """
-    Extract hostname from URL.
-    """
 
     try:
 
         hostname = urlparse(url).hostname
 
-
         if hostname:
 
             return hostname.lower()
 
-
         return None
-
 
     except Exception:
 
         return None
 
 
-
-
-
 def get_dns_records(url):
 
     """
-    Retrieves DNS records.
-
-    Returns:
+    Returns
 
     {
+
         A: [],
         AAAA: [],
         MX: [],
         NS: [],
-        CNAME: []
+        CNAME: [],
+        TXT: []
+
     }
 
     """
-
 
     records = {
 
@@ -70,39 +58,23 @@ def get_dns_records(url):
 
     }
 
-
-
     try:
 
-
         hostname = get_hostname(url)
-
-
 
         if not hostname:
 
             return records
 
-
-
-
         resolver = dns.resolver.Resolver()
-
-
-        # Prevent long waiting times
 
         resolver.timeout = 3
 
         resolver.lifetime = 5
 
-
-
-
         for record_type in DNS_RECORD_TYPES:
 
-
             try:
-
 
                 answers = resolver.resolve(
 
@@ -112,17 +84,13 @@ def get_dns_records(url):
 
                 )
 
-
-
                 for answer in answers:
 
-                    records[record_type].append(
+                    value = str(answer).strip()
 
-                        str(answer)
+                    if value not in records[record_type]:
 
-                    )
-
-
+                        records[record_type].append(value)
 
             except (
 
@@ -130,29 +98,20 @@ def get_dns_records(url):
 
                 dns.resolver.NXDOMAIN,
 
+                dns.resolver.NoNameservers,
+
                 dns.resolver.Timeout
 
             ):
 
                 continue
 
-
-
             except Exception:
 
                 continue
 
-
-
-
-
         return records
 
-
-
-
-
     except Exception:
-
 
         return records

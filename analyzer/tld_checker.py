@@ -1,8 +1,10 @@
 from urllib.parse import urlparse
 
 
-
-# TLDs frequently abused in phishing campaigns
+# ==========================================================
+# High Risk TLDs
+# Frequently abused in phishing campaigns
+# ==========================================================
 
 HIGH_RISK_TLDS = {
 
@@ -16,13 +18,19 @@ HIGH_RISK_TLDS = {
     "click",
     "zip",
     "country",
-    "stream"
+    "stream",
+    "cam",
+    "rest",
+    "fit",
+    "kim",
+    "men"
 
 }
 
 
-
-# TLDs that need moderate attention
+# ==========================================================
+# Medium Risk TLDs
+# ==========================================================
 
 MEDIUM_RISK_TLDS = {
 
@@ -30,63 +38,188 @@ MEDIUM_RISK_TLDS = {
     "live",
     "buzz",
     "work",
-    "support",
     "review",
-    "shop"
+    "support",
+    "shop",
+    "monster",
+    "party",
+    "loan",
+    "download"
 
 }
 
 
+# ==========================================================
+# Trusted Government Domains
+# ==========================================================
+
+GOVERNMENT_SUFFIXES = (
+
+    ".gov",
+    ".gov.in",
+    ".nic.in"
+
+)
 
 
+# ==========================================================
+# Trusted Educational Domains
+# ==========================================================
+
+EDUCATION_SUFFIXES = (
+
+    ".edu",
+    ".edu.in",
+    ".ac.in"
+
+)
+
+
+# ==========================================================
+# Military Domains
+# ==========================================================
+
+MILITARY_SUFFIXES = (
+
+    ".mil",
+
+)
+
+
+# ==========================================================
+# Banking Domains
+# (Common banking suffixes)
+# ==========================================================
+
+BANKING_SUFFIXES = (
+
+    ".bank",
+
+)
+
+
+# ==========================================================
+# Extract Hostname
+# ==========================================================
+
+def extract_hostname(url):
+
+    try:
+
+        hostname = urlparse(url).hostname
+
+        if hostname:
+
+            return hostname.lower()
+
+        return None
+
+    except Exception:
+
+        return None
+
+
+# ==========================================================
+# Check TLD
+# ==========================================================
 
 def check_tld(url):
+
     """
-    Checks domain TLD reputation.
+    Returns
 
-    Returns:
-
-        tld
-        status
+    (
+        tld,
+        status,
         score
-
+    )
     """
 
     try:
 
-
-        hostname = urlparse(url).hostname
-
-
+        hostname = extract_hostname(url)
 
         if not hostname:
-
 
             return (
 
                 "Unknown",
-
                 "Not Checked",
+                0
+
+            )
+
+        # ---------------------------------
+        # Government
+        # ---------------------------------
+
+        if hostname.endswith(GOVERNMENT_SUFFIXES):
+
+            return (
+
+                "Government",
+
+                "✅ Official Government Domain",
 
                 0
 
             )
 
+        # ---------------------------------
+        # Education
+        # ---------------------------------
 
+        if hostname.endswith(EDUCATION_SUFFIXES):
 
+            return (
 
+                "Education",
 
-        hostname = hostname.lower()
+                "✅ Educational Institution",
 
+                0
 
+            )
+
+        # ---------------------------------
+        # Military
+        # ---------------------------------
+
+        if hostname.endswith(MILITARY_SUFFIXES):
+
+            return (
+
+                "Military",
+
+                "✅ Military Domain",
+
+                0
+
+            )
+
+        # ---------------------------------
+        # Banking
+        # ---------------------------------
+
+        if hostname.endswith(BANKING_SUFFIXES):
+
+            return (
+
+                "Bank",
+
+                "✅ Banking Domain",
+
+                0
+
+            )
+
+        # ---------------------------------
+        # Normal TLD
+        # ---------------------------------
 
         parts = hostname.split(".")
 
-
-
-
         if len(parts) < 2:
-
 
             return (
 
@@ -98,18 +231,13 @@ def check_tld(url):
 
             )
 
-
-
-
-
         tld = parts[-1]
 
-
-
-
+        # ---------------------------------
+        # High Risk
+        # ---------------------------------
 
         if tld in HIGH_RISK_TLDS:
-
 
             return (
 
@@ -121,12 +249,11 @@ def check_tld(url):
 
             )
 
+        # ---------------------------------
+        # Medium Risk
+        # ---------------------------------
 
-
-
-
-        elif tld in MEDIUM_RISK_TLDS:
-
+        if tld in MEDIUM_RISK_TLDS:
 
             return (
 
@@ -138,29 +265,21 @@ def check_tld(url):
 
             )
 
+        # ---------------------------------
+        # Common
+        # ---------------------------------
 
+        return (
 
+            tld,
 
+            f"🟢 Common TLD (.{tld})",
 
-        else:
+            0
 
-
-            return (
-
-                tld,
-
-                f"🟢 Common TLD (.{tld})",
-
-                0
-
-            )
-
-
-
-
+        )
 
     except Exception:
-
 
         return (
 

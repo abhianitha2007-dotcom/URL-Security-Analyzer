@@ -2,31 +2,32 @@ from urllib.parse import urlparse
 import ipaddress
 
 
-
 def contains_ip(url):
+
     """
-    Checks whether hostname is an IP address.
+    Checks whether the hostname is
+    an IPv4 or IPv6 address.
 
-    Supports:
-    - IPv4
-    - IPv6
+    Returns
 
-    Returns:
-        True / False
+        True
+        False
+
     """
 
     try:
 
-        parsed = urlparse(url)
+        if not url:
 
-        hostname = parsed.hostname
+            return False
 
+        hostname = urlparse(url).hostname
 
         if not hostname:
 
             return False
 
-
+        hostname = hostname.strip()
 
         try:
 
@@ -34,12 +35,9 @@ def contains_ip(url):
 
             return True
 
-
         except ValueError:
 
             return False
-
-
 
     except Exception:
 
