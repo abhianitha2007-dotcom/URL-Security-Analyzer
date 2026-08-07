@@ -1,5 +1,9 @@
 import ipaddress
 import socket
+import time
+
+import dns.exception
+import dns.resolver
 
 from urllib.parse import urlparse
 
@@ -28,18 +32,43 @@ BLOCKED_HOST_SUFFIXES = (
 )
 
 
+# Number of attempts made using the operating system DNS
+# resolver before trying the fallback public resolvers.
+SYSTEM_DNS_ATTEMPTS = 3
+
+
+# Short delays between temporary system DNS failures.
+DNS_RETRY_DELAYS = (
+    0.15,
+    0.35
+)
+
+
+# Used only when the operating system resolver temporarily
+# fails. These are public DNS resolvers.
+FALLBACK_NAMESERVERS = (
+    "1.1.1.1",
+    "8.8.8.8"
+)
+
+
+# =========================================================
+# IP ADDRESS VALIDATION
+# =========================================================
+
 def _is_public_ip(value):
     """
     Return True only for globally routable IP addresses.
 
     This blocks:
-        loopback
-        private networks
-        link-local addresses
-        multicast
-        reserved ranges
-        unspecified addresses
-        other non-public special-use addresses
+
+        - loopback
+        - private networks
+        - link-local addresses
+        - multicast
+        - reserved ranges
+        - unspecified addresses
+        - other non-public special-use addresses
     """
 
     try:
@@ -53,8 +82,13 @@ def _is_public_ip(value):
         return False
 
 
-    # Handle IPv4-mapped IPv6 addresses such as:
+    # -----------------------------------------------------
+    # IPv4-MAPPED IPv6
+    #
+    # Example:
+    #
     # ::ffff:127.0.0.1
+    # -----------------------------------------------------
 
     if (
         isinstance(
@@ -70,11 +104,18 @@ def _is_public_ip(value):
     return ip.is_global
 
 
+# =========================================================
+# HOSTNAME NORMALIZATION
+# =========================================================
+
 def _normalize_hostname(
     hostname
 ):
     """
-    Normalize a hostname for validation.
+    Normalize a hostname before validation.
+
+    Converts internationalized hostnames to their ASCII
+    IDNA form and removes a trailing dot.
     """
 
     if not hostname:
@@ -108,6 +149,10 @@ def _normalize_hostname(
     return hostname
 
 
+# =========================================================
+# LOCAL HOSTNAME BLOCKING
+# =========================================================
+
 def _hostname_is_blocked(
     hostname
 ):
@@ -125,16 +170,28 @@ def _hostname_is_blocked(
     )
 
 
+# =========================================================
+# LITERAL IP VALIDATION
+# =========================================================
+
 def _validate_literal_ip(
     hostname
 ):
     """
-    Validate a hostname when it is directly an IP address.
+    Validate a hostname when the hostname itself is an
+    IP address.
 
     Returns:
-        True  -> public IP
-        False -> non-public IP
-        None  -> hostname is not an IP literal
+
+        True
+            The IP address is globally routable.
+
+        False
+            The IP address is private, local, reserved,
+            link-local or otherwise non-public.
+
+        None
+            The hostname is not an IP literal.
     """
 
     try:
@@ -153,56 +210,22 @@ def _validate_literal_ip(
     )
 
 
-def _resolve_public_hostname(
-    hostname,
-    port
+# =========================================================
+# DNS RESULT VALIDATION
+# =========================================================
+
+def _all_resolved_ips_are_public(
+    resolved_ips
 ):
     """
-    Resolve a hostname and ensure every returned address
-    is globally routable.
+    Validate a collection of resolved IP addresses.
 
-    Rejecting the host when any resolved address is
-    non-public prevents obvious DNS-based access to
-    localhost/private infrastructure.
+    Every returned address must be public.
+
+    If even one resolved address points to a private,
+    local, reserved or otherwise non-global network,
+    the hostname is rejected.
     """
-
-    try:
-
-        addresses = socket.getaddrinfo(
-            hostname,
-            port,
-            type=socket.SOCK_STREAM
-        )
-
-    except (
-        socket.gaierror,
-        OSError
-    ):
-
-        return False
-
-
-    resolved_ips = set()
-
-
-    for address in addresses:
-
-        sockaddr = address[4]
-
-
-        if not sockaddr:
-            continue
-
-
-        ip_value = sockaddr[0]
-
-
-        if ip_value:
-
-            resolved_ips.add(
-                ip_value
-            )
-
 
     if not resolved_ips:
 
@@ -210,10 +233,313 @@ def _resolve_public_hostname(
 
 
     return all(
-        _is_public_ip(ip_value)
+        _is_public_ip(
+            ip_value
+        )
         for ip_value in resolved_ips
     )
 
+
+# =========================================================
+# SYSTEM DNS RESOLUTION
+# =========================================================
+
+def _resolve_with_system_dns(
+    hostname,
+    port
+):
+    """
+    Resolve a hostname using the operating system DNS
+    resolver.
+
+    Temporary DNS failures are retried a small number of
+    times.
+
+    Returns:
+
+        set
+            Resolved IP addresses.
+
+        None
+            DNS resolution failed.
+    """
+
+    for attempt in range(
+        SYSTEM_DNS_ATTEMPTS
+    ):
+
+        try:
+
+            addresses = socket.getaddrinfo(
+                hostname,
+                port,
+                type=socket.SOCK_STREAM
+            )
+
+        except (
+            socket.gaierror,
+            OSError
+        ):
+
+            # -------------------------------------------------
+            # Retry temporary DNS failures.
+            # -------------------------------------------------
+
+            if (
+                attempt
+                < len(
+                    DNS_RETRY_DELAYS
+                )
+            ):
+
+                time.sleep(
+                    DNS_RETRY_DELAYS[
+                        attempt
+                    ]
+                )
+
+            continue
+
+
+        resolved_ips = set()
+
+
+        for address in addresses:
+
+            try:
+
+                sockaddr = address[4]
+
+            except (
+                IndexError,
+                TypeError
+            ):
+
+                continue
+
+
+            if not sockaddr:
+
+                continue
+
+
+            try:
+
+                ip_value = sockaddr[0]
+
+            except (
+                IndexError,
+                TypeError
+            ):
+
+                continue
+
+
+            if ip_value:
+
+                resolved_ips.add(
+                    str(
+                        ip_value
+                    )
+                )
+
+
+        if resolved_ips:
+
+            return resolved_ips
+
+
+    return None
+
+
+# =========================================================
+# FALLBACK DNS RESOLUTION
+# =========================================================
+
+def _resolve_with_fallback_dns(
+    hostname
+):
+    """
+    Resolve a hostname using public DNS resolvers when the
+    operating system resolver is temporarily unavailable.
+
+    This does NOT bypass SSRF protection.
+
+    Every returned IP address is still checked by
+    _is_public_ip() before the URL can be accepted.
+    """
+
+    resolver = dns.resolver.Resolver(
+        configure=False
+    )
+
+
+    resolver.nameservers = list(
+        FALLBACK_NAMESERVERS
+    )
+
+
+    resolver.timeout = 2.0
+    resolver.lifetime = 4.0
+
+
+    resolved_ips = set()
+
+
+    # -----------------------------------------------------
+    # IPV4
+    # -----------------------------------------------------
+
+    try:
+
+        answers = resolver.resolve(
+            hostname,
+            "A"
+        )
+
+
+        for answer in answers:
+
+            ip_value = getattr(
+                answer,
+                "address",
+                None
+            )
+
+
+            if ip_value:
+
+                resolved_ips.add(
+                    str(
+                        ip_value
+                    )
+                )
+
+
+    except (
+        dns.resolver.NXDOMAIN,
+        dns.resolver.NoAnswer,
+        dns.resolver.NoNameservers,
+        dns.exception.Timeout,
+        dns.exception.DNSException,
+        OSError
+    ):
+
+        pass
+
+
+    # -----------------------------------------------------
+    # IPV6
+    # -----------------------------------------------------
+
+    try:
+
+        answers = resolver.resolve(
+            hostname,
+            "AAAA"
+        )
+
+
+        for answer in answers:
+
+            ip_value = getattr(
+                answer,
+                "address",
+                None
+            )
+
+
+            if ip_value:
+
+                resolved_ips.add(
+                    str(
+                        ip_value
+                    )
+                )
+
+
+    except (
+        dns.resolver.NXDOMAIN,
+        dns.resolver.NoAnswer,
+        dns.resolver.NoNameservers,
+        dns.exception.Timeout,
+        dns.exception.DNSException,
+        OSError
+    ):
+
+        pass
+
+
+    if not resolved_ips:
+
+        return None
+
+
+    return resolved_ips
+
+
+# =========================================================
+# PUBLIC HOSTNAME RESOLUTION
+# =========================================================
+
+def _resolve_public_hostname(
+    hostname,
+    port
+):
+    """
+    Resolve a hostname and verify that every returned
+    address is globally routable.
+
+    Resolution strategy:
+
+        1. Try the operating system DNS resolver.
+        2. Retry temporary failures.
+        3. If system DNS still fails, use public DNS
+           resolvers as a fallback.
+        4. Validate every resolved IP address.
+
+    A hostname is rejected if:
+
+        - it cannot be resolved
+        - no addresses are returned
+        - any returned address is non-public
+
+    This preserves SSRF protections while avoiding false
+    "invalid URL" results caused by temporary DNS failures.
+    """
+
+    resolved_ips = _resolve_with_system_dns(
+        hostname,
+        port
+    )
+
+
+    # -----------------------------------------------------
+    # SYSTEM DNS FAILED
+    # -----------------------------------------------------
+
+    if resolved_ips is None:
+
+        resolved_ips = (
+            _resolve_with_fallback_dns(
+                hostname
+            )
+        )
+
+
+    if not resolved_ips:
+
+        return False
+
+
+    return _all_resolved_ips_are_public(
+        resolved_ips
+    )
+
+
+# =========================================================
+# MAIN URL VALIDATOR
+# =========================================================
 
 def is_valid_url(
     url
@@ -222,16 +548,26 @@ def is_valid_url(
     Validate whether a URL is suitable for scanning.
 
     Requirements:
-        - http:// or https:// only
+
+        - HTTP or HTTPS only
         - valid hostname
         - no embedded username/password
-        - valid port syntax
-        - no localhost/private/link-local/reserved targets
-        - hostname must resolve only to public IP addresses
+        - valid TCP port
+        - no localhost hostnames
+        - no private/local/reserved IP targets
+        - resolved addresses must be globally routable
+
+    DNS resolution includes retry handling and a public
+    DNS fallback for environments where the operating
+    system resolver temporarily fails.
 
     Returns:
         bool
     """
+
+    # -----------------------------------------------------
+    # INPUT TYPE
+    # -----------------------------------------------------
 
     if not isinstance(
         url,
@@ -248,6 +584,10 @@ def is_valid_url(
 
         return False
 
+
+    # -----------------------------------------------------
+    # URL PARSING
+    # -----------------------------------------------------
 
     try:
 
@@ -276,13 +616,17 @@ def is_valid_url(
 
 
     # -----------------------------------------------------
-    # NETWORK LOCATION / HOSTNAME
+    # NETWORK LOCATION
     # -----------------------------------------------------
 
     if not parsed.netloc:
 
         return False
 
+
+    # -----------------------------------------------------
+    # HOSTNAME
+    # -----------------------------------------------------
 
     try:
 
@@ -301,15 +645,14 @@ def is_valid_url(
 
 
     # -----------------------------------------------------
-    # USERINFO
+    # USERNAME / PASSWORD
     #
-    # URLs such as:
+    # Reject URLs such as:
     #
     # https://trusted.example@evil.example/
     #
-    # can visually mislead users and are unnecessary for
-    # this scanner, so credentials embedded in URLs are
-    # rejected.
+    # They can visually mislead users and are unnecessary
+    # for this security scanner.
     # -----------------------------------------------------
 
     if (
@@ -382,7 +725,7 @@ def is_valid_url(
 
 
     # -----------------------------------------------------
-    # DNS RESOLUTION
+    # DNS / SSRF VALIDATION
     # -----------------------------------------------------
 
     return _resolve_public_hostname(
