@@ -1,128 +1,105 @@
-# 🔐 URL Security Analyzer
+# URL Security Analyzer
 
-A web-based cybersecurity application that analyzes URLs for phishing indicators and calculates a security risk score.
+URL Security Analyzer is a Flask-based cybersecurity web application that analyzes URLs for phishing indicators, suspicious domain behavior, insecure configurations, and malicious reputation signals.
 
-The project identifies suspicious characteristics commonly used in phishing attacks and provides a detailed security report.
-
----
-
-# 🚀 Features
-
-## URL Analysis
-
-✅ HTTPS Detection  
-✅ IP Address Detection  
-✅ Suspicious Keyword Detection  
-✅ URL Length Analysis  
-✅ Subdomain Detection  
-✅ @ Symbol Detection  
-✅ URL Shortener Detection  
-✅ Hyphen Analysis  
-✅ TLD Reputation Checking  
+It combines multiple security checks into a final **Risk Score from 0–100** and provides detailed results, scan history, and downloadable PDF reports.
 
 ---
 
-## Domain Intelligence
+## Features
 
-✅ WHOIS Information  
-✅ Domain Age Analysis  
-✅ DNS Record Lookup  
-✅ SSL Certificate Analysis  
+- HTTPS detection
+- IP address detection
+- Suspicious keyword detection
+- URL length analysis
+- Subdomain analysis
+- URL shortener detection
+- Domain age analysis
+- WHOIS lookup
+- DNS analysis
+- SSL certificate inspection
+- Typosquatting and domain similarity detection
+- Redirect analysis
+- JavaScript and form inspection
+- Security header analysis
+- Cookie security checks
+- CORS analysis
+- Mixed-content detection
+- Sensitive file exposure checks
+- Technology detection
+- VirusTotal threat intelligence
+- Risk score calculation
+- SQLite scan history
+- PDF security reports
+- SSRF protection
+- CSRF protection
 
 ---
 
-## Risk Assessment
+## Risk Levels
 
-✅ Multi-factor Risk Engine  
-✅ Security Score (0-100)  
-✅ Safe / Suspicious / High Risk Classification  
-
----
-
-## Reports & History
-
-✅ PDF Security Report Generation  
-✅ SQLite Scan History  
-✅ Previous Scan Tracking  
+| Score | Verdict |
+|---|---|
+| 0–15 | Safe |
+| 16–30 | Low Risk |
+| 31–50 | Medium Risk |
+| 51–75 | High Risk |
+| 76–100 | Critical |
 
 ---
 
-# 🛠 Tech Stack
+## Tech Stack
 
-## Backend
-
+**Backend**
 - Python
 - Flask
 
-## Frontend
-
+**Frontend**
 - HTML
 - CSS
+- JavaScript
+- Bootstrap 5
 
-## Database
-
+**Database**
 - SQLite
 
-## Security Libraries
-
+**Security / Analysis**
+- Requests
 - python-whois
 - dnspython
-- SSL module
+- BeautifulSoup
+- VirusTotal API
 
-## Version Control
+**Reports**
+- ReportLab
 
-- Git
-- GitHub
+**Testing**
+- pytest
 
 ---
 
-# 📂 Project Structure
+## Project Structure
 
-```
+```text
 URL-Security-Analyzer/
-
 │
 ├── analyzer/
-│   ├── https_checker.py
-│   ├── ip_checker.py
-│   ├── keyword_checker.py
-│   ├── length_checker.py
-│   ├── subdomain_checker.py
-│   ├── at_symbol_checker.py
-│   ├── shortener_checker.py
-│   ├── hyphen_checker.py
-│   ├── domain_age_checker.py
-│   ├── whois_checker.py
-│   ├── dns_checker.py
-│   ├── ssl_checker.py
-│   ├── tld_checker.py
-│   ├── risk_engine.py
-│   └── pdf_generator.py
-│
 ├── database/
-│   ├── database.py
-│   └── scans.db
-│
 ├── templates/
-│   ├── index.html
-│   ├── result.html
-│   └── history.html
-│
 ├── static/
-│   └── style.css
-│
+├── tests/
+├── manual_tests/
 ├── reports/
 │
 ├── app.py
 ├── requirements.txt
-├── README.md
-└── .gitignore
-
+├── .gitignore
+└── README.md
 ```
 
 ---
 
-# ▶️ Installation
+## Installation
 
 Clone the repository:
 
@@ -130,23 +107,21 @@ Clone the repository:
 git clone <repository-url>
 ```
 
-Move into project directory:
+Move into the project:
 
 ```bash
 cd URL-Security-Analyzer
 ```
 
-Create virtual environment:
+Create a virtual environment:
 
 ```bash
 python -m venv venv
 ```
 
-Activate environment:
+Activate it on Windows:
 
-Windows:
-
-```bash
+```powershell
 venv\Scripts\activate
 ```
 
@@ -156,42 +131,76 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-Run application:
+---
+
+## Environment Variables
+
+Create a `.env` file in the project root:
+
+```env
+SECRET_KEY=your-secret-key
+VIRUSTOTAL_API_KEY=your-virustotal-api-key
+FLASK_DEBUG=true
+SESSION_COOKIE_SECURE=false
+```
+
+Do not upload your real `.env` file to GitHub.
+
+---
+
+## Run the Application
 
 ```bash
 python app.py
 ```
 
-Open browser:
+Open:
 
-```
+```text
 http://127.0.0.1:5000
 ```
 
 ---
 
-# 🔍 How It Works
+## Testing
 
-1. User enters a URL.
-2. Analyzer performs multiple security checks.
-3. Each indicator contributes to the risk score.
-4. Final score determines security level.
-5. User can download a PDF report.
-6. Scan history is stored in SQLite.
+Run the automated test suite:
 
----
+```bash
+python -m pytest tests -v
+```
 
-# 🔮 Future Improvements
+Current result:
 
-- SMS phishing detection
-- QR code URL scanning
-- Machine learning based phishing prediction
-- Browser extension
-- REST API
-- User authentication
+```text
+33 passed
+```
 
 ---
 
-# 📜 License
+## Security
+
+The application includes:
+
+- Private/local IP blocking
+- Redirect SSRF protection
+- Safe HTTP request handling
+- CSRF protection
+- Secure browser sessions
+- Request-size limits
+- Security response headers
+- Environment-based secret management
+
+---
+
+## Disclaimer
+
+This project is intended for educational and defensive cybersecurity purposes.
+
+The generated risk score should be treated as a security indicator, not a guarantee that a website is completely safe or malicious.
+
+---
+
+## License
 
 MIT License

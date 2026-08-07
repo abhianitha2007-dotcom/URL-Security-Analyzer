@@ -1,4 +1,5 @@
 import requests
+from analyzer.safe_http import safe_requests
 
 
 MAX_REDIRECTS = 10
@@ -18,7 +19,7 @@ def check_redirects(url):
 
     try:
 
-        response = requests.get(
+        response = safe_requests.get(
 
             url,
 

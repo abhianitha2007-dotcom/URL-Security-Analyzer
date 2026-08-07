@@ -2,6 +2,7 @@ import base64
 import re
 
 import requests
+from analyzer.safe_http import safe_requests
 from bs4 import BeautifulSoup
 
 
@@ -34,7 +35,7 @@ INFORMATIONAL_PATTERNS = {
 def fetch_page(url):
 
     try:
-        response = requests.get(
+        response = safe_requests.get(
             url,
             timeout=8,
             allow_redirects=True,

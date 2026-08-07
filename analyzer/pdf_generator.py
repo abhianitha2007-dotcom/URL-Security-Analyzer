@@ -1,5 +1,6 @@
 from datetime import datetime
 from xml.sax.saxutils import escape
+import os
 import re
 
 from reportlab.lib import colors
@@ -22,7 +23,7 @@ from reportlab.platypus import (
 
 PAGE_WIDTH, PAGE_HEIGHT = A4
 
-REPORT_VERSION = "2.0"
+REPORT_VERSION = "2.1"
 ENGINE_NAME = "Multi-Layer URL Threat Detection Engine"
 
 
@@ -556,14 +557,10 @@ def add_detection_table(
         Paragraph(
             "<b>Result</b>",
             styles["WhiteTableText"]
-        ),
-        Paragraph(
-            "<b>Score</b>",
-            styles["WhiteTableText"]
         )
     ]]
 
-    for name, status, score in rows:
+    for name, status in rows:
 
         table_data.append([
             Paragraph(
@@ -573,19 +570,14 @@ def add_detection_table(
             Paragraph(
                 pdf_text(status),
                 styles["BodySmall"]
-            ),
-            Paragraph(
-                pdf_text(score),
-                styles["BodySmall"]
             )
         ])
 
     table = Table(
         table_data,
         colWidths=[
-            47 * mm,
-            111 * mm,
-            22 * mm
+            52 * mm,
+            128 * mm
         ],
         repeatRows=1
     )
@@ -967,417 +959,80 @@ def add_evidence_summary(
 
 def build_detection_rows(analysis):
 
-    return [
-        (
-            "HTTPS",
-            get_nested(
-                analysis,
-                "https",
-                "status"
-            ),
-            0
-        ),
-        (
-            "IP Address",
-            get_nested(
-                analysis,
-                "ip_address",
-                "status"
-            ),
-            0
-        ),
-        (
-            "URL Length",
-            get_nested(
-                analysis,
-                "url_length",
-                "status"
-            ),
-            get_nested(
-                analysis,
-                "url_length",
-                "score",
-                0
-            )
-        ),
-        (
-            "Subdomains",
-            get_nested(
-                analysis,
-                "subdomains",
-                "status"
-            ),
-            get_nested(
-                analysis,
-                "subdomains",
-                "score",
-                0
-            )
-        ),
-        (
-            "At Symbol",
-            get_nested(
-                analysis,
-                "at_symbol",
-                "status"
-            ),
-            get_nested(
-                analysis,
-                "at_symbol",
-                "score",
-                0
-            )
-        ),
-        (
-            "URL Shortener",
-            get_nested(
-                analysis,
-                "shortener",
-                "status"
-            ),
-            get_nested(
-                analysis,
-                "shortener",
-                "score",
-                0
-            )
-        ),
-        (
-            "Hyphens",
-            get_nested(
-                analysis,
-                "hyphens",
-                "status"
-            ),
-            get_nested(
-                analysis,
-                "hyphens",
-                "score",
-                0
-            )
-        ),
-        (
-            "Top-Level Domain",
-            get_nested(
-                analysis,
-                "tld",
-                "status"
-            ),
-            get_nested(
-                analysis,
-                "tld",
-                "score",
-                0
-            )
-        ),
-        (
-            "Domain Similarity",
-            get_nested(
-                analysis,
-                "domain_similarity",
-                "status"
-            ),
-            get_nested(
-                analysis,
-                "domain_similarity",
-                "score",
-                0
-            )
-        ),
-        (
-            "Typosquatting",
-            get_nested(
-                analysis,
-                "typosquatting",
-                "status"
-            ),
-            get_nested(
-                analysis,
-                "typosquatting",
-                "score",
-                0
-            )
-        ),
-        (
-            "Homograph",
-            get_nested(
-                analysis,
-                "homograph",
-                "status"
-            ),
-            get_nested(
-                analysis,
-                "homograph",
-                "score",
-                0
-            )
-        ),
-        (
-            "Punycode",
-            get_nested(
-                analysis,
-                "punycode",
-                "status"
-            ),
-            get_nested(
-                analysis,
-                "punycode",
-                "score",
-                0
-            )
-        ),
-        (
-            "Domain Entropy",
-            get_nested(
-                analysis,
-                "entropy",
-                "status"
-            ),
-            get_nested(
-                analysis,
-                "entropy",
-                "score",
-                0
-            )
-        ),
-        (
-            "Port",
-            get_nested(
-                analysis,
-                "port",
-                "status"
-            ),
-            get_nested(
-                analysis,
-                "port",
-                "score",
-                0
-            )
-        ),
-        (
-            "Query Parameters",
-            get_nested(
-                analysis,
-                "query_parameters",
-                "status"
-            ),
-            get_nested(
-                analysis,
-                "query_parameters",
-                "score",
-                0
-            )
-        ),
-        (
-            "Email Address",
-            get_nested(
-                analysis,
-                "email_address",
-                "status"
-            ),
-            get_nested(
-                analysis,
-                "email_address",
-                "score",
-                0
-            )
-        ),
-        (
-            "File Extension",
-            get_nested(
-                analysis,
-                "file_extension",
-                "status"
-            ),
-            get_nested(
-                analysis,
-                "file_extension",
-                "score",
-                0
-            )
-        ),
-        (
-            "Redirects",
-            get_nested(
-                analysis,
-                "redirects",
-                "status"
-            ),
-            get_nested(
-                analysis,
-                "redirects",
-                "score",
-                0
-            )
-        ),
-        (
-            "Security Headers",
-            get_nested(
-                analysis,
-                "security_headers",
-                "status"
-            ),
-            get_nested(
-                analysis,
-                "security_headers",
-                "score",
-                0
-            )
-        ),
-        (
-            "JavaScript",
-            get_nested(
-                analysis,
-                "javascript",
-                "status"
-            ),
-            get_nested(
-                analysis,
-                "javascript",
-                "score",
-                0
-            )
-        ),
-        (
-            "Forms",
-            get_nested(
-                analysis,
-                "forms",
-                "status"
-            ),
-            get_nested(
-                analysis,
-                "forms",
-                "score",
-                0
-            )
-        ),
-        (
-            "Page Content",
-            get_nested(
-                analysis,
-                "content",
-                "status"
-            ),
-            get_nested(
-                analysis,
-                "content",
-                "score",
-                0
-            )
-        ),
-        (
-            "Favicon",
-            get_nested(
-                analysis,
-                "favicon",
-                "status"
-            ),
-            get_nested(
-                analysis,
-                "favicon",
-                "score",
-                0
-            )
-        )
-    ]
-
-
-def add_detection_statistics(
-    story,
-    rows,
-    styles
-):
-
-    total_checks = len(rows)
-
-    completed = sum(
-        1
-        for _, status, _ in rows
-        if safe_text(status).lower() != "not checked"
+    keyword_data = analysis.get(
+        "keywords",
+        {}
     )
 
-    flagged = sum(
-        1
-        for _, _, score in rows
-        if normalize_score(score) > 0
-    )
-
-    clean = max(
-        completed - flagged,
+    keyword_count = keyword_data.get(
+        "count",
         0
+    ) if isinstance(keyword_data, dict) else 0
+
+    keyword_matches = keyword_data.get(
+        "matches",
+        []
+    ) if isinstance(keyword_data, dict) else []
+
+    if keyword_count:
+        keyword_result = (
+            f"{keyword_count} suspicious keyword(s): "
+            f"{format_list(keyword_matches)}"
+        )
+    else:
+        keyword_result = "No suspicious keywords detected"
+
+    domain_age = analysis.get(
+        "domain_age",
+        {}
     )
 
-    stats_table = Table(
-        [[
-            Paragraph(
-                f"<b>{total_checks}</b><br/>Total Modules",
-                styles["BodyNormalCustom"]
-            ),
-            Paragraph(
-                f"<b>{completed}</b><br/>Checks Completed",
-                styles["BodyNormalCustom"]
-            ),
-            Paragraph(
-                f"<b>{flagged}</b><br/>Flagged Checks",
-                styles["BodyNormalCustom"]
-            ),
-            Paragraph(
-                f"<b>{clean}</b><br/>Clean Checks",
-                styles["BodyNormalCustom"]
-            )
-        ]],
-        colWidths=[
-            45 * mm,
-            45 * mm,
-            45 * mm,
-            45 * mm
-        ]
-    )
+    if isinstance(domain_age, dict):
+        domain_age_result = (
+            domain_age.get("message")
+            or domain_age.get("status")
+            or "Not Checked"
+        )
+    else:
+        domain_age_result = "Not Checked"
 
-    stats_table.setStyle(
-        TableStyle([
-            (
-                "BACKGROUND",
-                (0, 0),
-                (-1, -1),
-                colors.HexColor("#E2E8F0")
-            ),
-            (
-                "GRID",
-                (0, 0),
-                (-1, -1),
-                0.5,
-                colors.HexColor("#94A3B8")
-            ),
-            (
-                "ALIGN",
-                (0, 0),
-                (-1, -1),
-                "CENTER"
-            ),
-            (
-                "VALIGN",
-                (0, 0),
-                (-1, -1),
-                "MIDDLE"
-            ),
-            (
-                "TOPPADDING",
-                (0, 0),
-                (-1, -1),
-                10
-            ),
-            (
-                "BOTTOMPADDING",
-                (0, 0),
-                (-1, -1),
-                10
-            )
-        ])
-    )
-
-    story.append(stats_table)
+    return [
+        ("HTTPS", get_nested(analysis, "https", "status")),
+        ("IP Address", get_nested(analysis, "ip_address", "status")),
+        ("Suspicious Keywords", keyword_result),
+        ("URL Length", get_nested(analysis, "url_length", "status")),
+        ("Subdomains", get_nested(analysis, "subdomains", "status")),
+        ("At Symbol", get_nested(analysis, "at_symbol", "status")),
+        ("URL Shortener", get_nested(analysis, "shortener", "status")),
+        ("Hyphens", get_nested(analysis, "hyphens", "status")),
+        ("Top-Level Domain", get_nested(analysis, "tld", "status")),
+        ("Domain Age", domain_age_result),
+        ("Domain Similarity", get_nested(analysis, "domain_similarity", "status")),
+        ("Typosquatting", get_nested(analysis, "typosquatting", "status")),
+        ("Homograph", get_nested(analysis, "homograph", "status")),
+        ("Punycode", get_nested(analysis, "punycode", "status")),
+        ("Domain Entropy", get_nested(analysis, "entropy", "status")),
+        ("Port", get_nested(analysis, "port", "status")),
+        ("Query Parameters", get_nested(analysis, "query_parameters", "status")),
+        ("Email Address", get_nested(analysis, "email_address", "status")),
+        ("File Extension", get_nested(analysis, "file_extension", "status")),
+        ("Redirects", get_nested(analysis, "redirects", "status")),
+        ("Security Headers", get_nested(analysis, "security_headers", "status")),
+        ("JavaScript", get_nested(analysis, "javascript", "status")),
+        ("Forms", get_nested(analysis, "forms", "status")),
+        ("Page Content", get_nested(analysis, "content", "status")),
+        ("Favicon", get_nested(analysis, "favicon", "status")),
+        ("robots.txt", get_nested(analysis, "robots", "status")),
+        ("Sitemap", get_nested(analysis, "sitemap", "status")),
+        ("Response Headers", get_nested(analysis, "response_headers", "status")),
+        ("Technology", get_nested(analysis, "technology", "status")),
+        ("Sensitive File Exposure", get_nested(analysis, "file_exposure", "status")),
+        ("HTTP Methods", get_nested(analysis, "http_methods", "status")),
+        ("Cookie Security", get_nested(analysis, "cookie_security", "status")),
+        ("CORS", get_nested(analysis, "cors", "status")),
+        ("Mixed Content", get_nested(analysis, "mixed_content", "status")),
+        ("Threat Intelligence", get_nested(analysis, "threat_intelligence", "status"))
+    ]
 
 
 # ==========================================================
@@ -1471,6 +1126,15 @@ def generate_pdf(
     report_data,
     output_path
 ):
+
+    output_directory = os.path.dirname(
+        os.path.abspath(output_path)
+    )
+
+    os.makedirs(
+        output_directory,
+        exist_ok=True
+    )
 
     styles = build_styles()
 
@@ -1593,23 +1257,6 @@ def generate_pdf(
         styles
     )
 
-    if analysis:
-
-        detection_rows = build_detection_rows(
-            analysis
-        )
-
-        add_section_title(
-            story,
-            "Scan Statistics",
-            styles
-        )
-
-        add_detection_statistics(
-            story,
-            detection_rows,
-            styles
-        )
 
     story.append(
         PageBreak()
@@ -2030,18 +1677,19 @@ def generate_pdf(
             )
         )
 
-    if analysis:
+    story.append(
+        PageBreak()
+    )
 
-        story.append(
-            Spacer(
-                1,
-                12
-            )
-        )
+    # ======================================================
+    # PAGE 5 - WEBPAGE AND SERVER FINDINGS
+    # ======================================================
+
+    if analysis:
 
         add_section_title(
             story,
-            "Detailed Webpage and Network Findings",
+            "Webpage Behaviour",
             styles
         )
 
@@ -2145,6 +1793,268 @@ def generate_pdf(
             styles
         )
 
+        add_section_title(
+            story,
+            "Website and Server Intelligence",
+            styles
+        )
+
+        add_information_table(
+            story,
+            [
+                [
+                    "robots.txt",
+                    get_nested(
+                        analysis,
+                        "robots",
+                        "status"
+                    )
+                ],
+                [
+                    "robots.txt Disallow Entries",
+                    get_nested(
+                        analysis,
+                        "robots",
+                        "disallow_count",
+                        0
+                    )
+                ],
+                [
+                    "Sitemap",
+                    get_nested(
+                        analysis,
+                        "sitemap",
+                        "status"
+                    )
+                ],
+                [
+                    "Sitemap URL Count",
+                    get_nested(
+                        analysis,
+                        "sitemap",
+                        "url_count",
+                        0
+                    )
+                ],
+                [
+                    "Response Headers",
+                    get_nested(
+                        analysis,
+                        "response_headers",
+                        "status"
+                    )
+                ],
+                [
+                    "Server",
+                    get_nested(
+                        analysis,
+                        "response_headers",
+                        "server",
+                        "Unknown"
+                    )
+                ],
+                [
+                    "Technology Detection",
+                    get_nested(
+                        analysis,
+                        "technology",
+                        "status"
+                    )
+                ],
+                [
+                    "Technologies",
+                    format_list(
+                        get_nested(
+                            analysis,
+                            "technology",
+                            "technologies",
+                            []
+                        )
+                    )
+                ],
+                [
+                    "Sensitive File Exposure",
+                    get_nested(
+                        analysis,
+                        "file_exposure",
+                        "status"
+                    )
+                ],
+                [
+                    "Exposed File Count",
+                    get_nested(
+                        analysis,
+                        "file_exposure",
+                        "exposed_count",
+                        0
+                    )
+                ],
+                [
+                    "HTTP Methods",
+                    get_nested(
+                        analysis,
+                        "http_methods",
+                        "status"
+                    )
+                ],
+                [
+                    "Risky Methods",
+                    format_list(
+                        get_nested(
+                            analysis,
+                            "http_methods",
+                            "risky_methods",
+                            []
+                        )
+                    )
+                ]
+            ],
+            styles
+        )
+
+    story.append(
+        PageBreak()
+    )
+
+    # ======================================================
+    # PAGE 6 - ADVANCED SECURITY INTELLIGENCE
+    # ======================================================
+
+    add_section_title(
+        story,
+        "Advanced Security Intelligence",
+        styles
+    )
+
+    if analysis:
+
+        cookie = analysis.get(
+            "cookie_security",
+            {}
+        )
+
+        cors = analysis.get(
+            "cors",
+            {}
+        )
+
+        mixed = analysis.get(
+            "mixed_content",
+            {}
+        )
+
+        threat = analysis.get(
+            "threat_intelligence",
+            {}
+        )
+
+        if not isinstance(cookie, dict):
+            cookie = {}
+
+        if not isinstance(cors, dict):
+            cors = {}
+
+        if not isinstance(mixed, dict):
+            mixed = {}
+
+        if not isinstance(threat, dict):
+            threat = {}
+
+        add_section_title(
+            story,
+            "Cookie Security",
+            styles
+        )
+
+        add_information_table(
+            story,
+            [
+                ["Status", cookie.get("status", "Not Checked")],
+                ["Cookies Detected", cookie.get("cookie_count", 0)],
+                ["Secure Cookies", cookie.get("secure_count", 0)],
+                ["HttpOnly Cookies", cookie.get("httponly_count", 0)],
+                ["SameSite Cookies", cookie.get("samesite_count", 0)],
+                ["Observations", format_list(cookie.get("issues", []))]
+            ],
+            styles
+        )
+
+        add_section_title(
+            story,
+            "CORS Security",
+            styles
+        )
+
+        add_information_table(
+            story,
+            [
+                ["Status", cors.get("status", "Not Checked")],
+                ["CORS Exposed", cors.get("enabled", False)],
+                ["Allowed Origin", cors.get("allow_origin", "Not Set")],
+                ["Credentials Allowed", cors.get("allow_credentials", False)],
+                ["Origin Reflection", cors.get("origin_reflection", False)],
+                ["Allowed Methods", format_list(cors.get("allow_methods", []))],
+                ["Issues", format_list(cors.get("issues", []))]
+            ],
+            styles
+        )
+
+        add_section_title(
+            story,
+            "Mixed Content",
+            styles
+        )
+
+        add_information_table(
+            story,
+            [
+                ["Status", mixed.get("status", "Not Checked")],
+                ["HTTPS Page", mixed.get("https_page", False)],
+                ["Downgraded to HTTP", mixed.get("downgraded_to_http", False)],
+                ["Active Mixed Resources", mixed.get("active_count", 0)],
+                ["Passive Mixed Resources", mixed.get("passive_count", 0)],
+                ["Total Mixed Resources", mixed.get("total_count", 0)],
+                ["Issues", format_list(mixed.get("issues", []))]
+            ],
+            styles
+        )
+
+        add_section_title(
+            story,
+            "VirusTotal Threat Intelligence",
+            styles
+        )
+
+        add_information_table(
+            story,
+            [
+                ["Status", threat.get("status", "Not Checked")],
+                ["Report Found", threat.get("report_found", False)],
+                ["Submitted for Analysis", threat.get("submitted", False)],
+                ["Malicious Detections", threat.get("malicious", 0)],
+                ["Suspicious Detections", threat.get("suspicious", 0)],
+                ["Harmless", threat.get("harmless", 0)],
+                ["Undetected", threat.get("undetected", 0)],
+                ["Total Engines", threat.get("total_engines", 0)],
+                ["Reputation", threat.get("reputation", 0)],
+                ["Categories", format_list(threat.get("categories", []))],
+                ["Last Analysis", threat.get("last_analysis_date", "Unknown")]
+            ],
+            styles
+        )
+
+    else:
+
+        story.append(
+            Paragraph(
+                (
+                    "Advanced security intelligence was not available "
+                    "for this report."
+                ),
+                styles["BodyNormalCustom"]
+            )
+        )
+
     add_recommendations(
         story,
         risk_score,
@@ -2162,10 +2072,10 @@ def generate_pdf(
         Paragraph(
             (
                 "<b>Important:</b> This report is generated using "
-                "automated heuristics and technical checks. A low "
-                "score does not guarantee that a website is safe. "
-                "A high score should be verified using trusted "
-                "threat-intelligence and reputation services."
+                "automated heuristics, technical checks and available "
+                "threat-intelligence data. A low score does not guarantee "
+                "that a website is safe, and an unavailable reputation "
+                "result should not be treated as proof of safety."
             ),
             styles["Disclaimer"]
         )

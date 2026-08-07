@@ -3,6 +3,7 @@ import xml.etree.ElementTree as ET
 from urllib.parse import urljoin, urlparse
 
 import requests
+from analyzer.safe_http import safe_requests
 
 
 MAX_SITEMAP_FILES = 10
@@ -215,7 +216,7 @@ def fetch_sitemap(url):
     """
 
     try:
-        response = requests.get(
+        response = safe_requests.get(
             url,
             timeout=8,
             allow_redirects=True,

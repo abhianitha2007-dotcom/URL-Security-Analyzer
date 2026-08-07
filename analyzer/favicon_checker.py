@@ -1,6 +1,7 @@
 from urllib.parse import urljoin, urlparse
 
 import requests
+from analyzer.safe_http import safe_requests
 from bs4 import BeautifulSoup
 
 
@@ -24,7 +25,7 @@ def check_favicon(url):
     """
 
     try:
-        response = requests.get(
+        response = safe_requests.get(
             url,
             timeout=8,
             allow_redirects=True,
