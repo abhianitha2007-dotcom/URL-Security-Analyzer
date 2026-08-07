@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="description"
+        content="Analyze suspicious URLs using multi-layer cybersecurity checks.">
+
+    <title>URL Security Analyzer</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+                         NAVBAR
+========================================================= -->
+
+<nav class="navbar navbar-expand-lg navbar-dark custom-navbar fixed-top">
+
+    <div class="container">
+
+        <a
+            class="navbar-brand fw-bold"
+            href="{{ url_for('home') }}">
+
+            <span class="brand-icon">
+
+                <i class="fa-solid fa-shield-halved"></i>
+
+            </span>
+
+            URL Security Analyzer
+
+        </a>
+
+
+        <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation">
+
+            <span class="navbar-toggler-icon"></span>
+
+        </button>
+
+
+        <div
+            class="collapse navbar-collapse"
+            id="navbarNav">
+
+            <ul class="navbar-nav ms-auto">
+
+                <li class="nav-item">
+
+                    <a
+                        class="nav-link active"
+                        href="{{ url_for('home') }}">
+
+                        Dashboard
+
+                    </a>
+
+                </li>
+
+
+                <li class="nav-item">
+
+                    <a
+                        class="nav-link"
+                        href="{{ url_for('history') }}">
+
+                        History
+
+                    </a>
+
+                </li>
+
+            </ul>
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+
+<!-- =========================================================
+                           HERO
+========================================================= -->
+
+<section class="homepage-hero">
+
+    <div class="hero-glow hero-glow-one"></div>
+
+    <div class="hero-glow hero-glow-two"></div>
+
+    <div class="container position-relative">
+
+        <div class="row align-items-center g-5">
+
+
+            <!-- LEFT -->
+
+            <div class="col-lg-7">
+
+                <div class="hero-kicker">
+
+                    <span class="hero-kicker-dot"></span>
+
+                    MULTI-LAYER URL THREAT ANALYSIS
+
+                </div>
+
+
+                <h1 class="hero-title">
+
+                    Analyze URLs
+
+                    <span>
+                        Before You Trust Them
+                    </span>
+
+                </h1>
+
+
+                <p class="hero-description">
+
+                    Inspect suspicious links using URL structure analysis,
+                    domain intelligence, WHOIS, DNS, SSL, webpage behaviour
+                    and external threat intelligence before interacting
+                    with a website.
+
+                </p>
+
+
+                <div class="hero-actions">
+
+                    <a
+                        href="#scanner"
+                        class="btn btn-info btn-lg">
+
+                        <i class="fa-solid fa-magnifying-glass me-2"></i>
+
+                        Analyze a URL
+
+                    </a>
+
+
+                    <a
+                        href="{{ url_for('history') }}"
+                        class="btn btn-outline-light btn-lg">
+
+                        <i class="fa-solid fa-clock-rotate-left me-2"></i>
+
+                        Scan History
+
+                    </a>
+
+                </div>
+
+
+                <div class="hero-points">
+
+                    <span>
+
+                        <i class="fa-solid fa-circle-check"></i>
+
+                        URL & Domain
+
+                    </span>
+
+
+                    <span>
+
+                        <i class="fa-solid fa-circle-check"></i>
+
+                        Web Security
+
+                    </span>
+
+
+                    <span>
+
+                        <i class="fa-solid fa-circle-check"></i>
+
+                        Threat Intelligence
+
+                    </span>
+
+
+                    <span>
+
+                        <i class="fa-solid fa-circle-check"></i>
+
+                        PDF Reports
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- RIGHT -->
+
+            <div class="col-lg-5">
+
+                <div class="hero-dashboard">
+
+                    <div class="hero-dashboard-top">
+
+                        <div>
+
+                            <small>
+                                SECURITY ENGINE
+                            </small>
+
+                            <h4 class="mb-0">
+                                Analysis Pipeline
+                            </h4>
+
+                        </div>
+
+
+                        <div class="engine-ready">
+
+                            <span></span>
+
+                            Ready
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="hero-dashboard-url">
+
+                        <div class="dashboard-url-icon accent-cyan">
+
+                            <i class="fa-solid fa-link"></i>
+
+                        </div>
+
+
+                        <div>
+
+                            <small>
+                                TARGET URL
+                            </small>
+
+                            <strong>
+                                https://example.com
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="dashboard-scan-row">
+
+                        <div class="dashboard-scan-name">
+
+                            <span class="dashboard-scan-icon accent-blue">
+
+                                <i class="fa-solid fa-link"></i>
+
+                            </span>
+
+                            URL Structure
+
+                        </div>
+
+                        <span class="dashboard-active">
+                            READY
+                        </span>
+
+                    </div>
+
+
+                    <div class="dashboard-scan-row">
+
+                        <div class="dashboard-scan-name">
+
+                            <span class="dashboard-scan-icon accent-purple">
+
+                                <i class="fa-solid fa-fingerprint"></i>
+
+                            </span>
+
+                            Domain Identity
+
+                        </div>
+
+                        <span class="dashboard-active">
+                            READY
+                        </span>
+
+                    </div>
+
+
+                    <div class="dashboard-scan-row">
+
+                        <div class="dashboard-scan-name">
+
+                            <span class="dashboard-scan-icon accent-green">
+
+                                <i class="fa-solid fa-network-wired"></i>
+
+                            </span>
+
+                            Network & SSL
+
+                        </div>
+
+                        <span class="dashboard-active">
+                            READY
+                        </span>
+
+                    </div>
+
+
+                    <div class="dashboard-scan-row">
+
+                        <div class="dashboard-scan-name">
+
+                            <span class="dashboard-scan-icon accent-orange">
+
+                                <i class="fa-solid fa-code"></i>
+
+                            </span>
+
+                            Webpage Behaviour
+
+                        </div>
+
+                        <span class="dashboard-active">
+                            READY
+                        </span>
+
+                    </div>
+
+
+                    <div class="dashboard-scan-row">
+
+                        <div class="dashboard-scan-name">
+
+                            <span class="dashboard-scan-icon accent-pink">
+
+                                <i class="fa-solid fa-shield-virus"></i>
+
+                            </span>
+
+                            Threat Intelligence
+
+                        </div>
+
+                        <span class="dashboard-active">
+                            READY
+                        </span>
+
+                    </div>
+
+
+                    <div class="dashboard-engine-footer">
+
+                        <div>
+
+                            <small>
+                                FINAL OUTPUT
+                            </small>
+
+                            <strong>
+                                Risk Score + Evidence
+                            </strong>
+
+                        </div>
+
+
+                        <i class="fa-solid fa-shield-halved"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================================
+                         SCANNER
+========================================================= -->
+
+<section
+    id="scanner"
+    class="py-section scanner-section">
+
+    <div class="container">
+
+        <div class="scanner-card">
+
+            <div class="scanner-title text-center">
+
+                <div class="section-label">
+                    URL SCANNER
+                </div>
+
+
+                <h2>
+                    Analyze a Website
+                </h2>
+
+
+                <p>
+
+                    Enter a public HTTP or HTTPS URL to begin the
+                    complete security analysis.
+
+                </p>
+
+            </div>
+
+
+            {% if error %}
+
+            <div
+                id="scanError"
+                class="alert alert-danger scanner-alert mb-4"
+                role="alert">
+
+                <div class="d-flex align-items-start gap-3">
+
+                    <i class="fa-solid fa-circle-exclamation mt-1"></i>
+
+                    <div>
+
+                        <strong>
+                            URL cannot be scanned.
+                        </strong>
+
+                        <div class="mt-1">
+                            {{ error }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+            <form
+                id="scanForm"
+                action="{{ url_for('analyze') }}"
+                method="POST">
+
+                <div class="scanner-shell">
+
+
+                    <div class="scanner-input-wrapper">
+
+                        <i
+                            class="fa-solid fa-link scanner-input-icon">
+                        </i>
+
+
+                        <input
+                            id="urlInput"
+                            name="url"
+                            type="text"
+                            class="scanner-control"
+                            placeholder="https://example.com"
+                            value="{{ entered_url|default('') }}"
+                            autocomplete="url"
+                            autocapitalize="off"
+                            inputmode="url"
+                            spellcheck="false"
+                            aria-label="Website URL"
+                            required>
+
+                    </div>
+
+
+                    <button
+                        id="analyzeButton"
+                        type="submit"
+                        class="scanner-submit">
+
+                        <i
+                            id="analyzeButtonIcon"
+                            class="fa-solid fa-shield-halved">
+                        </i>
+
+                        <span id="analyzeButtonText">
+                            Analyze URL
+                        </span>
+
+                    </button>
+
+                </div>
+
+            </form>
+
+
+            <div class="scanner-meta">
+
+                <span>
+
+                    <i class="fa-solid fa-lock text-success"></i>
+
+                    HTTPS & SSL
+
+                </span>
+
+
+                <span>
+
+                    <i class="fa-solid fa-globe text-info"></i>
+
+                    WHOIS & DNS
+
+                </span>
+
+
+                <span>
+
+                    <i class="fa-solid fa-code text-warning"></i>
+
+                    Web Analysis
+
+                </span>
+
+
+                <span>
+
+                    <i class="fa-solid fa-shield-virus text-danger"></i>
+
+                    VirusTotal
+
+                </span>
+
+
+                <span>
+
+                    <i class="fa-solid fa-file-pdf text-purple"></i>
+
+                    PDF Report
+
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================================
+                  SECURITY INTELLIGENCE
+========================================================= -->
+
+<section class="py-section">
+
+    <div class="container">
+
+        <div class="section-title text-center">
+
+            <div class="section-label">
+                SECURITY INTELLIGENCE
+            </div>
+
+
+            <h2>
+                Multi-Layer Analysis
+            </h2>
+
+
+            <p>
+
+                Different security layers independently inspect
+                the submitted target before the risk engine
+                combines the findings.
+
+            </p>
+
+        </div>
+
+
+        <div class="row g-4">
+
+
+            <div class="col-lg-4 col-md-6">
+
+                <div class="security-feature feature-cyan">
+
+                    <div class="security-feature-icon">
+
+                        <i class="fa-solid fa-link"></i>
+
+                    </div>
+
+                    <h5>
+                        URL Structure
+                    </h5>
+
+                    <p>
+
+                        Checks HTTPS, IP usage, suspicious keywords,
+                        URL length, subdomains, ports and query
+                        parameters.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-lg-4 col-md-6">
+
+                <div class="security-feature feature-purple">
+
+                    <div class="security-feature-icon">
+
+                        <i class="fa-solid fa-fingerprint"></i>
+
+                    </div>
+
+                    <h5>
+                        Domain Identity
+                    </h5>
+
+                    <p>
+
+                        Evaluates domain age, TLD reputation,
+                        typosquatting, punycode, homographs,
+                        entropy and domain similarity.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-lg-4 col-md-6">
+
+                <div class="security-feature feature-green">
+
+                    <div class="security-feature-icon">
+
+                        <i class="fa-solid fa-network-wired"></i>
+
+                    </div>
+
+                    <h5>
+                        Network Intelligence
+                    </h5>
+
+                    <p>
+
+                        Retrieves available WHOIS, DNS and SSL
+                        information to provide infrastructure
+                        context.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-lg-4 col-md-6">
+
+                <div class="security-feature feature-orange">
+
+                    <div class="security-feature-icon">
+
+                        <i class="fa-solid fa-code"></i>
+
+                    </div>
+
+                    <h5>
+                        Webpage Behaviour
+                    </h5>
+
+                    <p>
+
+                        Reviews redirects, forms, JavaScript,
+                        page content, favicons and browser-facing
+                        behavior.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-lg-4 col-md-6">
+
+                <div class="security-feature feature-blue">
+
+                    <div class="security-feature-icon">
+
+                        <i class="fa-solid fa-server"></i>
+
+                    </div>
+
+                    <h5>
+                        Server Security
+                    </h5>
+
+                    <p>
+
+                        Examines headers, HTTP methods,
+                        robots.txt, sitemaps, technologies
+                        and sensitive file exposure.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-lg-4 col-md-6">
+
+                <div class="security-feature feature-pink">
+
+                    <div class="security-feature-icon">
+
+                        <i class="fa-solid fa-shield-virus"></i>
+
+                    </div>
+
+                    <h5>
+                        Threat Intelligence
+                    </h5>
+
+                    <p>
+
+                        Uses VirusTotal reputation data together
+                        with independent analyzer findings to
+                        strengthen the final assessment.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================================
+                         WORKFLOW
+========================================================= -->
+
+<section class="py-section workflow-section">
+
+    <div class="container">
+
+        <div class="section-title text-center">
+
+            <div class="section-label">
+                ANALYSIS WORKFLOW
+            </div>
+
+            <h2>
+                How It Works
+            </h2>
+
+            <p>
+
+                A structured pipeline takes the URL from validation
+                through analysis to the final security report.
+
+            </p>
+
+        </div>
+
+
+        <div class="row g-4">
+
+
+            <div class="col-lg-3 col-md-6">
+
+                <div class="workflow-card workflow-cyan">
+
+                    <span class="workflow-number">
+                        01
+                    </span>
+
+                    <div class="workflow-icon">
+
+                        <i class="fa-solid fa-link"></i>
+
+                    </div>
+
+                    <h5>
+                        Submit URL
+                    </h5>
+
+                    <p>
+
+                        Enter the public website address you want
+                        to investigate.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-lg-3 col-md-6">
+
+                <div class="workflow-card workflow-purple">
+
+                    <span class="workflow-number">
+                        02
+                    </span>
+
+                    <div class="workflow-icon">
+
+                        <i class="fa-solid fa-magnifying-glass"></i>
+
+                    </div>
+
+                    <h5>
+                        Run Checks
+                    </h5>
+
+                    <p>
+
+                        Independent modules inspect URL,
+                        domain, webpage and infrastructure signals.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-lg-3 col-md-6">
+
+                <div class="workflow-card workflow-orange">
+
+                    <span class="workflow-number">
+                        03
+                    </span>
+
+                    <div class="workflow-icon">
+
+                        <i class="fa-solid fa-chart-simple"></i>
+
+                    </div>
+
+                    <h5>
+                        Calculate Risk
+                    </h5>
+
+                    <p>
+
+                        The calibrated risk engine combines
+                        meaningful security findings.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-lg-3 col-md-6">
+
+                <div class="workflow-card workflow-green">
+
+                    <span class="workflow-number">
+                        04
+                    </span>
+
+                    <div class="workflow-icon">
+
+                        <i class="fa-solid fa-file-shield"></i>
+
+                    </div>
+
+                    <h5>
+                        Review Report
+                    </h5>
+
+                    <p>
+
+                        Review evidence, infrastructure details,
+                        verdict and the downloadable PDF report.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================================
+                          CTA
+========================================================= -->
+
+<section class="py-section">
+
+    <div class="container">
+
+        <div class="homepage-cta">
+
+            <div class="cta-shield">
+
+                <i class="fa-solid fa-shield-halved"></i>
+
+            </div>
+
+
+            <h2>
+                Check a Link Before You Trust It
+            </h2>
+
+
+            <p>
+
+                Investigate unfamiliar links before entering
+                credentials, making payments, downloading files
+                or sharing sensitive information.
+
+            </p>
+
+
+            <div class="d-flex justify-content-center flex-wrap gap-3">
+
+                <a
+                    href="#scanner"
+                    class="btn btn-info btn-lg">
+
+                    <i class="fa-solid fa-magnifying-glass me-2"></i>
+
+                    Analyze URL
+
+                </a>
+
+
+                <a
+                    href="{{ url_for('history') }}"
+                    class="btn btn-outline-light btn-lg">
+
+                    <i class="fa-solid fa-clock-rotate-left me-2"></i>
+
+                    View History
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================================
+                         FOOTER
+========================================================= -->
+
+<footer class="footer">
+
+    <div class="container">
+
+        <div class="row g-4">
+
+            <div class="col-lg-6">
+
+                <h4>
+
+                    <i class="fa-solid fa-shield-halved text-info me-2"></i>
+
+                    URL Security Analyzer
+
+                </h4>
+
+
+                <p class="mt-3 mb-0">
+
+                    A Flask-based defensive cybersecurity project
+                    for URL analysis, phishing detection and
+                    web security assessment.
+
+                </p>
+
+            </div>
+
+
+            <div class="col-lg-3">
+
+                <h5>
+                    Navigation
+                </h5>
+
+                <ul class="list-unstyled mt-3">
+
+                    <li class="mb-2">
+
+                        <a href="{{ url_for('home') }}">
+                            Dashboard
+                        </a>
+
+                    </li>
+
+                    <li class="mb-2">
+
+                        <a href="#scanner">
+                            Analyze URL
+                        </a>
+
+                    </li>
+
+                    <li>
+
+                        <a href="{{ url_for('history') }}">
+                            History
+                        </a>
+
+                    </li>
+
+                </ul>
+
+            </div>
+
+
+            <div class="col-lg-3">
+
+                <h5>
+                    Analysis
+                </h5>
+
+                <ul class="list-unstyled mt-3 footer-analysis-list">
+
+                    <li>URL Structure</li>
+                    <li>Domain Intelligence</li>
+                    <li>Network & SSL</li>
+                    <li>Webpage Behaviour</li>
+                    <li>Threat Intelligence</li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+
+        <hr class="my-4">
+
+
+        <div class="text-center">
+
+            <small>
+
+                © 2026 URL Security Analyzer
+                • Defensive Cybersecurity Project
+
+            </small>
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+
+<button
+    id="backToTop"
+    class="btn btn-info"
+    type="button"
+    aria-label="Back to top">
+
+    <i class="fa-solid fa-arrow-up"></i>
+
+</button>
+
+
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+</script>
+
+
+<script>
+
+const scanForm =
+    document.getElementById("scanForm");
+
+const urlInput =
+    document.getElementById("urlInput");
+
+const scanError =
+    document.getElementById("scanError");
+
+const analyzeButton =
+    document.getElementById("analyzeButton");
+
+const analyzeButtonText =
+    document.getElementById("analyzeButtonText");
+
+const analyzeButtonIcon =
+    document.getElementById("analyzeButtonIcon");
+
+const backToTop =
+    document.getElementById("backToTop");
+
+
+if (urlInput && scanError) {
+
+    urlInput.addEventListener(
+        "input",
+        function () {
+
+            scanError.style.display =
+                "none";
+
+        }
+    );
+
+}
+
+
+window.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        if (scanError) {
+
+            const scanner =
+                document.getElementById("scanner");
+
+            if (scanner) {
+
+                scanner.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+
+            }
+
+        }
+
+    }
+);
+
+
+if (
+    scanForm
+    && analyzeButton
+    && analyzeButtonText
+) {
+
+    scanForm.addEventListener(
+        "submit",
+        function () {
+
+            if (scanError) {
+
+                scanError.style.display =
+                    "none";
+
+            }
+
+            analyzeButton.disabled =
+                true;
+
+            analyzeButtonText.textContent =
+                "Analyzing...";
+
+            if (analyzeButtonIcon) {
+
+                analyzeButtonIcon.className =
+                    "fa-solid fa-spinner fa-spin";
+
+            }
+
+        }
+    );
+
+}
+
+
+if (backToTop) {
+
+    window.addEventListener(
+        "scroll",
+        function () {
+
+            if (window.scrollY > 300) {
+
+                backToTop.classList.add("show");
+
+            }
+
+            else {
+
+                backToTop.classList.remove("show");
+
+            }
+
+        }
+    );
+
+
+    backToTop.addEventListener(
+        "click",
+        function () {
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+
+        }
+    );
+
+}
+
+
+document
+    .querySelectorAll('a[href^="#"]')
+    .forEach(
+        function (anchor) {
+
+            anchor.addEventListener(
+                "click",
+                function (event) {
+
+                    const selector =
+                        this.getAttribute("href");
+
+                    if (
+                        !selector
+                        || selector === "#"
+                    ) {
+
+                        return;
+
+                    }
+
+                    const target =
+                        document.querySelector(selector);
+
+                    if (target) {
+
+                        event.preventDefault();
+
+                        target.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start"
+                        });
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+
+if ("IntersectionObserver" in window) {
+
+    const observer =
+        new IntersectionObserver(
+            function (entries) {
+
+                entries.forEach(
+                    function (entry) {
+
+                        if (entry.isIntersecting) {
+
+                            entry.target
+                                .classList
+                                .add("fade-up");
+
+                            observer.unobserve(
+                                entry.target
+                            );
+
+                        }
+
+                    }
+                );
+
+            },
+            {
+                threshold: 0.08
+            }
+        );
+
+
+    document
+        .querySelectorAll(
+            ".security-feature, " +
+            ".workflow-card, " +
+            ".homepage-cta"
+        )
+        .forEach(
+            function (element) {
+
+                observer.observe(element);
+
+            }
+        );
+
+}
+
+</script>
+
+
+</body>
+
+</html>
