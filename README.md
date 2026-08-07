@@ -2,7 +2,13 @@
 
 URL Security Analyzer is a Flask-based cybersecurity web application that analyzes URLs for phishing indicators, suspicious domain behavior, insecure configurations, and malicious reputation signals.
 
-It combines multiple security checks into a final **Risk Score from 0–100** and provides detailed results, scan history, and downloadable PDF reports.
+It combines multiple security checks into a final **Risk Score from 0–100** and provides detailed results, scan history, and downloadable PDF security reports.
+
+## Live Demo
+
+https://url-security-analyzer-1oky.onrender.com
+
+> The application is hosted on Render's free tier, so the first request after inactivity may take a short time to load.
 
 ---
 
@@ -11,25 +17,21 @@ It combines multiple security checks into a final **Risk Score from 0–100** an
 - HTTPS detection
 - IP address detection
 - Suspicious keyword detection
-- URL length analysis
-- Subdomain analysis
-- URL shortener detection
-- Domain age analysis
-- WHOIS lookup
-- DNS analysis
-- SSL certificate inspection
+- URL length and subdomain analysis
+- Domain age and WHOIS lookup
+- DNS and SSL certificate analysis
 - Typosquatting and domain similarity detection
-- Redirect analysis
+- Homograph and punycode detection
+- Redirect and webpage behavior analysis
 - JavaScript and form inspection
 - Security header analysis
-- Cookie security checks
-- CORS analysis
+- Cookie and CORS security checks
 - Mixed-content detection
 - Sensitive file exposure checks
 - Technology detection
 - VirusTotal threat intelligence
 - Risk score calculation
-- SQLite scan history
+- Private scan history
 - PDF security reports
 - SSRF protection
 - CSRF protection
@@ -53,6 +55,7 @@ It combines multiple security checks into a final **Risk Score from 0–100** an
 **Backend**
 - Python
 - Flask
+- Gunicorn
 
 **Frontend**
 - HTML
@@ -63,7 +66,7 @@ It combines multiple security checks into a final **Risk Score from 0–100** an
 **Database**
 - SQLite
 
-**Security / Analysis**
+**Security & Analysis**
 - Requests
 - python-whois
 - dnspython
@@ -75,6 +78,9 @@ It combines multiple security checks into a final **Risk Score from 0–100** an
 
 **Testing**
 - pytest
+
+**Deployment**
+- Render
 
 ---
 
@@ -93,6 +99,7 @@ URL-Security-Analyzer/
 │
 ├── app.py
 ├── requirements.txt
+├── .env.example
 ├── .gitignore
 └── README.md
 ```
@@ -104,7 +111,7 @@ URL-Security-Analyzer/
 Clone the repository:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/abhianitha2007-dotcom/URL-Security-Analyzer.git
 ```
 
 Move into the project:
@@ -144,17 +151,17 @@ FLASK_DEBUG=true
 SESSION_COOKIE_SECURE=false
 ```
 
-Do not upload your real `.env` file to GitHub.
+Never upload your real `.env` file or API keys to GitHub.
 
 ---
 
-## Run the Application
+## Run Locally
 
 ```bash
 python app.py
 ```
 
-Open:
+Then open:
 
 ```text
 http://127.0.0.1:5000
@@ -164,13 +171,13 @@ http://127.0.0.1:5000
 
 ## Testing
 
-Run the automated test suite:
+Run the automated security and Flask test suite:
 
 ```bash
 python -m pytest tests -v
 ```
 
-Current result:
+Current automated test result:
 
 ```text
 33 passed
@@ -182,7 +189,7 @@ Current result:
 
 The application includes:
 
-- Private/local IP blocking
+- Private and local IP blocking
 - Redirect SSRF protection
 - Safe HTTP request handling
 - CSRF protection
@@ -197,7 +204,7 @@ The application includes:
 
 This project is intended for educational and defensive cybersecurity purposes.
 
-The generated risk score should be treated as a security indicator, not a guarantee that a website is completely safe or malicious.
+The generated risk score is a security indicator and should not be treated as a guarantee that a website is completely safe or malicious.
 
 ---
 
