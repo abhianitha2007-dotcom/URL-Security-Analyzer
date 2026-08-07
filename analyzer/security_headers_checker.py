@@ -1,4 +1,5 @@
 import requests
+from analyzer.safe_http import safe_requests
 
 
 SECURITY_HEADERS = {
@@ -21,7 +22,7 @@ def check_security_headers(url):
     """
 
     try:
-        response = requests.get(
+        response = safe_requests.get(
             url,
             timeout=8,
             allow_redirects=True,

@@ -1,14 +1,30 @@
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+*.pyd
+
+venv/
+.venv/
+env/
+ENV/
 
 .env
+.env.*
+!.env.example
+
+.pytest_cache/
+.coverage
+htmlcov/
+
+*.bak
+*.tmp
+*.temp
 
 database/scans.db
-
 reports/*.pdf
 
 .vscode/
-
-venv/
-
 .idea/
+
+Thumbs.db
+.DS_Store

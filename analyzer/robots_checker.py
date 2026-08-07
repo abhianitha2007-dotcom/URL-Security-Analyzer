@@ -2,6 +2,7 @@ import re
 from urllib.parse import urljoin, urlparse
 
 import requests
+from analyzer.safe_http import safe_requests
 
 
 SENSITIVE_SEGMENTS = {
@@ -183,7 +184,7 @@ def check_robots(url):
 
         result["url"] = robots_url
 
-        response = requests.get(
+        response = safe_requests.get(
             robots_url,
             timeout=8,
             allow_redirects=True,
