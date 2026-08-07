@@ -486,33 +486,53 @@ def _resolve_public_hostname(
     hostname,
     port
 ):
-    """
-    Resolve a hostname and verify that every returned
-    address is globally routable.
-
-    Resolution strategy:
-
-        1. Try the operating system DNS resolver.
-        2. Retry temporary failures.
-        3. If system DNS still fails, use public DNS
-           resolvers as a fallback.
-        4. Validate every resolved IP address.
-
-    A hostname is rejected if:
-
-        - it cannot be resolved
-        - no addresses are returned
-        - any returned address is non-public
-
-    This preserves SSRF protections while avoiding false
-    "invalid URL" results caused by temporary DNS failures.
-    """
-
     resolved_ips = _resolve_with_system_dns(
         hostname,
         port
     )
 
+    print(
+        f"[DNS DEBUG] System DNS for {hostname}: "
+        f"{resolved_ips}",
+        flush=True
+    )
+
+    if resolved_ips is None:
+
+        resolved_ips = (
+            _resolve_with_fallback_dns(
+                hostname
+            )
+        )
+
+        print(
+            f"[DNS DEBUG] Fallback DNS for {hostname}: "
+            f"{resolved_ips}",
+            flush=True
+        )
+
+    if not resolved_ips:
+
+        print(
+            f"[DNS DEBUG] No usable DNS result for {hostname}",
+            flush=True
+        )
+
+        return False
+
+    public_result = (
+        _all_resolved_ips_are_public(
+            resolved_ips
+        )
+    )
+
+    print(
+        f"[DNS DEBUG] Public-IP validation for {hostname}: "
+        f"{public_result} | IPs={resolved_ips}",
+        flush=True
+    )
+
+    return public_result
 
     # -----------------------------------------------------
     # SYSTEM DNS FAILED
