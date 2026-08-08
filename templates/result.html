@@ -9,6 +9,10 @@
         name="viewport"
         content="width=device-width, initial-scale=1.0">
 
+    <meta
+        name="description"
+        content="URL Security Analyzer security analysis result.">
+
     <title>
         Analysis Result | URL Security Analyzer
     </title>
@@ -25,10 +29,339 @@
         rel="stylesheet"
         href="{{ url_for('static', filename='css/style.css') }}">
 
+    <style>
+
+        body.warning-pending {
+            overflow: hidden;
+        }
+
+        body.warning-pending #resultContent {
+            filter: blur(8px);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .content-warning-gate {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: rgba(3, 8, 20, 0.88);
+            backdrop-filter: blur(12px);
+        }
+
+        .content-warning-box {
+            width: min(520px, 100%);
+            padding: 36px;
+            border-radius: 24px;
+            text-align: center;
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(15, 23, 42, 0.99),
+                    rgba(7, 13, 27, 0.99)
+                );
+            box-shadow:
+                0 30px 90px rgba(0, 0, 0, 0.5);
+        }
+
+        .content-warning-box.warning-red {
+            border: 1px solid rgba(239, 68, 68, 0.7);
+            box-shadow:
+                0 25px 80px rgba(239, 68, 68, 0.18),
+                0 30px 90px rgba(0, 0, 0, 0.5);
+        }
+
+        .content-warning-box.warning-yellow {
+            border: 1px solid rgba(245, 158, 11, 0.75);
+            box-shadow:
+                0 25px 80px rgba(245, 158, 11, 0.16),
+                0 30px 90px rgba(0, 0, 0, 0.5);
+        }
+
+        .content-warning-icon {
+            width: 92px;
+            height: 92px;
+            margin: 0 auto 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 42px;
+        }
+
+        .warning-red .content-warning-icon {
+            color: #ff5a5f;
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            box-shadow: 0 0 45px rgba(239, 68, 68, 0.22);
+        }
+
+        .warning-yellow .content-warning-icon {
+            color: #fbbf24;
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            box-shadow: 0 0 45px rgba(245, 158, 11, 0.2);
+        }
+
+        .content-warning-box h2 {
+            margin-bottom: 14px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+        }
+
+        .warning-red h2 {
+            color: #ff6b6f;
+        }
+
+        .warning-yellow h2 {
+            color: #fbbf24;
+        }
+
+        .content-warning-box p {
+            margin: 0 auto;
+            max-width: 420px;
+            color: #cbd5e1;
+            line-height: 1.7;
+        }
+
+        .warning-site {
+            margin: 22px 0;
+            padding: 12px 15px;
+            border-radius: 12px;
+            color: #e2e8f0;
+            background: rgba(255, 255, 255, 0.045);
+            overflow-wrap: anywhere;
+            font-size: 0.9rem;
+        }
+
+        .warning-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 28px;
+        }
+
+        .warning-actions .btn {
+            min-width: 145px;
+            border-radius: 10px;
+            padding: 11px 18px;
+            font-weight: 700;
+        }
+
+        .warning-red .warning-continue {
+            border: 1px solid #ef4444;
+            background: #dc2626;
+            color: white;
+        }
+
+        .warning-red .warning-continue:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        .warning-yellow .warning-continue {
+            border: 1px solid #f59e0b;
+            background: #d97706;
+            color: #fff;
+        }
+
+        .warning-yellow .warning-continue:hover {
+            background: #f59e0b;
+            color: #111827;
+        }
+
+        .scan-coverage-banner {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 28px;
+            padding: 18px 20px;
+            border-radius: 16px;
+        }
+
+        .scan-coverage-banner.full {
+            border: 1px solid rgba(34, 197, 94, 0.28);
+            background: rgba(34, 197, 94, 0.07);
+        }
+
+        .scan-coverage-banner.partial {
+            border: 1px solid rgba(245, 158, 11, 0.38);
+            background: rgba(245, 158, 11, 0.08);
+        }
+
+        .scan-coverage-icon {
+            flex: 0 0 auto;
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .scan-coverage-banner.full .scan-coverage-icon {
+            color: #4ade80;
+            background: rgba(34, 197, 94, 0.12);
+        }
+
+        .scan-coverage-banner.partial .scan-coverage-icon {
+            color: #fbbf24;
+            background: rgba(245, 158, 11, 0.14);
+        }
+
+        .scan-coverage-banner strong {
+            display: block;
+            margin-bottom: 4px;
+            color: #f8fafc;
+        }
+
+        .scan-coverage-banner p {
+            margin: 0;
+            color: #94a3b8;
+            line-height: 1.55;
+        }
+
+        .partial-score-note {
+            margin-top: 12px;
+            color: #fbbf24;
+            font-size: 0.86rem;
+            line-height: 1.5;
+        }
+
+        .unavailable-summary {
+            padding: 22px;
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: 16px;
+            background: rgba(245, 158, 11, 0.06);
+        }
+
+        .unavailable-summary h5 {
+            color: #fbbf24;
+        }
+
+        .unavailable-summary p {
+            color: #94a3b8;
+            margin-bottom: 0;
+        }
+
+        .status-unavailable {
+            color: #94a3b8;
+        }
+
+        @media (max-width: 576px) {
+
+            .content-warning-gate {
+                padding: 16px;
+            }
+
+            .content-warning-box {
+                padding: 28px 20px;
+                border-radius: 20px;
+            }
+
+            .content-warning-icon {
+                width: 76px;
+                height: 76px;
+                font-size: 34px;
+            }
+
+            .warning-actions {
+                flex-direction: column;
+            }
+
+            .warning-actions .btn {
+                width: 100%;
+            }
+
+        }
+
+    </style>
+
 </head>
 
 
-<body>
+{% macro clean_status(value, context="generic") %}
+
+    {% set text = value | string %}
+    {% set lowered = text | lower | trim %}
+
+    {% if
+        not value
+        or lowered == "none"
+        or lowered == "unknown"
+        or lowered == "not checked"
+        or lowered == "unavailable"
+        or lowered == "n/a"
+    %}
+
+        {% if context == "ssl" %}
+            Certificate information unavailable
+
+        {% elif context == "dns" %}
+            DNS information unavailable
+
+        {% elif context == "whois" %}
+            Registration data unavailable
+
+        {% elif context == "robots" %}
+            Could not verify robots.txt
+
+        {% elif context == "sitemap" %}
+            Could not verify sitemap
+
+        {% elif context == "threat" %}
+            Reputation information unavailable
+
+        {% else %}
+            Could not verify
+        {% endif %}
+
+    {% elif "404" in lowered %}
+
+        {% if context == "robots" %}
+            No robots.txt found
+
+        {% elif context == "sitemap" %}
+            No sitemap found
+
+        {% elif context == "file" %}
+            Not exposed
+
+        {% elif context == "favicon" %}
+            No favicon found
+
+        {% else %}
+            Requested resource not found
+        {% endif %}
+
+    {% elif
+        "timeout" in lowered
+        or "timed out" in lowered
+    %}
+
+        Could not verify — website did not respond
+
+    {% elif
+        "request failed" in lowered
+        or "connection failed" in lowered
+        or "connection error" in lowered
+        or "lookup failed" in lowered
+    %}
+
+        Could not verify — website unavailable
+
+    {% else %}
+
+        {{ value }}
+
+    {% endif %}
+
+{% endmacro %}
 
 
 {% if risk_score > 75 %}
@@ -59,11 +392,147 @@
 
     {% set risk_class = "risk-safe" %}
     {% set verdict_class = "verdict-safe" %}
-    {% set risk_icon = "fa-shield-check" %}
+    {% set risk_icon = "fa-shield-halved" %}
 
 {% endif %}
 
 
+{% set scan_mode =
+    scan_status.get(
+        "mode",
+        "full"
+    )
+%}
+
+
+{% set is_partial =
+    scan_mode == "partial"
+%}
+
+
+{% set warning_visible =
+    content_warning
+    and content_warning.get(
+        "show",
+        False
+    )
+%}
+
+
+{% set warning_type =
+    content_warning.get(
+        "type",
+        ""
+    )
+    if content_warning
+    else ""
+%}
+
+
+<body class="{% if warning_visible %}warning-pending{% endif %}">
+
+
+{% if warning_visible %}
+
+<div
+    id="contentWarningGate"
+    class="content-warning-gate"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="contentWarningTitle">
+
+    <div class="
+        content-warning-box
+        {% if warning_type in ['adult', 'gambling'] %}
+            warning-red
+        {% else %}
+            warning-yellow
+        {% endif %}
+    ">
+
+        <div class="content-warning-icon">
+
+            {% if warning_type == "adult" %}
+
+                <i class="fa-solid fa-triangle-exclamation"></i>
+
+            {% elif warning_type == "gambling" %}
+
+                <i class="fa-solid fa-triangle-exclamation"></i>
+
+            {% else %}
+
+                <i class="fa-solid fa-triangle-exclamation"></i>
+
+            {% endif %}
+
+        </div>
+
+
+        <h2 id="contentWarningTitle">
+
+            {% if warning_type == "adult" %}
+
+                CONTENT WARNING
+
+            {% elif warning_type == "gambling" %}
+
+                GAMBLING WARNING
+
+            {% else %}
+
+                FINANCIAL CAUTION
+
+            {% endif %}
+
+        </h2>
+
+
+        <p>
+            {{ content_warning.get("message", "") }}
+        </p>
+
+
+        <div class="warning-site">
+            {{ url }}
+        </div>
+
+
+        <div class="warning-actions">
+
+            <a
+                href="{{ url_for('home') }}"
+                class="btn btn-outline-light">
+
+                <i class="fa-solid fa-arrow-left me-2"></i>
+
+                Go Back
+
+            </a>
+
+
+            <button
+                id="viewResultButton"
+                type="button"
+                class="btn warning-continue">
+
+                <i class="fa-solid fa-eye me-2"></i>
+
+                View Result
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endif %}
+
+
+
+<div id="resultContent">
 
 <nav class="navbar navbar-expand-lg navbar-dark custom-navbar">
 
@@ -88,7 +557,10 @@
             class="navbar-toggler"
             type="button"
             data-bs-toggle="collapse"
-            data-bs-target="#navbarNav">
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation">
 
             <span class="navbar-toggler-icon"></span>
 
@@ -145,10 +617,6 @@
 <div class="container py-5">
 
 
-<!-- ======================================================
-                      RESULT HERO
-====================================================== -->
-
 <section class="result-hero {{ risk_class }}">
 
     <div class="row align-items-center g-4">
@@ -156,22 +624,39 @@
         <div class="col-lg-8">
 
             <div class="section-label text-start">
-                SECURITY ANALYSIS COMPLETE
+
+                {% if is_partial %}
+
+                    PARTIAL SECURITY ANALYSIS
+
+                {% else %}
+
+                    SECURITY ANALYSIS COMPLETE
+
+                {% endif %}
+
             </div>
 
 
             <h1 class="result-main-title">
-
                 URL Security Report
-
             </h1>
 
 
             <p class="result-main-description">
 
-                Multi-layer analysis completed for the submitted
-                website. Review the evidence and technical findings
-                below.
+                {% if is_partial %}
+
+                    Available URL, domain and reputation evidence
+                    was analyzed. Some website-dependent checks
+                    could not be completed.
+
+                {% else %}
+
+                    Multi-layer URL, domain, network, webpage and
+                    reputation analysis was completed for this target.
+
+                {% endif %}
 
             </p>
 
@@ -182,7 +667,7 @@
                     ANALYZED URL
                 </small>
 
-                <strong>
+                <strong class="text-break">
                     {{ url }}
                 </strong>
 
@@ -197,6 +682,10 @@
 
                     {{ verdict }}
 
+                    {% if is_partial %}
+                        — based on available evidence
+                    {% endif %}
+
                 </span>
 
             </div>
@@ -209,7 +698,7 @@
             <div class="risk-panel">
 
                 <span class="risk-label">
-                    RISK SCORE
+                    SECURITY RISK
                 </span>
 
                 <div class="risk-number">
@@ -219,6 +708,14 @@
                 <div class="risk-out-of">
                     out of 100
                 </div>
+
+                {% if is_partial %}
+
+                    <div class="partial-score-note">
+                        Score uses only checks that completed.
+                    </div>
+
+                {% endif %}
 
             </div>
 
@@ -258,18 +755,67 @@
 
 
 
-<!-- ======================================================
-                    EVIDENCE SUMMARY
-====================================================== -->
+<div class="
+    scan-coverage-banner
+    {% if is_partial %}
+        partial
+    {% else %}
+        full
+    {% endif %}
+">
+
+    <div class="scan-coverage-icon">
+
+        {% if is_partial %}
+
+            <i class="fa-solid fa-circle-half-stroke"></i>
+
+        {% else %}
+
+            <i class="fa-solid fa-circle-check"></i>
+
+        {% endif %}
+
+    </div>
+
+
+    <div>
+
+        <strong>
+            {{ scan_status.get(
+                "label",
+                "Full Analysis"
+            ) }}
+        </strong>
+
+        <p>
+            {{ scan_status.get(
+                "message",
+                "Security analysis completed."
+            ) }}
+        </p>
+
+        {% if is_partial %}
+
+            <p class="mt-2">
+                Unavailable checks were not treated as safe results
+                and did not reduce the calculated risk score.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
 
 <section class="result-section result-section-yellow">
 
     <div class="result-section-heading">
 
         <div class="result-section-icon icon-yellow">
-
             <i class="fa-solid fa-list-check"></i>
-
         </div>
 
 
@@ -280,7 +826,7 @@
             </h3>
 
             <p>
-                Important findings used by the risk engine.
+                Findings that influenced the final security assessment.
             </p>
 
         </div>
@@ -294,17 +840,17 @@
 
             {% for reason in reasons %}
 
-            <div class="col-lg-6">
+                <div class="col-lg-6">
 
-                <div class="evidence-box">
+                    <div class="evidence-box">
 
-                    <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                        <i class="fa-solid fa-triangle-exclamation me-2"></i>
 
-                    {{ reason }}
+                        {{ reason }}
+
+                    </div>
 
                 </div>
-
-            </div>
 
             {% endfor %}
 
@@ -326,18 +872,12 @@
 
 
 
-<!-- ======================================================
-                    SECURITY OVERVIEW
-====================================================== -->
-
 <section class="result-section result-section-cyan">
 
     <div class="result-section-heading">
 
         <div class="result-section-icon icon-cyan">
-
             <i class="fa-solid fa-chart-pie"></i>
-
         </div>
 
 
@@ -348,7 +888,7 @@
             </h3>
 
             <p>
-                Quick summary of important analysis results.
+                Quick summary of the most important findings.
             </p>
 
         </div>
@@ -358,15 +898,12 @@
 
     <div class="row g-4">
 
-
         <div class="col-lg-3 col-md-6">
 
             <div class="result-overview-card overview-green">
 
                 <div class="overview-icon">
-
                     <i class="fa-solid fa-lock"></i>
-
                 </div>
 
                 <small>
@@ -387,9 +924,7 @@
             <div class="result-overview-card overview-purple">
 
                 <div class="overview-icon">
-
                     <i class="fa-solid fa-globe"></i>
-
                 </div>
 
                 <small>
@@ -397,7 +932,11 @@
                 </small>
 
                 <strong>
-                    .{{ tld }}
+                    {% if tld %}
+                        .{{ tld }}
+                    {% else %}
+                        Unavailable
+                    {% endif %}
                 </strong>
 
             </div>
@@ -410,17 +949,18 @@
             <div class="result-overview-card overview-orange">
 
                 <div class="overview-icon">
-
                     <i class="fa-solid fa-layer-group"></i>
-
                 </div>
 
                 <small>
-                    Subdomains
+                    Analysis Coverage
                 </small>
 
                 <strong>
-                    {{ subdomain_count }}
+                    {{ scan_status.get(
+                        "label",
+                        "Full Analysis"
+                    ) }}
                 </strong>
 
             </div>
@@ -433,9 +973,7 @@
             <div class="result-overview-card overview-red">
 
                 <div class="overview-icon">
-
                     <i class="fa-solid fa-gauge-high"></i>
-
                 </div>
 
                 <small>
@@ -456,18 +994,12 @@
 
 
 
-<!-- ======================================================
-                    URL STRUCTURE
-====================================================== -->
-
 <section class="result-section result-section-blue">
 
     <div class="result-section-heading">
 
         <div class="result-section-icon icon-blue">
-
             <i class="fa-solid fa-link"></i>
-
         </div>
 
 
@@ -478,7 +1010,7 @@
             </h3>
 
             <p>
-                Structural indicators found directly in the submitted URL.
+                Indicators extracted directly from the submitted URL.
             </p>
 
         </div>
@@ -544,9 +1076,7 @@
                         {% if keywords %}
 
                             <span class="result-detail">
-
                                 {{ keywords | join(", ") }}
-
                             </span>
 
                         {% endif %}
@@ -567,7 +1097,7 @@
                         {{ url_length }} characters
 
                         <span class="result-detail">
-                            {{ length_category }}
+                            {{ clean_status(length_category) }}
                         </span>
 
                     </td>
@@ -586,7 +1116,7 @@
                         {{ subdomain_count }}
 
                         <span class="result-detail">
-                            {{ subdomain_status }}
+                            {{ clean_status(subdomain_status) }}
                         </span>
 
                     </td>
@@ -601,7 +1131,7 @@
                     </th>
 
                     <td>
-                        {{ at_status }}
+                        {{ clean_status(at_status) }}
                     </td>
 
                 </tr>
@@ -614,7 +1144,7 @@
                     </th>
 
                     <td>
-                        {{ shortener_status }}
+                        {{ clean_status(shortener_status) }}
                     </td>
 
                 </tr>
@@ -631,7 +1161,7 @@
                         {{ hyphen_count }}
 
                         <span class="result-detail">
-                            {{ hyphen_status }}
+                            {{ clean_status(hyphen_status) }}
                         </span>
 
                     </td>
@@ -647,12 +1177,13 @@
 
                     <td>
 
-                        {{ analysis_results.get(
-                            "query_parameters",
-                            {}
-                        ).get(
-                            "status",
-                            "Not Checked"
+                        {{ clean_status(
+                            analysis_results.get(
+                                "query_parameters",
+                                {}
+                            ).get(
+                                "status"
+                            )
                         ) }}
 
                     </td>
@@ -668,12 +1199,13 @@
 
                     <td>
 
-                        {{ analysis_results.get(
-                            "port",
-                            {}
-                        ).get(
-                            "status",
-                            "Not Checked"
+                        {{ clean_status(
+                            analysis_results.get(
+                                "port",
+                                {}
+                            ).get(
+                                "status"
+                            )
                         ) }}
 
                     </td>
@@ -689,12 +1221,13 @@
 
                     <td>
 
-                        {{ analysis_results.get(
-                            "file_extension",
-                            {}
-                        ).get(
-                            "status",
-                            "Not Checked"
+                        {{ clean_status(
+                            analysis_results.get(
+                                "file_extension",
+                                {}
+                            ).get(
+                                "status"
+                            )
                         ) }}
 
                     </td>
@@ -711,18 +1244,12 @@
 
 
 
-<!-- ======================================================
-                     DOMAIN IDENTITY
-====================================================== -->
-
 <section class="result-section result-section-purple">
 
     <div class="result-section-heading">
 
         <div class="result-section-icon icon-purple">
-
             <i class="fa-solid fa-fingerprint"></i>
-
         </div>
 
 
@@ -733,7 +1260,7 @@
             </h3>
 
             <p>
-                Domain naming and impersonation indicators.
+                Domain naming, impersonation and internationalized-domain checks.
             </p>
 
         </div>
@@ -743,15 +1270,12 @@
 
     <div class="row g-4">
 
-
-        <div class="col-lg-4">
+        <div class="col-lg-4 col-md-6">
 
             <div class="advanced-card card-purple">
 
                 <div class="advanced-card-icon">
-
                     <i class="fa-solid fa-spell-check"></i>
-
                 </div>
 
                 <h5>
@@ -760,12 +1284,13 @@
 
                 <p>
 
-                    {{ analysis_results.get(
-                        "domain_similarity",
-                        {}
-                    ).get(
-                        "status",
-                        "Not Checked"
+                    {{ clean_status(
+                        analysis_results.get(
+                            "domain_similarity",
+                            {}
+                        ).get(
+                            "status"
+                        )
                     ) }}
 
                 </p>
@@ -775,14 +1300,12 @@
         </div>
 
 
-        <div class="col-lg-4">
+        <div class="col-lg-4 col-md-6">
 
             <div class="advanced-card card-orange">
 
                 <div class="advanced-card-icon">
-
                     <i class="fa-solid fa-keyboard"></i>
-
                 </div>
 
                 <h5>
@@ -791,12 +1314,13 @@
 
                 <p>
 
-                    {{ analysis_results.get(
-                        "typosquatting",
-                        {}
-                    ).get(
-                        "status",
-                        "Not Checked"
+                    {{ clean_status(
+                        analysis_results.get(
+                            "typosquatting",
+                            {}
+                        ).get(
+                            "status"
+                        )
                     ) }}
 
                 </p>
@@ -806,14 +1330,12 @@
         </div>
 
 
-        <div class="col-lg-4">
+        <div class="col-lg-4 col-md-6">
 
             <div class="advanced-card card-pink">
 
                 <div class="advanced-card-icon">
-
                     <i class="fa-solid fa-language"></i>
-
                 </div>
 
                 <h5>
@@ -822,12 +1344,13 @@
 
                 <p>
 
-                    {{ analysis_results.get(
-                        "homograph",
-                        {}
-                    ).get(
-                        "status",
-                        "Not Checked"
+                    {{ clean_status(
+                        analysis_results.get(
+                            "homograph",
+                            {}
+                        ).get(
+                            "status"
+                        )
                     ) }}
 
                 </p>
@@ -837,14 +1360,12 @@
         </div>
 
 
-        <div class="col-lg-4">
+        <div class="col-lg-4 col-md-6">
 
             <div class="advanced-card card-blue">
 
                 <div class="advanced-card-icon">
-
                     <i class="fa-solid fa-code"></i>
-
                 </div>
 
                 <h5>
@@ -853,12 +1374,13 @@
 
                 <p>
 
-                    {{ analysis_results.get(
-                        "punycode",
-                        {}
-                    ).get(
-                        "status",
-                        "Not Checked"
+                    {{ clean_status(
+                        analysis_results.get(
+                            "punycode",
+                            {}
+                        ).get(
+                            "status"
+                        )
                     ) }}
 
                 </p>
@@ -868,14 +1390,12 @@
         </div>
 
 
-        <div class="col-lg-4">
+        <div class="col-lg-4 col-md-6">
 
             <div class="advanced-card card-cyan">
 
                 <div class="advanced-card-icon">
-
                     <i class="fa-solid fa-shuffle"></i>
-
                 </div>
 
                 <h5>
@@ -884,12 +1404,13 @@
 
                 <p>
 
-                    {{ analysis_results.get(
-                        "entropy",
-                        {}
-                    ).get(
-                        "status",
-                        "Not Checked"
+                    {{ clean_status(
+                        analysis_results.get(
+                            "entropy",
+                            {}
+                        ).get(
+                            "status"
+                        )
                     ) }}
 
                 </p>
@@ -899,14 +1420,12 @@
         </div>
 
 
-        <div class="col-lg-4">
+        <div class="col-lg-4 col-md-6">
 
             <div class="advanced-card card-green">
 
                 <div class="advanced-card-icon">
-
                     <i class="fa-solid fa-earth-americas"></i>
-
                 </div>
 
                 <h5>
@@ -914,7 +1433,7 @@
                 </h5>
 
                 <p>
-                    {{ tld_status }}
+                    {{ clean_status(tld_status) }}
                 </p>
 
             </div>
@@ -927,29 +1446,23 @@
 
 
 
-<!-- ======================================================
-                      DOMAIN AGE
-====================================================== -->
-
 <section class="result-section result-section-green">
 
     <div class="result-section-heading">
 
         <div class="result-section-icon icon-green">
-
             <i class="fa-solid fa-calendar-days"></i>
-
         </div>
 
 
         <div>
 
             <h3>
-                Domain Age
+                Domain Registration
             </h3>
 
             <p>
-                Available domain registration-age information.
+                Available registration and domain-age information.
             </p>
 
         </div>
@@ -969,12 +1482,14 @@
 
                 <strong>
 
-                    {{ domain_age.get(
-                        "age",
+                    {{ clean_status(
                         domain_age.get(
-                            "age_days",
-                            "Unknown"
-                        )
+                            "age",
+                            domain_age.get(
+                                "age_days"
+                            )
+                        ),
+                        "whois"
                     ) }}
 
                 </strong>
@@ -989,17 +1504,19 @@
             <div class="result-overview-card overview-blue">
 
                 <small>
-                    Analysis
+                    Registration Analysis
                 </small>
 
                 <strong>
 
-                    {{ domain_age.get(
-                        "message",
+                    {{ clean_status(
                         domain_age.get(
-                            "status",
-                            "Unknown"
-                        )
+                            "message",
+                            domain_age.get(
+                                "status"
+                            )
+                        ),
+                        "whois"
                     ) }}
 
                 </strong>
@@ -1014,266 +1531,23 @@
 
 
 
-<!-- ======================================================
-                  WEBPAGE BEHAVIOUR
-====================================================== -->
-
-<section class="result-section result-section-orange">
-
-    <div class="result-section-heading">
-
-        <div class="result-section-icon icon-orange">
-
-            <i class="fa-solid fa-window-maximize"></i>
-
-        </div>
-
-
-        <div>
-
-            <h3>
-                Webpage Behaviour
-            </h3>
-
-            <p>
-                Page-level behavior and client-side indicators.
-            </p>
-
-        </div>
-
-    </div>
-
-
-    <div class="row g-4">
-
-
-        <div class="col-lg-4">
-
-            <div class="advanced-card card-orange">
-
-                <div class="advanced-card-icon">
-
-                    <i class="fa-solid fa-route"></i>
-
-                </div>
-
-                <h5>
-                    Redirects
-                </h5>
-
-                <p>
-
-                    {{ analysis_results.get(
-                        "redirects",
-                        {}
-                    ).get(
-                        "status",
-                        "Not Checked"
-                    ) }}
-
-                </p>
-
-                <small>
-
-                    Redirect Count:
-                    {{ analysis_results.get(
-                        "redirects",
-                        {}
-                    ).get(
-                        "count",
-                        0
-                    ) }}
-
-                </small>
-
-            </div>
-
-        </div>
-
-
-        <div class="col-lg-4">
-
-            <div class="advanced-card card-blue">
-
-                <div class="advanced-card-icon">
-
-                    <i class="fa-brands fa-js"></i>
-
-                </div>
-
-                <h5>
-                    JavaScript
-                </h5>
-
-                <p>
-
-                    {{ analysis_results.get(
-                        "javascript",
-                        {}
-                    ).get(
-                        "status",
-                        "Not Checked"
-                    ) }}
-
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <div class="col-lg-4">
-
-            <div class="advanced-card card-purple">
-
-                <div class="advanced-card-icon">
-
-                    <i class="fa-solid fa-rectangle-list"></i>
-
-                </div>
-
-                <h5>
-                    Forms
-                </h5>
-
-                <p>
-
-                    {{ analysis_results.get(
-                        "forms",
-                        {}
-                    ).get(
-                        "status",
-                        "Not Checked"
-                    ) }}
-
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <div class="col-lg-4">
-
-            <div class="advanced-card card-pink">
-
-                <div class="advanced-card-icon">
-
-                    <i class="fa-solid fa-file-lines"></i>
-
-                </div>
-
-                <h5>
-                    Page Content
-                </h5>
-
-                <p>
-
-                    {{ analysis_results.get(
-                        "content",
-                        {}
-                    ).get(
-                        "status",
-                        "Not Checked"
-                    ) }}
-
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <div class="col-lg-4">
-
-            <div class="advanced-card card-green">
-
-                <div class="advanced-card-icon">
-
-                    <i class="fa-solid fa-image"></i>
-
-                </div>
-
-                <h5>
-                    Favicon
-                </h5>
-
-                <p>
-
-                    {{ analysis_results.get(
-                        "favicon",
-                        {}
-                    ).get(
-                        "status",
-                        "Not Checked"
-                    ) }}
-
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <div class="col-lg-4">
-
-            <div class="advanced-card card-cyan">
-
-                <div class="advanced-card-icon">
-
-                    <i class="fa-solid fa-shield-halved"></i>
-
-                </div>
-
-                <h5>
-                    Security Headers
-                </h5>
-
-                <p>
-
-                    {{ analysis_results.get(
-                        "security_headers",
-                        {}
-                    ).get(
-                        "status",
-                        "Not Checked"
-                    ) }}
-
-                </p>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-
-<!-- ======================================================
-              ADVANCED SECURITY INTELLIGENCE
-====================================================== -->
-
 <section class="result-section result-section-pink">
 
     <div class="result-section-heading">
 
         <div class="result-section-icon icon-pink">
-
             <i class="fa-solid fa-shield-virus"></i>
-
         </div>
 
 
         <div>
 
             <h3>
-                Advanced Security Intelligence
+                Threat Intelligence
             </h3>
 
             <p>
-                Browser, cross-origin and reputation observations.
+                External reputation results from available security engines.
             </p>
 
         </div>
@@ -1281,182 +1555,48 @@
     </div>
 
 
+    {% set threat =
+        analysis_results.get(
+            "threat_intelligence",
+            {}
+        )
+    %}
+
+
     <div class="row g-4">
-
-
-        <div class="col-lg-6">
-
-            <div class="advanced-card card-green">
-
-                <div class="advanced-card-icon">
-
-                    <i class="fa-solid fa-cookie-bite"></i>
-
-                </div>
-
-                <h5>
-                    Cookie Security
-                </h5>
-
-                <p>
-
-                    {{ analysis_results.get(
-                        "cookie_security",
-                        {}
-                    ).get(
-                        "status",
-                        "Not Checked"
-                    ) }}
-
-                </p>
-
-                <small>
-
-                    Cookies:
-                    {{ analysis_results.get(
-                        "cookie_security",
-                        {}
-                    ).get(
-                        "cookie_count",
-                        0
-                    ) }}
-
-                </small>
-
-            </div>
-
-        </div>
-
-
-        <div class="col-lg-6">
-
-            <div class="advanced-card card-purple">
-
-                <div class="advanced-card-icon">
-
-                    <i class="fa-solid fa-arrows-left-right-to-line"></i>
-
-                </div>
-
-                <h5>
-                    CORS Security
-                </h5>
-
-                <p>
-
-                    {{ analysis_results.get(
-                        "cors",
-                        {}
-                    ).get(
-                        "status",
-                        "Not Checked"
-                    ) }}
-
-                </p>
-
-                <small>
-
-                    Allowed Origin:
-                    {{ analysis_results.get(
-                        "cors",
-                        {}
-                    ).get(
-                        "allow_origin",
-                        "Not Set"
-                    ) }}
-
-                </small>
-
-            </div>
-
-        </div>
-
-
-        <div class="col-lg-6">
-
-            <div class="advanced-card card-orange">
-
-                <div class="advanced-card-icon">
-
-                    <i class="fa-solid fa-lock-open"></i>
-
-                </div>
-
-                <h5>
-                    Mixed Content
-                </h5>
-
-                <p>
-
-                    {{ analysis_results.get(
-                        "mixed_content",
-                        {}
-                    ).get(
-                        "status",
-                        "Not Checked"
-                    ) }}
-
-                </p>
-
-                <small>
-
-                    Mixed Resources:
-                    {{ analysis_results.get(
-                        "mixed_content",
-                        {}
-                    ).get(
-                        "total_count",
-                        0
-                    ) }}
-
-                </small>
-
-            </div>
-
-        </div>
-
 
         <div class="col-lg-6">
 
             <div class="advanced-card card-pink threat-card">
 
                 <div class="advanced-card-icon">
-
                     <i class="fa-solid fa-shield-virus"></i>
-
                 </div>
 
+
                 <h5>
-                    VirusTotal
+                    VirusTotal Reputation
                 </h5>
+
 
                 <p>
 
-                    {{ analysis_results.get(
-                        "threat_intelligence",
-                        {}
-                    ).get(
-                        "status",
-                        "Not Checked"
+                    {{ clean_status(
+                        threat.get(
+                            "status"
+                        ),
+                        "threat"
                     ) }}
 
                 </p>
 
 
-                <div class="threat-mini-grid">
+                <div class="threat-engine-summary">
 
                     <span>
 
                         <strong class="text-danger">
-
-                            {{ analysis_results.get(
-                                "threat_intelligence",
-                                {}
-                            ).get(
-                                "malicious",
-                                0
-                            ) }}
-
+                            {{ threat.get("malicious", 0) }}
                         </strong>
 
                         Malicious
@@ -1467,15 +1607,7 @@
                     <span>
 
                         <strong class="text-warning">
-
-                            {{ analysis_results.get(
-                                "threat_intelligence",
-                                {}
-                            ).get(
-                                "suspicious",
-                                0
-                            ) }}
-
+                            {{ threat.get("suspicious", 0) }}
                         </strong>
 
                         Suspicious
@@ -1486,15 +1618,7 @@
                     <span>
 
                         <strong class="text-success">
-
-                            {{ analysis_results.get(
-                                "threat_intelligence",
-                                {}
-                            ).get(
-                                "harmless",
-                                0
-                            ) }}
-
+                            {{ threat.get("harmless", 0) }}
                         </strong>
 
                         Harmless
@@ -1507,35 +1631,478 @@
 
         </div>
 
+
+        <div class="col-lg-6">
+
+            <div class="advanced-card card-blue">
+
+                <div class="advanced-card-icon">
+                    <i class="fa-solid fa-chart-column"></i>
+                </div>
+
+
+                <h5>
+                    Reputation Coverage
+                </h5>
+
+
+                <p>
+
+                    {% if threat.get("checked", False) %}
+
+                        {{ threat.get(
+                            "total_engines",
+                            0
+                        ) }}
+                        security-engine results available.
+
+                    {% else %}
+
+                        Reputation information unavailable.
+
+                    {% endif %}
+
+                </p>
+
+
+                {% if threat.get("last_analysis_date") %}
+
+                    <small>
+                        Last analysis:
+                        {{ clean_status(
+                            threat.get(
+                                "last_analysis_date"
+                            )
+                        ) }}
+                    </small>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
     </div>
 
 </section>
 
 
 
-<!-- ======================================================
-                 INFRASTRUCTURE DETAILS
-====================================================== -->
+{% if not is_partial %}
 
-<section class="result-section result-section-blue">
+<section class="result-section result-section-orange">
 
     <div class="result-section-heading">
 
-        <div class="result-section-icon icon-blue">
-
-            <i class="fa-solid fa-server"></i>
-
+        <div class="result-section-icon icon-orange">
+            <i class="fa-solid fa-window-maximize"></i>
         </div>
 
 
         <div>
 
             <h3>
-                Infrastructure Details
+                Website Behaviour
             </h3>
 
             <p>
-                WHOIS, DNS, SSL and server-side intelligence.
+                Page-level and browser-facing security observations.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="row g-4">
+
+        <div class="col-lg-4 col-md-6">
+
+            <div class="advanced-card card-orange">
+
+                <div class="advanced-card-icon">
+                    <i class="fa-solid fa-route"></i>
+                </div>
+
+                <h5>
+                    Redirects
+                </h5>
+
+                <p>
+
+                    {{ clean_status(
+                        analysis_results.get(
+                            "redirects",
+                            {}
+                        ).get(
+                            "status"
+                        )
+                    ) }}
+
+                </p>
+
+                <small>
+                    Redirect count:
+                    {{ analysis_results.get(
+                        "redirects",
+                        {}
+                    ).get(
+                        "count",
+                        0
+                    ) }}
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-lg-4 col-md-6">
+
+            <div class="advanced-card card-blue">
+
+                <div class="advanced-card-icon">
+                    <i class="fa-brands fa-js"></i>
+                </div>
+
+                <h5>
+                    JavaScript
+                </h5>
+
+                <p>
+
+                    {{ clean_status(
+                        analysis_results.get(
+                            "javascript",
+                            {}
+                        ).get(
+                            "status"
+                        )
+                    ) }}
+
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-lg-4 col-md-6">
+
+            <div class="advanced-card card-purple">
+
+                <div class="advanced-card-icon">
+                    <i class="fa-solid fa-rectangle-list"></i>
+                </div>
+
+                <h5>
+                    Forms
+                </h5>
+
+                <p>
+
+                    {{ clean_status(
+                        analysis_results.get(
+                            "forms",
+                            {}
+                        ).get(
+                            "status"
+                        )
+                    ) }}
+
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-lg-4 col-md-6">
+
+            <div class="advanced-card card-pink">
+
+                <div class="advanced-card-icon">
+                    <i class="fa-solid fa-file-lines"></i>
+                </div>
+
+                <h5>
+                    Page Content
+                </h5>
+
+                <p>
+
+                    {{ clean_status(
+                        analysis_results.get(
+                            "content",
+                            {}
+                        ).get(
+                            "status"
+                        )
+                    ) }}
+
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-lg-4 col-md-6">
+
+            <div class="advanced-card card-green">
+
+                <div class="advanced-card-icon">
+                    <i class="fa-solid fa-image"></i>
+                </div>
+
+                <h5>
+                    Favicon
+                </h5>
+
+                <p>
+
+                    {{ clean_status(
+                        analysis_results.get(
+                            "favicon",
+                            {}
+                        ).get(
+                            "status"
+                        ),
+                        "favicon"
+                    ) }}
+
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-lg-4 col-md-6">
+
+            <div class="advanced-card card-cyan">
+
+                <div class="advanced-card-icon">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+
+                <h5>
+                    Security Headers
+                </h5>
+
+                <p>
+
+                    {{ clean_status(
+                        analysis_results.get(
+                            "security_headers",
+                            {}
+                        ).get(
+                            "status"
+                        )
+                    ) }}
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<section class="result-section result-section-cyan">
+
+    <div class="result-section-heading">
+
+        <div class="result-section-icon icon-cyan">
+            <i class="fa-solid fa-globe"></i>
+        </div>
+
+
+        <div>
+
+            <h3>
+                Browser & Server Security
+            </h3>
+
+            <p>
+                Additional browser, server and cross-origin checks.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="row g-4">
+
+        <div class="col-lg-4 col-md-6">
+
+            <div class="advanced-card card-green">
+
+                <div class="advanced-card-icon">
+                    <i class="fa-solid fa-cookie-bite"></i>
+                </div>
+
+                <h5>
+                    Cookie Security
+                </h5>
+
+                <p>
+
+                    {{ clean_status(
+                        analysis_results.get(
+                            "cookie_security",
+                            {}
+                        ).get(
+                            "status"
+                        )
+                    ) }}
+
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-lg-4 col-md-6">
+
+            <div class="advanced-card card-purple">
+
+                <div class="advanced-card-icon">
+                    <i class="fa-solid fa-arrows-left-right-to-line"></i>
+                </div>
+
+                <h5>
+                    CORS Security
+                </h5>
+
+                <p>
+
+                    {{ clean_status(
+                        analysis_results.get(
+                            "cors",
+                            {}
+                        ).get(
+                            "status"
+                        )
+                    ) }}
+
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-lg-4 col-md-6">
+
+            <div class="advanced-card card-orange">
+
+                <div class="advanced-card-icon">
+                    <i class="fa-solid fa-lock-open"></i>
+                </div>
+
+                <h5>
+                    Mixed Content
+                </h5>
+
+                <p>
+
+                    {{ clean_status(
+                        analysis_results.get(
+                            "mixed_content",
+                            {}
+                        ).get(
+                            "status"
+                        )
+                    ) }}
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% else %}
+
+<section class="result-section result-section-orange">
+
+    <div class="result-section-heading">
+
+        <div class="result-section-icon icon-orange">
+            <i class="fa-solid fa-circle-half-stroke"></i>
+        </div>
+
+
+        <div>
+
+            <h3>
+                Website-Dependent Checks
+            </h3>
+
+            <p>
+                Some checks require a direct connection to the target website.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="unavailable-summary">
+
+        <h5>
+
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+
+            Network checks could not be completed
+
+        </h5>
+
+
+        <p>
+
+            Webpage behaviour, redirects, JavaScript, forms,
+            security headers, cookies, CORS, mixed content,
+            server configuration and related checks could not
+            be verified from the analysis server.
+
+        </p>
+
+    </div>
+
+</section>
+
+{% endif %}
+
+
+
+<section class="result-section result-section-blue">
+
+    <div class="result-section-heading">
+
+        <div class="result-section-icon icon-blue">
+            <i class="fa-solid fa-server"></i>
+        </div>
+
+
+        <div>
+
+            <h3>
+                Technical Details
+            </h3>
+
+            <p>
+                WHOIS, DNS, SSL and server intelligence.
             </p>
 
         </div>
@@ -1545,10 +2112,8 @@
 
     <div
         class="accordion infrastructure-accordion"
-        id="infrastructureAccordion">
+        id="technicalAccordion">
 
-
-        <!-- WHOIS -->
 
         <div class="accordion-item">
 
@@ -1572,7 +2137,7 @@
             <div
                 id="whoisPanel"
                 class="accordion-collapse collapse show"
-                data-bs-parent="#infrastructureAccordion">
+                data-bs-parent="#technicalAccordion">
 
                 <div class="accordion-body">
 
@@ -1589,7 +2154,12 @@
                                     </th>
 
                                     <td>
-                                        {{ whois_info.get("status", "Unknown") }}
+                                        {{ clean_status(
+                                            whois_info.get(
+                                                "status"
+                                            ),
+                                            "whois"
+                                        ) }}
                                     </td>
 
                                 </tr>
@@ -1602,7 +2172,12 @@
                                     </th>
 
                                     <td>
-                                        {{ whois_info.get("registrar", "Unknown") }}
+                                        {{ clean_status(
+                                            whois_info.get(
+                                                "registrar"
+                                            ),
+                                            "whois"
+                                        ) }}
                                     </td>
 
                                 </tr>
@@ -1615,7 +2190,12 @@
                                     </th>
 
                                     <td>
-                                        {{ whois_info.get("creation_date", "Unknown") }}
+                                        {{ clean_status(
+                                            whois_info.get(
+                                                "creation_date"
+                                            ),
+                                            "whois"
+                                        ) }}
                                     </td>
 
                                 </tr>
@@ -1628,7 +2208,12 @@
                                     </th>
 
                                     <td>
-                                        {{ whois_info.get("expiration_date", "Unknown") }}
+                                        {{ clean_status(
+                                            whois_info.get(
+                                                "expiration_date"
+                                            ),
+                                            "whois"
+                                        ) }}
                                     </td>
 
                                 </tr>
@@ -1641,7 +2226,12 @@
                                     </th>
 
                                     <td>
-                                        {{ whois_info.get("updated_date", "Unknown") }}
+                                        {{ clean_status(
+                                            whois_info.get(
+                                                "updated_date"
+                                            ),
+                                            "whois"
+                                        ) }}
                                     </td>
 
                                 </tr>
@@ -1659,8 +2249,6 @@
         </div>
 
 
-
-        <!-- DNS -->
 
         <div class="accordion-item">
 
@@ -1684,47 +2272,94 @@
             <div
                 id="dnsPanel"
                 class="accordion-collapse collapse"
-                data-bs-parent="#infrastructureAccordion">
+                data-bs-parent="#technicalAccordion">
 
                 <div class="accordion-body">
 
-                    <div class="table-responsive">
 
-                        <table class="table result-table">
+                    {% if is_partial %}
 
-                            <tbody>
+                        <div class="unavailable-summary">
 
-                                {% for type in ["A", "AAAA", "MX", "NS", "CNAME", "TXT"] %}
+                            <h5>
+                                DNS information unavailable
+                            </h5>
 
-                                <tr>
+                            <p>
+                                The analysis server could not verify
+                                DNS information for this target.
+                            </p>
 
-                                    <th>
-                                        {{ type }}
-                                    </th>
+                        </div>
 
-                                    <td class="text-break">
+                    {% else %}
 
-                                        {% if dns_records.get(type) %}
+                        {% set dns_data =
+                            dns_records.get(
+                                "records",
+                                dns_records
+                            )
+                        %}
 
-                                            {{ dns_records.get(type) | join(", ") }}
 
-                                        {% else %}
+                        <div class="table-responsive">
 
-                                            None
+                            <table class="table result-table">
 
-                                        {% endif %}
+                                <tbody>
 
-                                    </td>
+                                    {% for record_type in [
+                                        "A",
+                                        "AAAA",
+                                        "MX",
+                                        "NS",
+                                        "CNAME",
+                                        "TXT"
+                                    ] %}
 
-                                </tr>
+                                        <tr>
 
-                                {% endfor %}
+                                            <th>
+                                                {{ record_type }}
+                                            </th>
 
-                            </tbody>
 
-                        </table>
+                                            <td class="text-break">
 
-                    </div>
+                                                {% if dns_data.get(record_type) %}
+
+                                                    {% if
+                                                        dns_data.get(record_type)
+                                                        is string
+                                                    %}
+
+                                                        {{ dns_data.get(record_type) }}
+
+                                                    {% else %}
+
+                                                        {{ dns_data.get(record_type) | join(", ") }}
+
+                                                    {% endif %}
+
+                                                {% else %}
+
+                                                    No record found
+
+                                                {% endif %}
+
+                                            </td>
+
+                                        </tr>
+
+                                    {% endfor %}
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    {% endif %}
 
                 </div>
 
@@ -1733,8 +2368,6 @@
         </div>
 
 
-
-        <!-- SSL -->
 
         <div class="accordion-item">
 
@@ -1758,111 +2391,161 @@
             <div
                 id="sslPanel"
                 class="accordion-collapse collapse"
-                data-bs-parent="#infrastructureAccordion">
+                data-bs-parent="#technicalAccordion">
 
                 <div class="accordion-body">
 
-                    <div class="table-responsive">
 
-                        <table class="table result-table">
+                    {% if is_partial %}
 
-                            <tbody>
+                        <div class="unavailable-summary">
 
-                                <tr>
+                            <h5>
+                                Certificate information unavailable
+                            </h5>
 
-                                    <th>
-                                        Status
-                                    </th>
+                            <p>
+                                SSL certificate details could not be
+                                verified because the website was not
+                                reachable from the analysis server.
+                            </p>
 
-                                    <td>
-                                        {{ ssl_info.get("status", "Unknown") }}
-                                    </td>
+                        </div>
 
-                                </tr>
+                    {% else %}
 
+                        <div class="table-responsive">
 
-                                <tr>
+                            <table class="table result-table">
 
-                                    <th>
-                                        Issuer
-                                    </th>
+                                <tbody>
 
-                                    <td>
-                                        {{ ssl_info.get("issuer", "Unknown") }}
-                                    </td>
+                                    <tr>
 
-                                </tr>
+                                        <th>
+                                            Status
+                                        </th>
 
+                                        <td>
+                                            {{ clean_status(
+                                                ssl_info.get(
+                                                    "status"
+                                                ),
+                                                "ssl"
+                                            ) }}
+                                        </td>
 
-                                <tr>
-
-                                    <th>
-                                        Protocol
-                                    </th>
-
-                                    <td>
-                                        {{ ssl_info.get("protocol", "Unknown") }}
-                                    </td>
-
-                                </tr>
+                                    </tr>
 
 
-                                <tr>
+                                    <tr>
 
-                                    <th>
-                                        Cipher
-                                    </th>
+                                        <th>
+                                            Issuer
+                                        </th>
 
-                                    <td>
-                                        {{ ssl_info.get("cipher", "Unknown") }}
-                                    </td>
+                                        <td class="text-break">
+                                            {{ clean_status(
+                                                ssl_info.get(
+                                                    "issuer"
+                                                ),
+                                                "ssl"
+                                            ) }}
+                                        </td>
 
-                                </tr>
-
-
-                                <tr>
-
-                                    <th>
-                                        Valid From
-                                    </th>
-
-                                    <td>
-                                        {{ ssl_info.get("valid_from", "Unknown") }}
-                                    </td>
-
-                                </tr>
+                                    </tr>
 
 
-                                <tr>
+                                    <tr>
 
-                                    <th>
-                                        Valid Until
-                                    </th>
+                                        <th>
+                                            Subject
+                                        </th>
 
-                                    <td>
-                                        {{ ssl_info.get("valid_to", "Unknown") }}
-                                    </td>
+                                        <td class="text-break">
+                                            {{ clean_status(
+                                                ssl_info.get(
+                                                    "subject"
+                                                ),
+                                                "ssl"
+                                            ) }}
+                                        </td>
 
-                                </tr>
+                                    </tr>
 
 
-                                <tr>
+                                    <tr>
 
-                                    <th>
-                                        Days Remaining
-                                    </th>
+                                        <th>
+                                            Valid From
+                                        </th>
 
-                                    <td>
-                                        {{ ssl_info.get("days_remaining", "Unknown") }}
-                                    </td>
+                                        <td>
+                                            {{ clean_status(
+                                                ssl_info.get(
+                                                    "valid_from"
+                                                ),
+                                                "ssl"
+                                            ) }}
+                                        </td>
 
-                                </tr>
+                                    </tr>
 
-                            </tbody>
 
-                        </table>
+                                    <tr>
 
-                    </div>
+                                        <th>
+                                            Valid Until
+                                        </th>
+
+                                        <td>
+                                            {{ clean_status(
+                                                ssl_info.get(
+                                                    "valid_to"
+                                                ),
+                                                "ssl"
+                                            ) }}
+                                        </td>
+
+                                    </tr>
+
+
+                                    <tr>
+
+                                        <th>
+                                            Days Remaining
+                                        </th>
+
+                                        <td>
+
+                                            {% if
+                                                ssl_info.get(
+                                                    "days_remaining"
+                                                )
+                                                is not none
+                                            %}
+
+                                                {{ ssl_info.get(
+                                                    "days_remaining"
+                                                ) }}
+
+                                            {% else %}
+
+                                                Certificate information unavailable
+
+                                            {% endif %}
+
+                                        </td>
+
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    {% endif %}
 
                 </div>
 
@@ -1871,8 +2554,6 @@
         </div>
 
 
-
-        <!-- SERVER -->
 
         <div class="accordion-item">
 
@@ -1896,190 +2577,222 @@
             <div
                 id="serverPanel"
                 class="accordion-collapse collapse"
-                data-bs-parent="#infrastructureAccordion">
+                data-bs-parent="#technicalAccordion">
 
                 <div class="accordion-body">
 
-                    <div class="row g-4">
 
-                        <div class="col-lg-6">
+                    {% if is_partial %}
 
-                            <div class="advanced-card card-cyan">
+                        <div class="unavailable-summary">
 
-                                <h5>
-                                    robots.txt
-                                </h5>
+                            <h5>
+                                Server checks unavailable
+                            </h5>
 
-                                <p>
+                            <p>
 
-                                    {{ analysis_results.get(
-                                        "robots",
-                                        {}
-                                    ).get(
-                                        "status",
-                                        "Not Checked"
-                                    ) }}
+                                The target website could not be reached,
+                                so server-dependent checks could not be
+                                verified.
 
-                                </p>
-
-                            </div>
+                            </p>
 
                         </div>
 
+                    {% else %}
 
-                        <div class="col-lg-6">
+                        <div class="row g-4">
 
-                            <div class="advanced-card card-purple">
+                            <div class="col-lg-6">
 
-                                <h5>
-                                    Sitemap
-                                </h5>
+                                <div class="advanced-card card-cyan">
 
-                                <p>
+                                    <h5>
+                                        robots.txt
+                                    </h5>
 
-                                    {{ analysis_results.get(
-                                        "sitemap",
-                                        {}
-                                    ).get(
-                                        "status",
-                                        "Not Checked"
-                                    ) }}
+                                    <p>
 
-                                </p>
+                                        {{ clean_status(
+                                            analysis_results.get(
+                                                "robots",
+                                                {}
+                                            ).get(
+                                                "status"
+                                            ),
+                                            "robots"
+                                        ) }}
 
-                            </div>
-
-                        </div>
-
-
-                        <div class="col-lg-6">
-
-                            <div class="advanced-card card-orange">
-
-                                <h5>
-                                    Technology
-                                </h5>
-
-                                <p>
-
-                                    {{ analysis_results.get(
-                                        "technology",
-                                        {}
-                                    ).get(
-                                        "status",
-                                        "Not Checked"
-                                    ) }}
-
-                                </p>
-
-
-                                {% set technologies =
-                                    analysis_results.get(
-                                        "technology",
-                                        {}
-                                    ).get(
-                                        "technologies",
-                                        []
-                                    )
-                                %}
-
-
-                                {% if technologies %}
-
-                                <div class="technology-tags">
-
-                                    {% for technology in technologies %}
-
-                                    <span>
-                                        {{ technology }}
-                                    </span>
-
-                                    {% endfor %}
+                                    </p>
 
                                 </div>
 
-                                {% endif %}
+                            </div>
+
+
+                            <div class="col-lg-6">
+
+                                <div class="advanced-card card-purple">
+
+                                    <h5>
+                                        Sitemap
+                                    </h5>
+
+                                    <p>
+
+                                        {{ clean_status(
+                                            analysis_results.get(
+                                                "sitemap",
+                                                {}
+                                            ).get(
+                                                "status"
+                                            ),
+                                            "sitemap"
+                                        ) }}
+
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-lg-6">
+
+                                <div class="advanced-card card-orange">
+
+                                    <h5>
+                                        Technology
+                                    </h5>
+
+                                    <p>
+
+                                        {{ clean_status(
+                                            analysis_results.get(
+                                                "technology",
+                                                {}
+                                            ).get(
+                                                "status"
+                                            )
+                                        ) }}
+
+                                    </p>
+
+
+                                    {% set technologies =
+                                        analysis_results.get(
+                                            "technology",
+                                            {}
+                                        ).get(
+                                            "technologies",
+                                            []
+                                        )
+                                    %}
+
+
+                                    {% if technologies %}
+
+                                        <div class="technology-tags">
+
+                                            {% for technology in technologies %}
+
+                                                <span>
+                                                    {{ technology }}
+                                                </span>
+
+                                            {% endfor %}
+
+                                        </div>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-lg-6">
+
+                                <div class="advanced-card card-pink">
+
+                                    <h5>
+                                        Sensitive Files
+                                    </h5>
+
+                                    <p>
+
+                                        {{ clean_status(
+                                            analysis_results.get(
+                                                "file_exposure",
+                                                {}
+                                            ).get(
+                                                "status"
+                                            ),
+                                            "file"
+                                        ) }}
+
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-lg-6">
+
+                                <div class="advanced-card card-blue">
+
+                                    <h5>
+                                        Response Headers
+                                    </h5>
+
+                                    <p>
+
+                                        {{ clean_status(
+                                            analysis_results.get(
+                                                "response_headers",
+                                                {}
+                                            ).get(
+                                                "status"
+                                            )
+                                        ) }}
+
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-lg-6">
+
+                                <div class="advanced-card card-green">
+
+                                    <h5>
+                                        HTTP Methods
+                                    </h5>
+
+                                    <p>
+
+                                        {{ clean_status(
+                                            analysis_results.get(
+                                                "http_methods",
+                                                {}
+                                            ).get(
+                                                "status"
+                                            )
+                                        ) }}
+
+                                    </p>
+
+                                </div>
 
                             </div>
 
                         </div>
 
-
-                        <div class="col-lg-6">
-
-                            <div class="advanced-card card-pink">
-
-                                <h5>
-                                    Sensitive Files
-                                </h5>
-
-                                <p>
-
-                                    {{ analysis_results.get(
-                                        "file_exposure",
-                                        {}
-                                    ).get(
-                                        "status",
-                                        "Not Checked"
-                                    ) }}
-
-                                </p>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="col-lg-6">
-
-                            <div class="advanced-card card-blue">
-
-                                <h5>
-                                    Response Headers
-                                </h5>
-
-                                <p>
-
-                                    {{ analysis_results.get(
-                                        "response_headers",
-                                        {}
-                                    ).get(
-                                        "status",
-                                        "Not Checked"
-                                    ) }}
-
-                                </p>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="col-lg-6">
-
-                            <div class="advanced-card card-green">
-
-                                <h5>
-                                    HTTP Methods
-                                </h5>
-
-                                <p>
-
-                                    {{ analysis_results.get(
-                                        "http_methods",
-                                        {}
-                                    ).get(
-                                        "status",
-                                        "Not Checked"
-                                    ) }}
-
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    </div>
+                    {% endif %}
 
                 </div>
 
@@ -2092,10 +2805,6 @@
 </section>
 
 
-
-<!-- ======================================================
-                      ACTIONS
-====================================================== -->
 
 <section class="result-actions">
 
@@ -2125,15 +2834,15 @@
 
         {% if pdf_available %}
 
-        <a
-            href="{{ url_for('download_report') }}"
-            class="btn btn-danger">
+            <a
+                href="{{ url_for('download_report') }}"
+                class="btn btn-danger">
 
-            <i class="fa-solid fa-file-pdf me-2"></i>
+                <i class="fa-solid fa-file-pdf me-2"></i>
 
-            Download PDF
+                Download PDF
 
-        </a>
+            </a>
 
         {% endif %}
 
@@ -2149,10 +2858,10 @@
 
     URL Security Analyzer
 
-    <div>
+    <div class="mt-2">
 
-        Automated analysis should be treated as a security
-        indicator rather than a guarantee of website safety.
+        Automated analysis provides security indicators and
+        should not be treated as an absolute guarantee of safety.
 
     </div>
 
@@ -2160,8 +2869,8 @@
 
 
 </div>
-</main>
 
+</main>
 
 
 <button
@@ -2175,6 +2884,9 @@
 </button>
 
 
+</div>
+
+
 
 <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
@@ -2183,8 +2895,49 @@
 
 <script>
 
+const warningGate =
+    document.getElementById(
+        "contentWarningGate"
+    );
+
+const viewResultButton =
+    document.getElementById(
+        "viewResultButton"
+    );
+
+
+if (
+    warningGate
+    && viewResultButton
+) {
+
+    viewResultButton.addEventListener(
+        "click",
+        function () {
+
+            warningGate.style.display =
+                "none";
+
+            document.body.classList.remove(
+                "warning-pending"
+            );
+
+            window.scrollTo({
+                top: 0,
+                behavior: "instant"
+            });
+
+        }
+    );
+
+}
+
+
 const backToTop =
-    document.getElementById("backToTop");
+    document.getElementById(
+        "backToTop"
+    );
+
 
 if (backToTop) {
 
@@ -2192,15 +2945,21 @@ if (backToTop) {
         "scroll",
         function () {
 
-            if (window.scrollY > 300) {
+            if (
+                window.scrollY > 300
+            ) {
 
-                backToTop.classList.add("show");
+                backToTop.classList.add(
+                    "show"
+                );
 
             }
 
             else {
 
-                backToTop.classList.remove("show");
+                backToTop.classList.remove(
+                    "show"
+                );
 
             }
 

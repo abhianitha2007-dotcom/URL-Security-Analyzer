@@ -26,11 +26,10 @@ BLOCKED_HOST_SUFFIXES = (
     ".local"
 )
 
-SYSTEM_DNS_ATTEMPTS = 3
+SYSTEM_DNS_ATTEMPTS = 2
 
 DNS_RETRY_DELAYS = (
     0.15,
-    0.35
 )
 
 FALLBACK_NAMESERVERS = (
@@ -79,6 +78,7 @@ def _is_public_ip(value):
         ip = ipaddress.ip_address(
             value
         )
+
     except ValueError:
         return False
 
@@ -114,6 +114,7 @@ def _normalize_hostname(hostname):
             .encode("idna")
             .decode("ascii")
         )
+
     except UnicodeError:
         return None
 
@@ -162,16 +163,214 @@ def _hostname_is_blocked(hostname):
     )
 
 
-def _validate_literal_ip(hostname):
+def _literal_ip_status(hostname):
     try:
         ipaddress.ip_address(
             hostname
         )
+
     except ValueError:
         return None
 
     return _is_public_ip(
         hostname
+    )
+
+
+def _private_target_message():
+    return (
+        "Private or local network addresses cannot be scanned. "
+        "Please enter a valid public HTTP or HTTPS URL."
+    )
+
+
+def _parse_input(url):
+    if not isinstance(
+        url,
+        str
+    ):
+        return None, {
+            "code": "invalid_format",
+            "message": (
+                "Please enter a valid HTTP or HTTPS URL."
+            ),
+            "hostname": None
+        }
+
+    url = url.strip()
+
+    if not url:
+        return None, {
+            "code": "invalid_format",
+            "message": (
+                "Please enter a valid HTTP or HTTPS URL."
+            ),
+            "hostname": None
+        }
+
+    try:
+        parsed = urlparse(
+            url
+        )
+
+    except ValueError:
+        return None, {
+            "code": "invalid_format",
+            "message": (
+                "Please enter a valid HTTP or HTTPS URL."
+            ),
+            "hostname": None
+        }
+
+    scheme = (
+        parsed.scheme
+        or ""
+    ).lower()
+
+    if scheme not in ALLOWED_SCHEMES:
+        return None, {
+            "code": "invalid_scheme",
+            "message": (
+                "Please enter a valid HTTP or HTTPS URL."
+            ),
+            "hostname": None
+        }
+
+    if not parsed.netloc:
+        return None, {
+            "code": "invalid_format",
+            "message": (
+                "Please enter a valid HTTP or HTTPS URL."
+            ),
+            "hostname": None
+        }
+
+    try:
+        hostname = _normalize_hostname(
+            parsed.hostname
+        )
+
+    except ValueError:
+        hostname = None
+
+    if not hostname:
+        return None, {
+            "code": "invalid_domain",
+            "message": (
+                "Please enter a valid HTTP or HTTPS URL."
+            ),
+            "hostname": None
+        }
+
+    if (
+        parsed.username is not None
+        or parsed.password is not None
+    ):
+        return None, {
+            "code": "embedded_credentials",
+            "message": (
+                "URLs containing embedded usernames "
+                "or passwords cannot be scanned."
+            ),
+            "hostname": hostname
+        }
+
+    try:
+        parsed_port = parsed.port
+
+    except ValueError:
+        return None, {
+            "code": "invalid_port",
+            "message": (
+                "The URL contains an invalid port number."
+            ),
+            "hostname": hostname
+        }
+
+    port = parsed_port
+
+    if port is None:
+        port = (
+            443
+            if scheme == "https"
+            else 80
+        )
+
+    if not (
+        1 <= port <= 65535
+    ):
+        return None, {
+            "code": "invalid_port",
+            "message": (
+                "The URL contains an invalid port number."
+            ),
+            "hostname": hostname
+        }
+
+    if _hostname_is_blocked(
+        hostname
+    ):
+        return None, {
+            "code": "private_target",
+            "message": _private_target_message(),
+            "hostname": hostname
+        }
+
+    literal_status = _literal_ip_status(
+        hostname
+    )
+
+    if literal_status is False:
+        return None, {
+            "code": "private_target",
+            "message": _private_target_message(),
+            "hostname": hostname
+        }
+
+    if (
+        literal_status is None
+        and not _hostname_syntax_valid(
+            hostname
+        )
+    ):
+        return None, {
+            "code": "invalid_domain",
+            "message": (
+                "Please enter a valid HTTP or HTTPS URL."
+            ),
+            "hostname": hostname
+        }
+
+    return {
+        "url": url,
+        "parsed": parsed,
+        "scheme": scheme,
+        "hostname": hostname,
+        "port": port,
+        "literal_ip": (
+            literal_status is not None
+        )
+    }, None
+
+
+def validate_url_input(url):
+    details, error = _parse_input(
+        url
+    )
+
+    if error:
+        return _set_result(
+            False,
+            error["code"],
+            error["message"],
+            error["hostname"]
+        )
+
+    return _set_result(
+        True,
+        "valid_input",
+        "URL format is valid.",
+        details["hostname"]
     )
 
 
@@ -188,6 +387,7 @@ def _resolve_with_system_dns(
                 port,
                 type=socket.SOCK_STREAM
             )
+
         except (
             socket.gaierror,
             OSError
@@ -208,6 +408,7 @@ def _resolve_with_system_dns(
         for address in addresses:
             try:
                 ip_value = address[4][0]
+
             except (
                 IndexError,
                 TypeError
@@ -225,9 +426,7 @@ def _resolve_with_system_dns(
     return None
 
 
-def _resolve_with_fallback_dns(
-    hostname
-):
+def _resolve_with_fallback_dns(hostname):
     resolver = dns.resolver.Resolver(
         configure=False
     )
@@ -236,8 +435,8 @@ def _resolve_with_fallback_dns(
         FALLBACK_NAMESERVERS
     )
 
-    resolver.timeout = 2.0
-    resolver.lifetime = 4.0
+    resolver.timeout = 1.5
+    resolver.lifetime = 3.0
 
     resolved_ips = set()
 
@@ -297,169 +496,110 @@ def _resolve_hostname(
     return resolved_ips
 
 
-def is_valid_url(url):
-    if not isinstance(
-        url,
-        str
-    ):
-        return _set_result(
-            False,
-            "invalid_format",
-            "Please enter a valid HTTP or HTTPS URL."
-        )
-
-    url = url.strip()
-
-    if not url:
-        return _set_result(
-            False,
-            "invalid_format",
-            "Please enter a valid HTTP or HTTPS URL."
-        )
-
-    try:
-        parsed = urlparse(
-            url
-        )
-    except ValueError:
-        return _set_result(
-            False,
-            "invalid_format",
-            "Please enter a valid HTTP or HTTPS URL."
-        )
-
-    scheme = (
-        parsed.scheme
-        or ""
-    ).lower()
-
-    if scheme not in ALLOWED_SCHEMES:
-        return _set_result(
-            False,
-            "invalid_scheme",
-            "Please enter a valid HTTP or HTTPS URL."
-        )
-
-    if not parsed.netloc:
-        return _set_result(
-            False,
-            "invalid_format",
-            "Please enter a valid HTTP or HTTPS URL."
-        )
-
-    try:
-        hostname = _normalize_hostname(
-            parsed.hostname
-        )
-    except ValueError:
-        hostname = None
-
-    if not hostname:
-        return _set_result(
-            False,
-            "invalid_format",
-            "Please enter a valid HTTP or HTTPS URL."
-        )
-
-    if (
-        parsed.username is not None
-        or parsed.password is not None
-    ):
-        return _set_result(
-            False,
-            "embedded_credentials",
-            (
-                "URLs containing embedded usernames "
-                "or passwords cannot be scanned."
-            ),
-            hostname
-        )
-
-    try:
-        parsed_port = parsed.port
-    except ValueError:
-        return _set_result(
-            False,
-            "invalid_port",
-            "The URL contains an invalid port number.",
-            hostname
-        )
-
-    port = parsed_port
-
-    if port is None:
-        port = (
-            443
-            if scheme == "https"
-            else 80
-        )
-
-    if not (
-        1 <= port <= 65535
-    ):
-        return _set_result(
-            False,
-            "invalid_port",
-            "The URL contains an invalid port number.",
-            hostname
-        )
-
-    if _hostname_is_blocked(
-        hostname
-    ):
-        return _set_result(
-            False,
-            "private_target",
-            (
-                "Private or local network addresses "
-                "cannot be scanned. Please enter a valid "
-                "public HTTP or HTTPS URL."
-            ),
-            hostname
-        )
-
-    literal_ip_result = (
-        _validate_literal_ip(
-            hostname
-        )
+def get_network_target_status(url):
+    details, error = _parse_input(
+        url
     )
 
-    if literal_ip_result is not None:
-        if literal_ip_result:
-            return _set_result(
-                True,
-                "valid",
-                "URL is valid.",
-                hostname
-            )
+    if error:
+        return {
+            "safe": False,
+            "available": False,
+            "code": error["code"],
+            "message": error["message"],
+            "hostname": error["hostname"],
+            "resolved_ips": []
+        }
 
-        return _set_result(
-            False,
-            "private_target",
-            (
-                "Private or local network addresses "
-                "cannot be scanned. Please enter a valid "
-                "public HTTP or HTTPS URL."
+    hostname = details[
+        "hostname"
+    ]
+
+    if details[
+        "literal_ip"
+    ]:
+        return {
+            "safe": True,
+            "available": True,
+            "code": "public_target",
+            "message": (
+                "Public network target verified."
             ),
-            hostname
-        )
-
-    if not _hostname_syntax_valid(
-        hostname
-    ):
-        return _set_result(
-            False,
-            "invalid_domain",
-            "Please enter a valid HTTP or HTTPS URL.",
-            hostname
-        )
+            "hostname": hostname,
+            "resolved_ips": [
+                hostname
+            ]
+        }
 
     resolved_ips = _resolve_hostname(
         hostname,
-        port
+        details["port"]
     )
 
     if not resolved_ips:
+        return {
+            "safe": False,
+            "available": False,
+            "code": "dns_unavailable",
+            "message": (
+                "Network-dependent checks could not "
+                "reach or resolve this website."
+            ),
+            "hostname": hostname,
+            "resolved_ips": []
+        }
+
+    non_public = [
+        ip_value
+        for ip_value in resolved_ips
+        if not _is_public_ip(
+            ip_value
+        )
+    ]
+
+    if non_public:
+        return {
+            "safe": False,
+            "available": False,
+            "code": "private_target",
+            "message": _private_target_message(),
+            "hostname": hostname,
+            "resolved_ips": []
+        }
+
+    return {
+        "safe": True,
+        "available": True,
+        "code": "public_target",
+        "message": (
+            "Public network target verified."
+        ),
+        "hostname": hostname,
+        "resolved_ips": sorted(
+            resolved_ips
+        )
+    }
+
+
+def is_valid_url(url):
+    status = get_network_target_status(
+        url
+    )
+
+    if status[
+        "safe"
+    ]:
+        return _set_result(
+            True,
+            "valid",
+            "URL is valid.",
+            status["hostname"]
+        )
+
+    if (
+        status["code"]
+        == "dns_unavailable"
+    ):
         return _set_result(
             False,
             "dns_failed",
@@ -467,27 +607,12 @@ def is_valid_url(url):
                 "The domain could not be resolved. "
                 "It may be offline or unavailable."
             ),
-            hostname
-        )
-
-    if not all(
-        _is_public_ip(ip_value)
-        for ip_value in resolved_ips
-    ):
-        return _set_result(
-            False,
-            "private_target",
-            (
-                "Private or local network addresses "
-                "cannot be scanned. Please enter a valid "
-                "public HTTP or HTTPS URL."
-            ),
-            hostname
+            status["hostname"]
         )
 
     return _set_result(
-        True,
-        "valid",
-        "URL is valid.",
-        hostname
+        False,
+        status["code"],
+        status["message"],
+        status["hostname"]
     )

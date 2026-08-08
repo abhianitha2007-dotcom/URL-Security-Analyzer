@@ -11,9 +11,11 @@
 
     <meta
         name="description"
-        content="Analyze suspicious URLs using multi-layer cybersecurity checks.">
+        content="Analyze suspicious URLs using multi-layer cybersecurity checks, domain intelligence, webpage analysis and threat reputation.">
 
-    <title>URL Security Analyzer</title>
+    <title>
+        URL Security Analyzer
+    </title>
 
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
@@ -27,15 +29,777 @@
         rel="stylesheet"
         href="{{ url_for('static', filename='css/style.css') }}">
 
+    <style>
+
+        /* =====================================================
+           HERO
+        ===================================================== */
+
+        .new-home-hero {
+            position: relative;
+            overflow: hidden;
+            min-height: 760px;
+            display: flex;
+            align-items: center;
+            padding: 115px 0 70px;
+        }
+
+        .new-home-hero::before {
+            content: "";
+            position: absolute;
+            width: 560px;
+            height: 560px;
+            top: -250px;
+            left: -180px;
+            border-radius: 50%;
+            background: rgba(6, 182, 212, 0.08);
+            filter: blur(40px);
+        }
+
+        .new-home-hero::after {
+            content: "";
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            right: -230px;
+            top: 30px;
+            border-radius: 50%;
+            background: rgba(99, 102, 241, 0.08);
+            filter: blur(40px);
+        }
+
+        .hero-main-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-badge-new {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 22px;
+            padding: 7px 13px;
+            border: 1px solid rgba(34, 211, 238, 0.22);
+            border-radius: 999px;
+            color: #67e8f9;
+            background: rgba(6, 182, 212, 0.065);
+            font-size: 0.72rem;
+            font-weight: 850;
+            letter-spacing: 0.09em;
+        }
+
+        .hero-badge-new span {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #22c55e;
+        }
+
+        .hero-title-new {
+            max-width: 850px;
+            margin: 0 0 22px;
+            color: #f8fafc;
+            font-size: clamp(3rem, 5.5vw, 5.35rem);
+            font-weight: 900;
+            line-height: 1.03;
+            letter-spacing: -0.045em;
+        }
+
+        .hero-title-new span {
+            display: block;
+            color: #22d3ee;
+        }
+
+        .hero-description-new {
+            max-width: 700px;
+            margin-bottom: 30px;
+            color: #94a3b8;
+            font-size: 1.04rem;
+            line-height: 1.8;
+        }
+
+
+        /* =====================================================
+           HERO SCANNER
+        ===================================================== */
+
+        .hero-scanner {
+            max-width: 760px;
+            margin-top: 8px;
+        }
+
+        .hero-scanner-form {
+            display: flex;
+            align-items: stretch;
+            gap: 6px;
+            padding: 6px;
+            overflow: hidden;
+            border: 1px solid rgba(34, 211, 238, 0.18);
+            border-radius: 15px;
+            background: #020817;
+            box-shadow:
+                0 18px 55px rgba(0, 0, 0, 0.22);
+        }
+
+        .hero-scanner-input {
+            position: relative;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            border-radius: 10px;
+            background: #07111f !important;
+        }
+
+        .hero-scanner-input i {
+            position: absolute;
+            z-index: 3;
+            top: 50%;
+            left: 18px;
+            transform: translateY(-50%);
+            color: #22d3ee;
+            font-size: 0.95rem;
+            pointer-events: none;
+        }
+
+        .hero-scanner-input input {
+            width: 100%;
+            height: 56px;
+            padding: 0 18px 0 47px !important;
+            border: 0 !important;
+            border-radius: 10px !important;
+            outline: 0 !important;
+            color: #f1f5f9 !important;
+            background: #07111f !important;
+            box-shadow: none !important;
+            font-size: 0.96rem;
+            caret-color: #22d3ee;
+        }
+
+        .hero-scanner-input input:focus {
+            color: #f8fafc !important;
+            background: #07111f !important;
+            box-shadow:
+                inset 0 0 0 1px rgba(34, 211, 238, 0.22) !important;
+        }
+
+        .hero-scanner-input input::placeholder {
+            color: #475569 !important;
+            opacity: 1;
+        }
+
+        .hero-scanner-input input:-webkit-autofill,
+        .hero-scanner-input input:-webkit-autofill:hover,
+        .hero-scanner-input input:-webkit-autofill:focus,
+        .hero-scanner-input input:-webkit-autofill:active {
+            -webkit-text-fill-color: #f1f5f9 !important;
+            -webkit-box-shadow:
+                0 0 0 1000px #07111f inset !important;
+            box-shadow:
+                0 0 0 1000px #07111f inset !important;
+            caret-color: #22d3ee !important;
+            border: 0 !important;
+            transition:
+                background-color 9999s ease-out 0s;
+        }
+
+        .hero-scan-button {
+            flex: 0 0 auto;
+            min-width: 175px;
+            border: 0;
+            border-radius: 10px;
+            color: #031018;
+            background:
+                linear-gradient(
+                    135deg,
+                    #22d3ee,
+                    #3b82f6
+                );
+            font-weight: 850;
+            transition:
+                transform 0.2s ease,
+                filter 0.2s ease;
+        }
+
+        .hero-scan-button:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.08);
+        }
+
+        .hero-scan-button:disabled {
+            opacity: 0.7;
+            transform: none;
+        }
+
+        .hero-scanner-meta {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px 20px;
+            margin-top: 13px;
+            color: #64748b;
+            font-size: 0.75rem;
+        }
+
+        .hero-scanner-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .hero-scanner-meta i {
+            color: #38bdf8;
+        }
+
+        .hero-scanner-meta a {
+            color: #94a3b8;
+            text-decoration: none;
+        }
+
+        .hero-scanner-meta a:hover {
+            color: #22d3ee;
+        }
+
+        .hero-error {
+            margin-top: 17px;
+            max-width: 760px;
+            padding: 13px 15px;
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: 11px;
+            color: #fecaca;
+            background: rgba(239, 68, 68, 0.07);
+            font-size: 0.86rem;
+        }
+
+        .hero-error i {
+            color: #f87171;
+        }
+
+
+        /* =====================================================
+           SECURITY SIGNAL MAP
+        ===================================================== */
+
+        .signal-panel {
+            position: relative;
+            overflow: hidden;
+            padding: 27px;
+            border: 1px solid rgba(34, 211, 238, 0.14);
+            border-radius: 25px;
+            background:
+                linear-gradient(
+                    150deg,
+                    rgba(12, 22, 42, 0.98),
+                    rgba(5, 10, 25, 0.99)
+                );
+            box-shadow:
+                0 30px 85px rgba(0, 0, 0, 0.28);
+        }
+
+        .signal-panel::before {
+            content: "";
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            top: -180px;
+            right: -120px;
+            border-radius: 50%;
+            background: rgba(99, 102, 241, 0.11);
+        }
+
+        .signal-panel-header {
+            position: relative;
+            z-index: 4;
+            margin-bottom: 12px;
+        }
+
+        .signal-panel-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 7px;
+            color: #22d3ee;
+            font-size: 0.67rem;
+            font-weight: 900;
+            letter-spacing: 0.11em;
+        }
+
+        .signal-panel-header h3 {
+            margin: 0;
+            color: #f8fafc;
+            font-size: 1.55rem;
+            font-weight: 850;
+        }
+
+        .signal-panel-header p {
+            margin: 7px 0 0;
+            color: #64748b;
+            font-size: 0.79rem;
+            line-height: 1.55;
+        }
+
+        .security-signal-map {
+            position: relative;
+            height: 365px;
+            margin-top: 8px;
+        }
+
+        .security-signal-map::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 12%;
+            right: 12%;
+            height: 1px;
+            background:
+                linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(34, 211, 238, 0.18),
+                    rgba(139, 92, 246, 0.2),
+                    rgba(34, 211, 238, 0.18),
+                    transparent
+                );
+        }
+
+        .security-signal-map::after {
+            content: "";
+            position: absolute;
+            top: 12%;
+            bottom: 12%;
+            left: 50%;
+            width: 1px;
+            background:
+                linear-gradient(
+                    180deg,
+                    transparent,
+                    rgba(34, 211, 238, 0.17),
+                    rgba(139, 92, 246, 0.2),
+                    rgba(34, 211, 238, 0.17),
+                    transparent
+                );
+        }
+
+        .signal-core {
+            position: absolute;
+            z-index: 5;
+            top: 50%;
+            left: 50%;
+            width: 132px;
+            height: 132px;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(34, 211, 238, 0.3);
+            border-radius: 50%;
+            background:
+                radial-gradient(
+                    circle,
+                    rgba(34, 211, 238, 0.17),
+                    rgba(5, 14, 30, 0.96) 68%
+                );
+            box-shadow:
+                0 0 50px rgba(34, 211, 238, 0.1);
+        }
+
+        .signal-core::before {
+            content: "";
+            position: absolute;
+            inset: -14px;
+            border: 1px dashed rgba(34, 211, 238, 0.14);
+            border-radius: 50%;
+        }
+
+        .signal-core i {
+            margin-bottom: 8px;
+            color: #22d3ee;
+            font-size: 2rem;
+        }
+
+        .signal-core strong {
+            color: #f1f5f9;
+            font-size: 0.83rem;
+        }
+
+        .signal-core small {
+            margin-top: 3px;
+            color: #64748b;
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+        }
+
+        .signal-node {
+            position: absolute;
+            z-index: 4;
+            width: 148px;
+            padding: 13px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 14px;
+            background: rgba(13, 23, 42, 0.92);
+            box-shadow:
+                0 12px 30px rgba(0, 0, 0, 0.16);
+        }
+
+        .signal-node-top-left {
+            top: 17px;
+            left: 0;
+        }
+
+        .signal-node-top-right {
+            top: 17px;
+            right: 0;
+        }
+
+        .signal-node-bottom-left {
+            bottom: 17px;
+            left: 0;
+        }
+
+        .signal-node-bottom-right {
+            right: 0;
+            bottom: 17px;
+        }
+
+        .signal-node-icon {
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 9px;
+            border-radius: 9px;
+        }
+
+        .signal-node strong {
+            display: block;
+            margin-bottom: 4px;
+            color: #e2e8f0;
+            font-size: 0.78rem;
+        }
+
+        .signal-node p {
+            margin: 0;
+            color: #64748b;
+            font-size: 0.64rem;
+            line-height: 1.45;
+        }
+
+        .signal-cyan {
+            color: #22d3ee;
+            background: rgba(6, 182, 212, 0.11);
+        }
+
+        .signal-purple {
+            color: #a78bfa;
+            background: rgba(139, 92, 246, 0.11);
+        }
+
+        .signal-green {
+            color: #4ade80;
+            background: rgba(34, 197, 94, 0.11);
+        }
+
+        .signal-red {
+            color: #fb7185;
+            background: rgba(244, 63, 94, 0.11);
+        }
+
+        .signal-output {
+            position: relative;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 13px 14px;
+            border: 1px solid rgba(34, 211, 238, 0.1);
+            border-radius: 12px;
+            background: rgba(34, 211, 238, 0.045);
+        }
+
+        .signal-output small {
+            display: block;
+            color: #64748b;
+            font-size: 0.6rem;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+        }
+
+        .signal-output strong {
+            color: #dbeafe;
+            font-size: 0.8rem;
+        }
+
+        .signal-output i {
+            color: #22d3ee;
+            font-size: 1.25rem;
+        }
+
+
+        /* =====================================================
+           FEATURES
+        ===================================================== */
+
+        .homepage-section {
+            padding: 78px 0;
+        }
+
+        .homepage-section-heading {
+            max-width: 700px;
+            margin: 0 auto 42px;
+            text-align: center;
+        }
+
+        .homepage-section-label {
+            display: inline-block;
+            margin-bottom: 9px;
+            color: #22d3ee;
+            font-size: 0.69rem;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+        }
+
+        .homepage-section-heading h2 {
+            margin-bottom: 11px;
+            color: #f8fafc;
+            font-size: clamp(1.9rem, 3vw, 2.6rem);
+            font-weight: 850;
+        }
+
+        .homepage-section-heading p {
+            margin: 0;
+            color: #94a3b8;
+            line-height: 1.7;
+        }
+
+        .home-feature-card {
+            height: 100%;
+            padding: 24px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 17px;
+            background: rgba(15, 23, 42, 0.52);
+            transition:
+                transform 0.2s ease,
+                border-color 0.2s ease;
+        }
+
+        .home-feature-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(34, 211, 238, 0.2);
+        }
+
+        .home-feature-icon {
+            width: 46px;
+            height: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 17px;
+            border-radius: 12px;
+        }
+
+        .home-feature-card h5 {
+            margin-bottom: 9px;
+            color: #f1f5f9;
+            font-weight: 750;
+        }
+
+        .home-feature-card p {
+            margin: 0;
+            color: #94a3b8;
+            font-size: 0.88rem;
+            line-height: 1.65;
+        }
+
+
+        /* =====================================================
+           WARNING INFO
+        ===================================================== */
+
+        .warning-information {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            margin-top: 35px;
+            padding: 19px;
+            border: 1px solid rgba(245, 158, 11, 0.15);
+            border-radius: 15px;
+            background: rgba(245, 158, 11, 0.04);
+        }
+
+        .warning-information-icon {
+            flex: 0 0 auto;
+            width: 39px;
+            height: 39px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            color: #fbbf24;
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .warning-information strong {
+            display: block;
+            margin-bottom: 4px;
+            color: #fbbf24;
+        }
+
+        .warning-information p {
+            margin: 0;
+            color: #94a3b8;
+            font-size: 0.86rem;
+            line-height: 1.65;
+        }
+
+
+        /* =====================================================
+           WORKFLOW
+        ===================================================== */
+
+        .home-workflow-card {
+            height: 100%;
+            padding: 23px;
+            border: 1px solid rgba(148, 163, 184, 0.09);
+            border-radius: 16px;
+            background: rgba(15, 23, 42, 0.48);
+        }
+
+        .home-workflow-step {
+            display: inline-block;
+            margin-bottom: 14px;
+            color: #22d3ee;
+            font-size: 0.7rem;
+            font-weight: 900;
+            letter-spacing: 0.1em;
+        }
+
+        .home-workflow-card h5 {
+            color: #f1f5f9;
+        }
+
+        .home-workflow-card p {
+            margin: 0;
+            color: #94a3b8;
+            font-size: 0.86rem;
+            line-height: 1.6;
+        }
+
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (max-width: 991.98px) {
+
+            .new-home-hero {
+                min-height: auto;
+                padding-top: 110px;
+            }
+
+            .signal-panel {
+                margin-top: 12px;
+            }
+
+        }
+
+        @media (max-width: 767.98px) {
+
+            .new-home-hero {
+                padding: 100px 0 55px;
+            }
+
+            .hero-title-new {
+                font-size: 2.65rem;
+            }
+
+            .hero-scanner-form {
+                flex-direction: column;
+            }
+
+            .hero-scan-button {
+                width: 100%;
+                min-height: 51px;
+            }
+
+            .hero-scanner-input input {
+                height: 51px;
+            }
+
+            .signal-panel {
+                padding: 20px;
+            }
+
+            .security-signal-map {
+                height: 330px;
+            }
+
+            .signal-node {
+                width: 135px;
+            }
+
+            .signal-core {
+                width: 112px;
+                height: 112px;
+            }
+
+            .homepage-section {
+                padding: 62px 0;
+            }
+
+        }
+
+        @media (max-width: 430px) {
+
+            .hero-title-new {
+                font-size: 2.35rem;
+            }
+
+            .hero-description-new {
+                font-size: 0.94rem;
+            }
+
+            .security-signal-map {
+                height: 305px;
+            }
+
+            .signal-node {
+                width: 122px;
+                padding: 10px;
+            }
+
+            .signal-node strong {
+                font-size: 0.7rem;
+            }
+
+            .signal-node p {
+                display: none;
+            }
+
+            .signal-core {
+                width: 96px;
+                height: 96px;
+            }
+
+            .signal-core i {
+                font-size: 1.6rem;
+            }
+
+            .signal-core strong {
+                font-size: 0.7rem;
+            }
+
+        }
+
+    </style>
+
 </head>
 
 
 <body>
 
-
-<!-- =========================================================
-                         NAVBAR
-========================================================= -->
 
 <nav class="navbar navbar-expand-lg navbar-dark custom-navbar fixed-top">
 
@@ -46,9 +810,7 @@
             href="{{ url_for('home') }}">
 
             <span class="brand-icon">
-
                 <i class="fa-solid fa-shield-halved"></i>
-
             </span>
 
             URL Security Analyzer
@@ -81,9 +843,7 @@
                     <a
                         class="nav-link active"
                         href="{{ url_for('home') }}">
-
                         Dashboard
-
                     </a>
 
                 </li>
@@ -94,9 +854,7 @@
                     <a
                         class="nav-link"
                         href="{{ url_for('history') }}">
-
                         History
-
                     </a>
 
                 </li>
@@ -111,307 +869,308 @@
 
 
 
-<!-- =========================================================
-                           HERO
-========================================================= -->
+<section class="new-home-hero">
 
-<section class="homepage-hero">
-
-    <div class="hero-glow hero-glow-one"></div>
-
-    <div class="hero-glow hero-glow-two"></div>
-
-    <div class="container position-relative">
+    <div class="container hero-main-content">
 
         <div class="row align-items-center g-5">
 
 
-            <!-- LEFT -->
-
             <div class="col-lg-7">
 
-                <div class="hero-kicker">
+                <div class="hero-badge-new">
 
-                    <span class="hero-kicker-dot"></span>
+                    <span></span>
 
                     MULTI-LAYER URL THREAT ANALYSIS
 
                 </div>
 
 
-                <h1 class="hero-title">
+                <h1 class="hero-title-new">
 
-                    Analyze URLs
+                    Check a Link
 
                     <span>
-                        Before You Trust Them
+                        Before You Trust It
                     </span>
 
                 </h1>
 
 
-                <p class="hero-description">
+                <p class="hero-description-new">
 
-                    Inspect suspicious links using URL structure analysis,
-                    domain intelligence, WHOIS, DNS, SSL, webpage behaviour
-                    and external threat intelligence before interacting
-                    with a website.
+                    Inspect suspicious links using URL structure,
+                    domain identity, network security and external
+                    threat reputation before opening a website or
+                    entering sensitive information.
 
                 </p>
 
 
-                <div class="hero-actions">
 
-                    <a
-                        href="#scanner"
-                        class="btn btn-info btn-lg">
+                <div
+                    id="scanner"
+                    class="hero-scanner">
 
-                        <i class="fa-solid fa-magnifying-glass me-2"></i>
 
-                        Analyze a URL
+                    <form
+                        id="scanForm"
+                        action="{{ url_for('analyze') }}"
+                        method="POST">
 
-                    </a>
+                        <div class="hero-scanner-form">
 
 
-                    <a
-                        href="{{ url_for('history') }}"
-                        class="btn btn-outline-light btn-lg">
-
-                        <i class="fa-solid fa-clock-rotate-left me-2"></i>
-
-                        Scan History
-
-                    </a>
-
-                </div>
-
-
-                <div class="hero-points">
-
-                    <span>
-
-                        <i class="fa-solid fa-circle-check"></i>
-
-                        URL & Domain
-
-                    </span>
-
-
-                    <span>
-
-                        <i class="fa-solid fa-circle-check"></i>
-
-                        Web Security
-
-                    </span>
-
-
-                    <span>
-
-                        <i class="fa-solid fa-circle-check"></i>
-
-                        Threat Intelligence
-
-                    </span>
-
-
-                    <span>
-
-                        <i class="fa-solid fa-circle-check"></i>
-
-                        PDF Reports
-
-                    </span>
-
-                </div>
-
-            </div>
-
-
-
-            <!-- RIGHT -->
-
-            <div class="col-lg-5">
-
-                <div class="hero-dashboard">
-
-                    <div class="hero-dashboard-top">
-
-                        <div>
-
-                            <small>
-                                SECURITY ENGINE
-                            </small>
-
-                            <h4 class="mb-0">
-                                Analysis Pipeline
-                            </h4>
-
-                        </div>
-
-
-                        <div class="engine-ready">
-
-                            <span></span>
-
-                            Ready
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="hero-dashboard-url">
-
-                        <div class="dashboard-url-icon accent-cyan">
-
-                            <i class="fa-solid fa-link"></i>
-
-                        </div>
-
-
-                        <div>
-
-                            <small>
-                                TARGET URL
-                            </small>
-
-                            <strong>
-                                https://example.com
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="dashboard-scan-row">
-
-                        <div class="dashboard-scan-name">
-
-                            <span class="dashboard-scan-icon accent-blue">
+                            <div class="hero-scanner-input">
 
                                 <i class="fa-solid fa-link"></i>
 
-                            </span>
 
-                            URL Structure
+                                <input
+                                    id="urlInput"
+                                    name="url"
+                                    type="text"
+                                    placeholder="https://example.com"
+                                    value="{{ entered_url or '' }}"
+                                    autocomplete="url"
+                                    autocapitalize="off"
+                                    inputmode="url"
+                                    spellcheck="false"
+                                    aria-label="Website URL"
+                                    required>
+
+                            </div>
+
+
+                            <button
+                                id="analyzeButton"
+                                type="submit"
+                                class="hero-scan-button">
+
+                                <i
+                                    id="analyzeButtonIcon"
+                                    class="fa-solid fa-shield-halved me-2">
+                                </i>
+
+                                <span id="analyzeButtonText">
+                                    Analyze URL
+                                </span>
+
+                            </button>
+
 
                         </div>
 
-                        <span class="dashboard-active">
-                            READY
+                    </form>
+
+
+
+                    {% if error %}
+
+                    <div
+                        id="scanError"
+                        class="hero-error">
+
+                        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+
+                        {{ error }}
+
+                    </div>
+
+                    {% endif %}
+
+
+
+                    <div class="hero-scanner-meta">
+
+
+                        <span>
+
+                            <i class="fa-solid fa-circle-info"></i>
+
+                            Partial Analysis supported when direct
+                            website checks are unavailable.
+
                         </span>
+
+
+                        <a href="{{ url_for('history') }}">
+
+                            <i class="fa-solid fa-clock-rotate-left me-1"></i>
+
+                            View Scan History
+
+                        </a>
+
 
                     </div>
 
 
-                    <div class="dashboard-scan-row">
+                </div>
 
-                        <div class="dashboard-scan-name">
+            </div>
 
-                            <span class="dashboard-scan-icon accent-purple">
+
+
+            <div class="col-lg-5">
+
+                <div class="signal-panel">
+
+
+                    <div class="signal-panel-header">
+
+                        <div class="signal-panel-label">
+
+                            <i class="fa-solid fa-wave-square"></i>
+
+                            SECURITY SIGNALS
+
+                        </div>
+
+
+                        <h3>
+                            Evidence Intelligence
+                        </h3>
+
+
+                        <p>
+
+                            Multiple independent signals feed the
+                            risk engine before a verdict is produced.
+
+                        </p>
+
+                    </div>
+
+
+
+                    <div class="security-signal-map">
+
+
+                        <div class="signal-node signal-node-top-left">
+
+                            <div class="signal-node-icon signal-cyan">
+
+                                <i class="fa-solid fa-link"></i>
+
+                            </div>
+
+                            <strong>
+                                URL Signal
+                            </strong>
+
+                            <p>
+                                Structure and lexical indicators.
+                            </p>
+
+                        </div>
+
+
+
+                        <div class="signal-node signal-node-top-right">
+
+                            <div class="signal-node-icon signal-purple">
 
                                 <i class="fa-solid fa-fingerprint"></i>
 
-                            </span>
+                            </div>
 
-                            Domain Identity
+                            <strong>
+                                Domain Signal
+                            </strong>
 
-                        </div>
-
-                        <span class="dashboard-active">
-                            READY
-                        </span>
-
-                    </div>
-
-
-                    <div class="dashboard-scan-row">
-
-                        <div class="dashboard-scan-name">
-
-                            <span class="dashboard-scan-icon accent-green">
-
-                                <i class="fa-solid fa-network-wired"></i>
-
-                            </span>
-
-                            Network & SSL
+                            <p>
+                                Identity and impersonation evidence.
+                            </p>
 
                         </div>
 
-                        <span class="dashboard-active">
-                            READY
-                        </span>
-
-                    </div>
 
 
-                    <div class="dashboard-scan-row">
+                        <div class="signal-core">
 
-                        <div class="dashboard-scan-name">
+                            <i class="fa-solid fa-shield-halved"></i>
 
-                            <span class="dashboard-scan-icon accent-orange">
+                            <strong>
+                                Risk Engine
+                            </strong>
 
-                                <i class="fa-solid fa-code"></i>
-
-                            </span>
-
-                            Webpage Behaviour
+                            <small>
+                                EVIDENCE FUSION
+                            </small>
 
                         </div>
 
-                        <span class="dashboard-active">
-                            READY
-                        </span>
-
-                    </div>
 
 
-                    <div class="dashboard-scan-row">
+                        <div class="signal-node signal-node-bottom-left">
 
-                        <div class="dashboard-scan-name">
+                            <div class="signal-node-icon signal-green">
 
-                            <span class="dashboard-scan-icon accent-pink">
+                                <i class="fa-solid fa-lock"></i>
+
+                            </div>
+
+                            <strong>
+                                Web Security
+                            </strong>
+
+                            <p>
+                                SSL, DNS and website behaviour.
+                            </p>
+
+                        </div>
+
+
+
+                        <div class="signal-node signal-node-bottom-right">
+
+                            <div class="signal-node-icon signal-red">
 
                                 <i class="fa-solid fa-shield-virus"></i>
 
-                            </span>
+                            </div>
 
-                            Threat Intelligence
+                            <strong>
+                                Reputation
+                            </strong>
+
+                            <p>
+                                External threat intelligence.
+                            </p>
 
                         </div>
 
-                        <span class="dashboard-active">
-                            READY
-                        </span>
 
                     </div>
 
 
-                    <div class="dashboard-engine-footer">
+
+                    <div class="signal-output">
 
                         <div>
 
                             <small>
-                                FINAL OUTPUT
+                                ANALYSIS OUTPUT
                             </small>
 
                             <strong>
-                                Risk Score + Evidence
+                                Risk Score + Supporting Evidence
                             </strong>
 
                         </div>
 
 
-                        <i class="fa-solid fa-shield-halved"></i>
+                        <i class="fa-solid fa-chart-column"></i>
 
                     </div>
+
 
                 </div>
 
             </div>
+
 
         </div>
 
@@ -421,208 +1180,32 @@
 
 
 
-<!-- =========================================================
-                         SCANNER
-========================================================= -->
-
-<section
-    id="scanner"
-    class="py-section scanner-section">
+<section class="homepage-section">
 
     <div class="container">
 
-        <div class="scanner-card">
 
-            <div class="scanner-title text-center">
+        <div class="homepage-section-heading">
 
-                <div class="section-label">
-                    URL SCANNER
-                </div>
-
-
-                <h2>
-                    Analyze a Website
-                </h2>
-
-
-                <p>
-
-                    Enter a public HTTP or HTTPS URL to begin the
-                    complete security analysis.
-
-                </p>
-
-            </div>
-
-
-            {% if error %}
-
-            <div
-                id="scanError"
-                class="alert alert-danger scanner-alert mb-4"
-                role="alert">
-
-                <div class="d-flex align-items-start gap-3">
-
-                    <i class="fa-solid fa-circle-exclamation mt-1"></i>
-
-                    <div>
-
-                        <strong>
-                            URL cannot be scanned.
-                        </strong>
-
-                        <div class="mt-1">
-                            {{ error }}
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            {% endif %}
-
-
-            <form
-                id="scanForm"
-                action="{{ url_for('analyze') }}"
-                method="POST">
-
-                <div class="scanner-shell">
-
-
-                    <div class="scanner-input-wrapper">
-
-                        <i
-                            class="fa-solid fa-link scanner-input-icon">
-                        </i>
-
-
-                        <input
-                            id="urlInput"
-                            name="url"
-                            type="text"
-                            class="scanner-control"
-                            placeholder="https://example.com"
-                            value="{{ entered_url|default('') }}"
-                            autocomplete="url"
-                            autocapitalize="off"
-                            inputmode="url"
-                            spellcheck="false"
-                            aria-label="Website URL"
-                            required>
-
-                    </div>
-
-
-                    <button
-                        id="analyzeButton"
-                        type="submit"
-                        class="scanner-submit">
-
-                        <i
-                            id="analyzeButtonIcon"
-                            class="fa-solid fa-shield-halved">
-                        </i>
-
-                        <span id="analyzeButtonText">
-                            Analyze URL
-                        </span>
-
-                    </button>
-
-                </div>
-
-            </form>
-
-
-            <div class="scanner-meta">
-
-                <span>
-
-                    <i class="fa-solid fa-lock text-success"></i>
-
-                    HTTPS & SSL
-
-                </span>
-
-
-                <span>
-
-                    <i class="fa-solid fa-globe text-info"></i>
-
-                    WHOIS & DNS
-
-                </span>
-
-
-                <span>
-
-                    <i class="fa-solid fa-code text-warning"></i>
-
-                    Web Analysis
-
-                </span>
-
-
-                <span>
-
-                    <i class="fa-solid fa-shield-virus text-danger"></i>
-
-                    VirusTotal
-
-                </span>
-
-
-                <span>
-
-                    <i class="fa-solid fa-file-pdf text-purple"></i>
-
-                    PDF Report
-
-                </span>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-
-<!-- =========================================================
-                  SECURITY INTELLIGENCE
-========================================================= -->
-
-<section class="py-section">
-
-    <div class="container">
-
-        <div class="section-title text-center">
-
-            <div class="section-label">
-                SECURITY INTELLIGENCE
+            <div class="homepage-section-label">
+                SECURITY CAPABILITIES
             </div>
 
 
             <h2>
-                Multi-Layer Analysis
+                Multi-Layer URL Analysis
             </h2>
 
 
             <p>
 
-                Different security layers independently inspect
-                the submitted target before the risk engine
-                combines the findings.
+                Each layer examines a different part of the
+                submitted target before the findings are combined.
 
             </p>
 
         </div>
+
 
 
         <div class="row g-4">
@@ -630,23 +1213,25 @@
 
             <div class="col-lg-4 col-md-6">
 
-                <div class="security-feature feature-cyan">
+                <div class="home-feature-card">
 
-                    <div class="security-feature-icon">
+                    <div class="home-feature-icon signal-cyan">
 
                         <i class="fa-solid fa-link"></i>
 
                     </div>
 
+
                     <h5>
-                        URL Structure
+                        URL Analysis
                     </h5>
+
 
                     <p>
 
-                        Checks HTTPS, IP usage, suspicious keywords,
-                        URL length, subdomains, ports and query
-                        parameters.
+                        HTTPS, IP usage, suspicious keywords,
+                        length, subdomains, ports, query parameters,
+                        URL shorteners and unusual symbols.
 
                     </p>
 
@@ -655,24 +1240,27 @@
             </div>
 
 
+
             <div class="col-lg-4 col-md-6">
 
-                <div class="security-feature feature-purple">
+                <div class="home-feature-card">
 
-                    <div class="security-feature-icon">
+                    <div class="home-feature-icon signal-purple">
 
                         <i class="fa-solid fa-fingerprint"></i>
 
                     </div>
 
+
                     <h5>
-                        Domain Identity
+                        Domain Intelligence
                     </h5>
+
 
                     <p>
 
-                        Evaluates domain age, TLD reputation,
-                        typosquatting, punycode, homographs,
+                        Domain age, TLD reputation, Punycode,
+                        Unicode homographs, typosquatting,
                         entropy and domain similarity.
 
                     </p>
@@ -682,25 +1270,28 @@
             </div>
 
 
+
             <div class="col-lg-4 col-md-6">
 
-                <div class="security-feature feature-green">
+                <div class="home-feature-card">
 
-                    <div class="security-feature-icon">
+                    <div class="home-feature-icon signal-green">
 
                         <i class="fa-solid fa-network-wired"></i>
 
                     </div>
 
+
                     <h5>
-                        Network Intelligence
+                        Network & SSL
                     </h5>
+
 
                     <p>
 
-                        Retrieves available WHOIS, DNS and SSL
-                        information to provide infrastructure
-                        context.
+                        WHOIS, DNS records and SSL certificate
+                        information provide registration and
+                        infrastructure context.
 
                     </p>
 
@@ -709,25 +1300,33 @@
             </div>
 
 
+
             <div class="col-lg-4 col-md-6">
 
-                <div class="security-feature feature-orange">
+                <div class="home-feature-card">
 
-                    <div class="security-feature-icon">
+                    <div
+                        class="home-feature-icon"
+                        style="
+                            color:#fb923c;
+                            background:rgba(249,115,22,.1);
+                        ">
 
                         <i class="fa-solid fa-code"></i>
 
                     </div>
 
+
                     <h5>
                         Webpage Behaviour
                     </h5>
 
+
                     <p>
 
-                        Reviews redirects, forms, JavaScript,
-                        page content, favicons and browser-facing
-                        behavior.
+                        Redirects, forms, JavaScript, page content,
+                        favicons and other browser-facing security
+                        indicators.
 
                     </p>
 
@@ -736,25 +1335,28 @@
             </div>
 
 
+
             <div class="col-lg-4 col-md-6">
 
-                <div class="security-feature feature-blue">
+                <div class="home-feature-card">
 
-                    <div class="security-feature-icon">
+                    <div class="home-feature-icon signal-cyan">
 
                         <i class="fa-solid fa-server"></i>
 
                     </div>
 
+
                     <h5>
                         Server Security
                     </h5>
 
+
                     <p>
 
-                        Examines headers, HTTP methods,
-                        robots.txt, sitemaps, technologies
-                        and sensitive file exposure.
+                        Security headers, cookies, CORS,
+                        HTTP methods, robots.txt, sitemap and
+                        sensitive-file exposure checks.
 
                     </p>
 
@@ -763,25 +1365,28 @@
             </div>
 
 
+
             <div class="col-lg-4 col-md-6">
 
-                <div class="security-feature feature-pink">
+                <div class="home-feature-card">
 
-                    <div class="security-feature-icon">
+                    <div class="home-feature-icon signal-red">
 
                         <i class="fa-solid fa-shield-virus"></i>
 
                     </div>
 
+
                     <h5>
                         Threat Intelligence
                     </h5>
 
+
                     <p>
 
-                        Uses VirusTotal reputation data together
-                        with independent analyzer findings to
-                        strengthen the final assessment.
+                        VirusTotal reputation information is
+                        combined with independent analyzer evidence
+                        to strengthen the assessment.
 
                     </p>
 
@@ -789,7 +1394,41 @@
 
             </div>
 
+
         </div>
+
+
+
+        <div class="warning-information">
+
+            <div class="warning-information-icon">
+
+                <i class="fa-solid fa-triangle-exclamation"></i>
+
+            </div>
+
+
+            <div>
+
+                <strong>
+                    Content & Service Notices
+                </strong>
+
+
+                <p>
+
+                    Adult or explicit content and gambling/betting
+                    services receive a red warning before the result.
+                    Financial and cryptocurrency services receive an
+                    amber caution. These notices remain separate
+                    from the cybersecurity risk score.
+
+                </p>
+
+            </div>
+
+        </div>
+
 
     </div>
 
@@ -797,32 +1436,32 @@
 
 
 
-<!-- =========================================================
-                         WORKFLOW
-========================================================= -->
-
-<section class="py-section workflow-section">
+<section class="homepage-section workflow-section">
 
     <div class="container">
 
-        <div class="section-title text-center">
 
-            <div class="section-label">
+        <div class="homepage-section-heading">
+
+            <div class="homepage-section-label">
                 ANALYSIS WORKFLOW
             </div>
 
+
             <h2>
-                How It Works
+                From Link to Security Report
             </h2>
+
 
             <p>
 
-                A structured pipeline takes the URL from validation
-                through analysis to the final security report.
+                A simple workflow turns the submitted URL into
+                an evidence-based security assessment.
 
             </p>
 
         </div>
+
 
 
         <div class="row g-4">
@@ -830,27 +1469,18 @@
 
             <div class="col-lg-3 col-md-6">
 
-                <div class="workflow-card workflow-cyan">
+                <div class="home-workflow-card">
 
-                    <span class="workflow-number">
-                        01
+                    <span class="home-workflow-step">
+                        STEP 01
                     </span>
-
-                    <div class="workflow-icon">
-
-                        <i class="fa-solid fa-link"></i>
-
-                    </div>
 
                     <h5>
                         Submit URL
                     </h5>
 
                     <p>
-
-                        Enter the public website address you want
-                        to investigate.
-
+                        Enter the public link you want to analyze.
                     </p>
 
                 </div>
@@ -858,29 +1488,22 @@
             </div>
 
 
+
             <div class="col-lg-3 col-md-6">
 
-                <div class="workflow-card workflow-purple">
+                <div class="home-workflow-card">
 
-                    <span class="workflow-number">
-                        02
+                    <span class="home-workflow-step">
+                        STEP 02
                     </span>
 
-                    <div class="workflow-icon">
-
-                        <i class="fa-solid fa-magnifying-glass"></i>
-
-                    </div>
-
                     <h5>
-                        Run Checks
+                        Analyze
                     </h5>
 
                     <p>
-
-                        Independent modules inspect URL,
-                        domain, webpage and infrastructure signals.
-
+                        Independent modules inspect available
+                        security signals.
                     </p>
 
                 </div>
@@ -888,76 +1511,60 @@
             </div>
 
 
+
             <div class="col-lg-3 col-md-6">
 
-                <div class="workflow-card workflow-orange">
+                <div class="home-workflow-card">
 
-                    <span class="workflow-number">
-                        03
+                    <span class="home-workflow-step">
+                        STEP 03
                     </span>
-
-                    <div class="workflow-icon">
-
-                        <i class="fa-solid fa-chart-simple"></i>
-
-                    </div>
 
                     <h5>
                         Calculate Risk
                     </h5>
 
                     <p>
-
-                        The calibrated risk engine combines
-                        meaningful security findings.
-
+                        Relevant findings are combined by the
+                        calibrated risk engine.
                     </p>
 
                 </div>
 
             </div>
+
 
 
             <div class="col-lg-3 col-md-6">
 
-                <div class="workflow-card workflow-green">
+                <div class="home-workflow-card">
 
-                    <span class="workflow-number">
-                        04
+                    <span class="home-workflow-step">
+                        STEP 04
                     </span>
 
-                    <div class="workflow-icon">
-
-                        <i class="fa-solid fa-file-shield"></i>
-
-                    </div>
-
                     <h5>
-                        Review Report
+                        Review Evidence
                     </h5>
 
                     <p>
-
-                        Review evidence, infrastructure details,
-                        verdict and the downloadable PDF report.
-
+                        Inspect the result and download the
+                        detailed PDF report.
                     </p>
 
                 </div>
 
             </div>
 
+
         </div>
+
 
     </div>
 
 </section>
 
 
-
-<!-- =========================================================
-                          CTA
-========================================================= -->
 
 <section class="py-section">
 
@@ -973,7 +1580,7 @@
 
 
             <h2>
-                Check a Link Before You Trust It
+                Check Before You Trust
             </h2>
 
 
@@ -1005,7 +1612,7 @@
 
                     <i class="fa-solid fa-clock-rotate-left me-2"></i>
 
-                    View History
+                    Scan History
 
                 </a>
 
@@ -1019,15 +1626,12 @@
 
 
 
-<!-- =========================================================
-                         FOOTER
-========================================================= -->
-
 <footer class="footer">
 
     <div class="container">
 
         <div class="row g-4">
+
 
             <div class="col-lg-6">
 
@@ -1042,13 +1646,15 @@
 
                 <p class="mt-3 mb-0">
 
-                    A Flask-based defensive cybersecurity project
-                    for URL analysis, phishing detection and
-                    web security assessment.
+                    A defensive cybersecurity project for
+                    investigating suspicious URLs, phishing
+                    indicators, website security and external
+                    threat reputation.
 
                 </p>
 
             </div>
+
 
 
             <div class="col-lg-3">
@@ -1056,6 +1662,7 @@
                 <h5>
                     Navigation
                 </h5>
+
 
                 <ul class="list-unstyled mt-3">
 
@@ -1067,6 +1674,7 @@
 
                     </li>
 
+
                     <li class="mb-2">
 
                         <a href="#scanner">
@@ -1074,6 +1682,7 @@
                         </a>
 
                     </li>
+
 
                     <li>
 
@@ -1088,23 +1697,40 @@
             </div>
 
 
+
             <div class="col-lg-3">
 
                 <h5>
                     Analysis
                 </h5>
 
+
                 <ul class="list-unstyled mt-3 footer-analysis-list">
 
-                    <li>URL Structure</li>
-                    <li>Domain Intelligence</li>
-                    <li>Network & SSL</li>
-                    <li>Webpage Behaviour</li>
-                    <li>Threat Intelligence</li>
+                    <li>
+                        URL Structure
+                    </li>
+
+                    <li>
+                        Domain Intelligence
+                    </li>
+
+                    <li>
+                        Network & SSL
+                    </li>
+
+                    <li>
+                        Webpage Behaviour
+                    </li>
+
+                    <li>
+                        Threat Intelligence
+                    </li>
 
                 </ul>
 
             </div>
+
 
         </div>
 
@@ -1149,35 +1775,58 @@
 <script>
 
 const scanForm =
-    document.getElementById("scanForm");
-
-const urlInput =
-    document.getElementById("urlInput");
+    document.getElementById(
+        "scanForm"
+    );
 
 const scanError =
-    document.getElementById("scanError");
+    document.getElementById(
+        "scanError"
+    );
 
 const analyzeButton =
-    document.getElementById("analyzeButton");
+    document.getElementById(
+        "analyzeButton"
+    );
 
 const analyzeButtonText =
-    document.getElementById("analyzeButtonText");
+    document.getElementById(
+        "analyzeButtonText"
+    );
 
 const analyzeButtonIcon =
-    document.getElementById("analyzeButtonIcon");
+    document.getElementById(
+        "analyzeButtonIcon"
+    );
 
 const backToTop =
-    document.getElementById("backToTop");
+    document.getElementById(
+        "backToTop"
+    );
 
 
-if (urlInput && scanError) {
+if (
+    scanForm
+    && analyzeButton
+    && analyzeButtonText
+) {
 
-    urlInput.addEventListener(
-        "input",
+    scanForm.addEventListener(
+        "submit",
         function () {
 
-            scanError.style.display =
-                "none";
+            analyzeButton.disabled =
+                true;
+
+            analyzeButtonText.textContent =
+                "Analyzing...";
+
+            if (analyzeButtonIcon) {
+
+                analyzeButtonIcon.className =
+                    "fa-solid fa-spinner fa-spin me-2";
+
+            }
 
         }
     );
@@ -1192,7 +1841,9 @@ window.addEventListener(
         if (scanError) {
 
             const scanner =
-                document.getElementById("scanner");
+                document.getElementById(
+                    "scanner"
+                );
 
             if (scanner) {
 
@@ -1209,57 +1860,27 @@ window.addEventListener(
 );
 
 
-if (
-    scanForm
-    && analyzeButton
-    && analyzeButtonText
-) {
-
-    scanForm.addEventListener(
-        "submit",
-        function () {
-
-            if (scanError) {
-
-                scanError.style.display =
-                    "none";
-
-            }
-
-            analyzeButton.disabled =
-                true;
-
-            analyzeButtonText.textContent =
-                "Analyzing...";
-
-            if (analyzeButtonIcon) {
-
-                analyzeButtonIcon.className =
-                    "fa-solid fa-spinner fa-spin";
-
-            }
-
-        }
-    );
-
-}
-
-
 if (backToTop) {
 
     window.addEventListener(
         "scroll",
         function () {
 
-            if (window.scrollY > 300) {
+            if (
+                window.scrollY > 300
+            ) {
 
-                backToTop.classList.add("show");
+                backToTop.classList.add(
+                    "show"
+                );
 
             }
 
             else {
 
-                backToTop.classList.remove("show");
+                backToTop.classList.remove(
+                    "show"
+                );
 
             }
 
@@ -1283,7 +1904,9 @@ if (backToTop) {
 
 
 document
-    .querySelectorAll('a[href^="#"]')
+    .querySelectorAll(
+        'a[href^="#"]'
+    )
     .forEach(
         function (anchor) {
 
@@ -1292,19 +1915,23 @@ document
                 function (event) {
 
                     const selector =
-                        this.getAttribute("href");
+                        this.getAttribute(
+                            "href"
+                        );
 
                     if (
                         !selector
                         || selector === "#"
                     ) {
-
                         return;
-
                     }
 
+
                     const target =
-                        document.querySelector(selector);
+                        document.querySelector(
+                            selector
+                        );
+
 
                     if (target) {
 
@@ -1312,7 +1939,7 @@ document
 
                         target.scrollIntoView({
                             behavior: "smooth",
-                            block: "start"
+                            block: "center"
                         });
 
                     }
@@ -1322,54 +1949,6 @@ document
 
         }
     );
-
-
-if ("IntersectionObserver" in window) {
-
-    const observer =
-        new IntersectionObserver(
-            function (entries) {
-
-                entries.forEach(
-                    function (entry) {
-
-                        if (entry.isIntersecting) {
-
-                            entry.target
-                                .classList
-                                .add("fade-up");
-
-                            observer.unobserve(
-                                entry.target
-                            );
-
-                        }
-
-                    }
-                );
-
-            },
-            {
-                threshold: 0.08
-            }
-        );
-
-
-    document
-        .querySelectorAll(
-            ".security-feature, " +
-            ".workflow-card, " +
-            ".homepage-cta"
-        )
-        .forEach(
-            function (element) {
-
-                observer.observe(element);
-
-            }
-        );
-
-}
 
 </script>
 

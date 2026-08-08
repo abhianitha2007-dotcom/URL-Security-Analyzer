@@ -1,7 +1,9 @@
 import re
+
 from urllib.parse import urljoin, urlparse
 
 import requests
+
 from analyzer.safe_http import safe_requests
 
 
@@ -46,7 +48,9 @@ def build_robots_url(url):
     if not parsed.scheme or not parsed.netloc:
         return None
 
-    base_url = f"{parsed.scheme}://{parsed.netloc}"
+    base_url = (
+        f"{parsed.scheme}://{parsed.netloc}"
+    )
 
     return urljoin(
         base_url,
@@ -57,13 +61,20 @@ def build_robots_url(url):
 def extract_path_segments(path):
     return [
         segment.lower()
-        for segment in re.split(r"[/\\]+", path)
+        for segment in re.split(
+            r"[/\\]+",
+            path
+        )
         if segment
     ]
 
 
 def is_sensitive_path(path):
-    lower_path = path.lower().strip()
+    lower_path = (
+        path
+        .lower()
+        .strip()
+    )
 
     if not lower_path:
         return False
@@ -73,7 +84,9 @@ def is_sensitive_path(path):
     )
 
     for segment in segments:
-        clean_segment = segment.strip()
+        clean_segment = (
+            segment.strip()
+        )
 
         if clean_segment in SENSITIVE_SEGMENTS:
             return True
@@ -118,55 +131,94 @@ def parse_robots_content(content):
         if ":" not in line_without_comment:
             continue
 
-        directive, value = line_without_comment.split(
-            ":",
-            1
+        directive, value = (
+            line_without_comment.split(
+                ":",
+                1
+            )
         )
 
-        directive = directive.strip().lower()
+        directive = (
+            directive
+            .strip()
+            .lower()
+        )
+
         value = value.strip()
 
         if not value:
             continue
 
         if directive == "disallow":
-            disallowed_paths.append(value)
+            disallowed_paths.append(
+                value
+            )
 
-            if is_sensitive_path(value):
-                suspicious_paths.append(value)
+            if is_sensitive_path(
+                value
+            ):
+                suspicious_paths.append(
+                    value
+                )
 
         elif directive == "sitemap":
-            sitemap_urls.append(value)
+            sitemap_urls.append(
+                value
+            )
 
     return (
-        sorted(set(disallowed_paths)),
-        sorted(set(suspicious_paths)),
-        sorted(set(sitemap_urls))
+        sorted(
+            set(disallowed_paths)
+        ),
+        sorted(
+            set(suspicious_paths)
+        ),
+        sorted(
+            set(sitemap_urls)
+        )
+    )
+
+
+def http_status_message(status_code):
+    if status_code in {
+        401,
+        403
+    }:
+        return (
+            "⚪ robots.txt Access Restricted"
+        )
+
+    if status_code == 429:
+        return (
+            "⚪ Could not verify robots.txt — "
+            "request was rate limited"
+        )
+
+    if 500 <= status_code <= 599:
+        return (
+            "⚪ Could not verify robots.txt — "
+            "website temporarily unavailable"
+        )
+
+    if 400 <= status_code <= 499:
+        return (
+            "⚪ Could not verify robots.txt"
+        )
+
+    return (
+        "⚪ Could not verify robots.txt — "
+        "unexpected server response"
     )
 
 
 def check_robots(url):
-    """
-    Analyzes the website's robots.txt file.
-
-    Returns:
-        {
-            found,
-            url,
-            status_code,
-            status,
-            score,
-            disallow_count,
-            suspicious_paths,
-            sitemap_urls
-        }
-    """
-
     result = {
         "found": False,
         "url": None,
         "status_code": None,
-        "status": "Not Checked",
+        "status": (
+            "Could not verify robots.txt"
+        ),
         "score": 0,
         "disallow_count": 0,
         "suspicious_paths": [],
@@ -179,7 +231,10 @@ def check_robots(url):
         )
 
         if not robots_url:
-            result["status"] = "Invalid URL"
+            result["status"] = (
+                "Invalid URL"
+            )
+
             return result
 
         result["url"] = robots_url
@@ -191,7 +246,8 @@ def check_robots(url):
             headers={
                 "User-Agent": (
                     "Mozilla/5.0 "
-                    "(compatible; URLSecurityAnalyzer/2.0)"
+                    "(compatible; "
+                    "URLSecurityAnalyzer/2.0)"
                 )
             }
         )
@@ -202,30 +258,41 @@ def check_robots(url):
 
         if response.status_code == 404:
             result["status"] = (
-                "🟢 robots.txt Not Found"
+                "🟢 No robots.txt Found"
             )
+
             return result
 
         if response.status_code != 200:
             result["status"] = (
-                f"Not Checked — HTTP {response.status_code}"
+                http_status_message(
+                    response.status_code
+                )
             )
+
             return result
 
-        content_type = response.headers.get(
-            "Content-Type",
-            ""
-        ).lower()
+        content_type = (
+            response.headers.get(
+                "Content-Type",
+                ""
+            )
+            .lower()
+        )
 
-        text = response.text[:1_000_000]
+        text = response.text[
+            :1_000_000
+        ]
 
         if (
             "text/html" in content_type
             and "<html" in text.lower()
         ):
             result["status"] = (
-                "Not Checked — robots.txt Returned HTML"
+                "⚪ Could not verify robots.txt — "
+                "unexpected webpage response"
             )
+
             return result
 
         result["found"] = True
@@ -234,7 +301,9 @@ def check_robots(url):
             disallowed_paths,
             suspicious_paths,
             sitemap_urls
-        ) = parse_robots_content(text)
+        ) = parse_robots_content(
+            text
+        )
 
         result["disallow_count"] = len(
             disallowed_paths
@@ -244,7 +313,9 @@ def check_robots(url):
             suspicious_paths
         )
 
-        result["sitemap_urls"] = sitemap_urls
+        result["sitemap_urls"] = (
+            sitemap_urls
+        )
 
         suspicious_count = len(
             suspicious_paths
@@ -255,40 +326,51 @@ def check_robots(url):
                 "🟢 robots.txt Found — "
                 "No Sensitive Paths Detected"
             )
+
             result["score"] = 0
 
         elif suspicious_count <= 2:
             result["status"] = (
                 "🟡 Sensitive Paths Listed"
             )
+
             result["score"] = 2
 
         elif suspicious_count <= 5:
             result["status"] = (
                 "🟠 Multiple Sensitive Paths Listed"
             )
+
             result["score"] = 4
 
         else:
             result["status"] = (
                 "🔴 Many Sensitive Paths Listed"
             )
+
             result["score"] = 6
 
         return result
 
     except requests.Timeout:
         result["status"] = (
-            "Not Checked — Request Timed Out"
+            "⚪ Could not verify robots.txt — "
+            "website did not respond"
         )
+
         return result
 
     except requests.RequestException:
         result["status"] = (
-            "Not Checked — Request Failed"
+            "⚪ Could not verify robots.txt — "
+            "website unavailable"
         )
+
         return result
 
     except Exception:
-        result["status"] = "Not Checked"
+        result["status"] = (
+            "⚪ Could not verify robots.txt"
+        )
+
         return result

@@ -111,6 +111,47 @@ def test_valid_public_url_validation(
     assert result["message"] == "URL is valid."
 
 
+def test_input_validation_does_not_require_dns(
+    monkeypatch
+):
+    monkeypatch.setattr(
+        url_validator,
+        "_resolve_hostname",
+        lambda hostname, port: None
+    )
+
+    valid = url_validator.validate_url_input(
+        "https://unavailable-example.com"
+    )
+
+    result = (
+        url_validator.get_last_validation_result()
+    )
+
+    assert valid is True
+    assert result["code"] == "valid_input"
+
+
+def test_network_status_reports_dns_unavailable(
+    monkeypatch
+):
+    monkeypatch.setattr(
+        url_validator,
+        "_resolve_hostname",
+        lambda hostname, port: None
+    )
+
+    result = (
+        url_validator.get_network_target_status(
+            "https://unavailable-example.com"
+        )
+    )
+
+    assert result["safe"] is False
+    assert result["available"] is False
+    assert result["code"] == "dns_unavailable"
+
+
 def test_flask_displays_invalid_domain_message():
     app.config["TESTING"] = True
 
@@ -160,7 +201,7 @@ def test_flask_displays_private_target_message():
     )
 
 
-def test_flask_displays_dns_failure_message(
+def test_flask_allows_dns_unavailable_url(
     monkeypatch
 ):
     monkeypatch.setattr(
@@ -187,9 +228,14 @@ def test_flask_displays_dns_failure_message(
     assert response.status_code == 200
 
     assert (
+        "Analysis Result"
+        in page
+    )
+
+    assert (
         "The domain could not be resolved. "
         "It may be offline or unavailable."
-        in page
+        not in page
     )
 
 
