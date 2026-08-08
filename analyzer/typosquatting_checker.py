@@ -3,6 +3,36 @@ import re
 from urllib.parse import urlparse
 
 
+MULTI_LEVEL_SUFFIXES = {
+    "co.in",
+    "com.in",
+    "org.in",
+    "net.in",
+    "gov.in",
+    "nic.in",
+    "ac.in",
+    "edu.in",
+    "res.in",
+    "firm.in",
+    "gen.in",
+    "ind.in",
+    "mil.in",
+
+    "co.uk",
+    "org.uk",
+    "gov.uk",
+    "ac.uk",
+
+    "com.au",
+    "net.au",
+    "org.au",
+
+    "co.jp",
+    "ne.jp",
+    "or.jp"
+}
+
+
 COMMON_SUBSTITUTIONS = {
     "0": "o",
     "1": "i",
@@ -21,7 +51,7 @@ def extract_domain_label(url):
         if not hostname:
             return ""
 
-        hostname = hostname.lower()
+        hostname = hostname.lower().rstrip(".")
 
         if hostname.startswith("www."):
             hostname = hostname[4:]
@@ -30,6 +60,14 @@ def extract_domain_label(url):
 
         if len(parts) < 2:
             return parts[0]
+
+        suffix = ".".join(parts[-2:])
+
+        if suffix in MULTI_LEVEL_SUFFIXES:
+            if len(parts) >= 3:
+                return parts[-3]
+
+            return ""
 
         return parts[-2]
 
@@ -46,7 +84,10 @@ def count_digit_substitutions(text):
 
 def has_repeated_characters(text):
     return bool(
-        re.search(r"(.)\1{2,}", text)
+        re.search(
+            r"(.)\1{2,}",
+            text
+        )
     )
 
 
@@ -65,24 +106,13 @@ def has_letter_digit_mixing(text):
 
 
 def has_excessive_separators(text):
-    separator_count = (
+    return (
         text.count("-")
         + text.count("_")
-    )
-
-    return separator_count >= 3
+    ) >= 3
 
 
 def check_typosquatting(url):
-    """
-    Checks generic typosquatting indicators.
-
-    Returns:
-        detected,
-        status,
-        score
-    """
-
     try:
         domain_label = extract_domain_label(url)
 
@@ -90,6 +120,13 @@ def check_typosquatting(url):
             return (
                 False,
                 "Not Checked",
+                0
+            )
+
+        if domain_label.startswith("xn--"):
+            return (
+                False,
+                "🟢 Punycode Handled Separately",
                 0
             )
 
@@ -112,40 +149,61 @@ def check_typosquatting(url):
                 "possible letter-number substitution"
             )
 
-        if has_repeated_characters(domain_label):
+        if has_repeated_characters(
+            domain_label
+        ):
             score += 8
             reasons.append(
                 "repeated characters"
             )
 
-        if has_letter_digit_mixing(domain_label):
+        if has_letter_digit_mixing(
+            domain_label
+        ):
             score += 5
             reasons.append(
                 "mixed letters and digits"
             )
 
-        if has_excessive_separators(domain_label):
+        if has_excessive_separators(
+            domain_label
+        ):
             score += 6
             reasons.append(
                 "excessive separators"
             )
 
-        score = min(score, 25)
+        score = min(
+            score,
+            25
+        )
 
         if score >= 16:
-            status = "🔴 Strong Typosquatting Indicators"
+            status = (
+                "🔴 Strong Typosquatting Indicators"
+            )
+
             detected = True
 
         elif score >= 7:
-            status = "🟡 Possible Typosquatting Pattern"
+            status = (
+                "🟡 Possible Typosquatting Pattern"
+            )
+
             detected = True
 
         else:
-            status = "🟢 No Typosquatting Pattern Detected"
-            detected = False
+            return (
+                False,
+                "🟢 No Typosquatting Pattern Detected",
+                0
+            )
 
         if reasons:
-            status += " — " + ", ".join(reasons)
+            status += (
+                " — "
+                + ", ".join(reasons)
+            )
 
         return (
             detected,
