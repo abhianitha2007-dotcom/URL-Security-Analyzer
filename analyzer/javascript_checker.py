@@ -2,14 +2,14 @@ import base64
 import re
 
 import requests
-from analyzer.safe_http import safe_requests
 from bs4 import BeautifulSoup
+
+from analyzer.safe_http import safe_requests
 
 
 HIGH_RISK_PATTERNS = {
     "eval": r"\beval\s*\(",
-    "long_hex_sequence": r"(?:\\x[0-9a-fA-F]{2}){12,}",
-    "document_cookie_assignment": r"document\.cookie\s*="
+    "long_hex_sequence": r"(?:\\x[0-9a-fA-F]{2}){12,}"
 }
 
 
@@ -21,6 +21,7 @@ MEDIUM_RISK_PATTERNS = {
 
 
 INFORMATIONAL_PATTERNS = {
+    "document_cookie_assignment": r"document\.cookie\s*=",
     "hidden_iframe": (
         r"<iframe[^>]+"
         r"(?:display\s*:\s*none|visibility\s*:\s*hidden)"
@@ -32,8 +33,8 @@ INFORMATIONAL_PATTERNS = {
     "javascript_url": r"javascript\s*:"
 }
 
-def fetch_page(url):
 
+def fetch_page(url):
     try:
         response = safe_requests.get(
             url,
@@ -64,7 +65,6 @@ def fetch_page(url):
 
 
 def extract_javascript(html):
-
     soup = BeautifulSoup(
         html,
         "html.parser"
@@ -82,7 +82,6 @@ def extract_javascript(html):
 
 
 def detect_base64_content(script_text):
-
     matches = re.findall(
         r"[A-Za-z0-9+/]{120,}={0,2}",
         script_text
@@ -121,7 +120,6 @@ def detect_base64_content(script_text):
 
 
 def find_patterns(text, patterns):
-
     found = []
 
     for name, pattern in patterns.items():
@@ -136,14 +134,6 @@ def find_patterns(text, patterns):
 
 
 def check_javascript(url):
-
-    """
-    Returns:
-        detected_patterns,
-        status,
-        score
-    """
-
     try:
         html = fetch_page(url)
 
@@ -155,7 +145,6 @@ def check_javascript(url):
             )
 
         javascript = extract_javascript(html)
-
         combined_text = html + "\n" + javascript
 
         high_risk = find_patterns(
@@ -193,14 +182,10 @@ def check_javascript(url):
             + len(medium_risk) * 3
         )
 
-        # Informational patterns do not add risk alone.
-        if high_risk or len(medium_risk) >= 2:
-            score += min(
-                len(informational),
-                2
-            )
-
-        score = min(score, 30)
+        score = min(
+            score,
+            30
+        )
 
         if score >= 20:
             status = "🔴 Highly Suspicious JavaScript"
