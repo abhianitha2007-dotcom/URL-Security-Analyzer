@@ -23,7 +23,7 @@ from analyzer.pdf_generator import generate_pdf
 from analyzer.risk_engine import calculate_risk
 from analyzer.url_validator import (
     get_last_validation_result,
-    is_valid_url
+    validate_url_input
 )
 
 from database.database import (
@@ -42,14 +42,8 @@ from database.database import (
 load_dotenv()
 
 
-BASE_DIR = Path(
-    __file__
-).resolve().parent
-
-REPORTS_DIR = (
-    BASE_DIR
-    / "reports"
-)
+BASE_DIR = Path(__file__).resolve().parent
+REPORTS_DIR = BASE_DIR / "reports"
 
 REPORTS_DIR.mkdir(
     parents=True,
@@ -57,85 +51,63 @@ REPORTS_DIR.mkdir(
 )
 
 
-SECRET_KEY = os.getenv(
-    "SECRET_KEY"
-)
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 if not SECRET_KEY:
     raise RuntimeError(
-        (
-            "SECRET_KEY is missing. "
-            "Add SECRET_KEY to your .env file "
-            "before starting the application."
-        )
+        "SECRET_KEY is missing. "
+        "Add SECRET_KEY to your .env file "
+        "before starting the application."
     )
 
 
-def env_flag(
-    name,
-    default=False
-):
-    value = os.getenv(
-        name
-    )
+def env_flag(name, default=False):
+    value = os.getenv(name)
 
     if value is None:
         return default
 
-    return (
-        value.strip().lower()
-        in {
-            "1",
-            "true",
-            "yes",
-            "on"
-        }
-    )
+    return value.strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on"
+    }
 
 
-app = Flask(
-    __name__
-)
+app = Flask(__name__)
 
 app.secret_key = SECRET_KEY
 
-app.config[
-    "MAX_CONTENT_LENGTH"
-] = 16 * 1024
+app.config["MAX_CONTENT_LENGTH"] = 16 * 1024
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
-app.config[
-    "SESSION_COOKIE_HTTPONLY"
-] = True
-
-app.config[
-    "SESSION_COOKIE_SAMESITE"
-] = "Lax"
-
-app.config[
-    "SESSION_COOKIE_SECURE"
-] = env_flag(
+app.config["SESSION_COOKIE_SECURE"] = env_flag(
     "SESSION_COOKIE_SECURE",
     default=False
 )
 
-app.config[
-    "SESSION_COOKIE_NAME"
-] = "url_security_session"
+app.config["SESSION_COOKIE_NAME"] = (
+    "url_security_session"
+)
 
-app.config[
-    "PERMANENT_SESSION_LIFETIME"
-] = timedelta(
-    hours=12
+app.config["PERMANENT_SESSION_LIFETIME"] = (
+    timedelta(hours=12)
 )
 
 
 create_database()
 
 
+# Kept as an app-level name for route/test compatibility.
+# Outbound requests still use the stricter network validator
+# inside safe_http.py.
+is_valid_url = validate_url_input
+
+
 @app.after_request
-def add_security_headers(
-    response
-):
+def add_security_headers(response):
     response.headers[
         "X-Content-Type-Options"
     ] = "nosniff"
@@ -146,9 +118,7 @@ def add_security_headers(
 
     response.headers[
         "Referrer-Policy"
-    ] = (
-        "strict-origin-when-cross-origin"
-    )
+    ] = "strict-origin-when-cross-origin"
 
     response.headers[
         "Permissions-Policy"
@@ -182,9 +152,7 @@ def get_csrf_token():
     )
 
     if not token:
-        token = secrets.token_urlsafe(
-            32
-        )
+        token = secrets.token_urlsafe(32)
 
         session[
             "_csrf_token"
@@ -225,17 +193,12 @@ app.jinja_env.globals[
 ] = get_csrf_token
 
 
-def get_report_path(
-    filename
-):
+def get_report_path(filename):
     safe_filename = os.path.basename(
         filename
     )
 
-    return (
-        REPORTS_DIR
-        / safe_filename
-    )
+    return REPORTS_DIR / safe_filename
 
 
 def remove_previous_report():
@@ -258,6 +221,30 @@ def remove_previous_report():
             pass
 
 
+def default_scan_status():
+    return {
+        "mode": "full",
+        "label": "Full Analysis",
+        "complete": True,
+        "network_available": True,
+        "code": "public_target",
+        "message": (
+            "URL, domain, network, webpage and "
+            "threat-intelligence checks were performed."
+        )
+    }
+
+
+def default_content_warning():
+    return {
+        "show": False,
+        "type": None,
+        "icon": None,
+        "title": None,
+        "message": None
+    }
+
+
 @app.route("/")
 def home():
     return render_template(
@@ -267,9 +254,7 @@ def home():
 
 @app.route(
     "/analyze",
-    methods=[
-        "POST"
-    ]
+    methods=["POST"]
 )
 def analyze():
     url = request.form.get(
@@ -290,14 +275,9 @@ def analyze():
             "https://"
         )
     ):
-        url = (
-            "https://"
-            + url
-        )
+        url = "https://" + url
 
-    if not is_valid_url(
-        url
-    ):
+    if not is_valid_url(url):
         validation_result = (
             get_last_validation_result()
         )
@@ -332,141 +312,120 @@ def analyze():
         results
     )
 
-    https_status = (
-        results[
-            "https"
-        ][
-            "status"
-        ]
+    scan_status = results.get(
+        "scan_status",
+        default_scan_status()
     )
 
-    ip_status = (
-        results[
-            "ip_address"
-        ][
-            "status"
-        ]
+    network_status = results.get(
+        "network_status",
+        {}
     )
 
-    keyword_count = (
-        results[
-            "keywords"
-        ][
-            "count"
-        ]
+    content_warning = results.get(
+        "content_warning",
+        default_content_warning()
     )
 
-    keywords = (
-        results[
-            "keywords"
-        ][
-            "matches"
-        ]
-    )
+    https_status = results[
+        "https"
+    ][
+        "status"
+    ]
 
-    url_length = (
-        results[
-            "url_length"
-        ][
-            "length"
-        ]
-    )
+    ip_status = results[
+        "ip_address"
+    ][
+        "status"
+    ]
 
-    length_category = (
-        results[
-            "url_length"
-        ][
-            "status"
-        ]
-    )
+    keyword_count = results[
+        "keywords"
+    ][
+        "count"
+    ]
 
-    subdomain_count = (
-        results[
-            "subdomains"
-        ][
-            "count"
-        ]
-    )
+    keywords = results[
+        "keywords"
+    ][
+        "matches"
+    ]
 
-    subdomain_status = (
-        results[
-            "subdomains"
-        ][
-            "status"
-        ]
-    )
+    url_length = results[
+        "url_length"
+    ][
+        "length"
+    ]
 
-    at_status = (
-        results[
-            "at_symbol"
-        ][
-            "status"
-        ]
-    )
+    length_category = results[
+        "url_length"
+    ][
+        "status"
+    ]
 
-    shortener_status = (
-        results[
-            "shortener"
-        ][
-            "status"
-        ]
-    )
+    subdomain_count = results[
+        "subdomains"
+    ][
+        "count"
+    ]
 
-    hyphen_count = (
-        results[
-            "hyphens"
-        ][
-            "count"
-        ]
-    )
+    subdomain_status = results[
+        "subdomains"
+    ][
+        "status"
+    ]
 
-    hyphen_status = (
-        results[
-            "hyphens"
-        ][
-            "status"
-        ]
-    )
+    at_status = results[
+        "at_symbol"
+    ][
+        "status"
+    ]
 
-    domain_age = (
-        results[
-            "domain_age"
-        ]
-    )
+    shortener_status = results[
+        "shortener"
+    ][
+        "status"
+    ]
 
-    whois_info = (
-        results[
-            "whois"
-        ]
-    )
+    hyphen_count = results[
+        "hyphens"
+    ][
+        "count"
+    ]
 
-    dns_records = (
-        results[
-            "dns"
-        ]
-    )
+    hyphen_status = results[
+        "hyphens"
+    ][
+        "status"
+    ]
 
-    ssl_info = (
-        results[
-            "ssl"
-        ]
-    )
+    domain_age = results[
+        "domain_age"
+    ]
 
-    tld = (
-        results[
-            "tld"
-        ][
-            "value"
-        ]
-    )
+    whois_info = results[
+        "whois"
+    ]
 
-    tld_status = (
-        results[
-            "tld"
-        ][
-            "status"
-        ]
-    )
+    dns_records = results[
+        "dns"
+    ]
+
+    ssl_info = results[
+        "ssl"
+    ]
+
+    tld = results[
+        "tld"
+    ][
+        "value"
+    ]
+
+    tld_status = results[
+        "tld"
+    ][
+        "status"
+    ]
 
     save_scan(
         url,
@@ -480,6 +439,9 @@ def analyze():
         "risk_score": risk_score,
         "verdict": verdict,
         "reasons": reasons,
+        "scan_status": scan_status,
+        "network_status": network_status,
+        "content_warning": content_warning,
         "https_status": https_status,
         "ip_status": ip_status,
         "keyword_count": keyword_count,
@@ -543,6 +505,9 @@ def analyze():
         risk_score=risk_score,
         verdict=verdict,
         reasons=reasons,
+        scan_status=scan_status,
+        network_status=network_status,
+        content_warning=content_warning,
         https_status=https_status,
         ip_status=ip_status,
         keyword_count=keyword_count,
@@ -604,9 +569,7 @@ def download_report():
     return send_file(
         report_path,
         as_attachment=True,
-        download_name=(
-            "security_report.pdf"
-        )
+        download_name="security_report.pdf"
     )
 
 
@@ -650,13 +613,9 @@ def history():
 
 @app.route(
     "/delete-scan/<int:scan_id>",
-    methods=[
-        "POST"
-    ]
+    methods=["POST"]
 )
-def delete_scan_route(
-    scan_id
-):
+def delete_scan_route(scan_id):
     validate_csrf_token()
 
     history_session_id = (
@@ -674,17 +633,13 @@ def delete_scan_route(
     )
 
     return redirect(
-        url_for(
-            "history"
-        )
+        url_for("history")
     )
 
 
 @app.route(
     "/clear-history",
-    methods=[
-        "POST"
-    ]
+    methods=["POST"]
 )
 def clear_history_route():
     validate_csrf_token()
@@ -703,18 +658,12 @@ def clear_history_route():
     )
 
     return redirect(
-        url_for(
-            "history"
-        )
+        url_for("history")
     )
 
 
-@app.errorhandler(
-    413
-)
-def request_too_large(
-    error
-):
+@app.errorhandler(413)
+def request_too_large(error):
     return render_template(
         "index.html",
         error=(
