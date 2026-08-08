@@ -3,150 +3,173 @@ import unicodedata
 from urllib.parse import urlparse
 
 
+CONFUSABLE_SCRIPTS = {
+    "Latin",
+    "Cyrillic",
+    "Greek",
+    "Armenian"
+}
+
+
 def extract_hostname(url):
-
     try:
-
         hostname = urlparse(url).hostname
 
-        if hostname:
+        if not hostname:
+            return None
 
-            return hostname
+        hostname = hostname.lower().rstrip(".")
 
-        return None
+        if hostname.startswith("www."):
+            hostname = hostname[4:]
+
+        return hostname
 
     except Exception:
-
         return None
+
+
+def decode_hostname(hostname):
+    labels = []
+
+    for label in hostname.split("."):
+        if label.startswith("xn--"):
+            try:
+                label = (
+                    label
+                    .encode("ascii")
+                    .decode("idna")
+                )
+
+            except Exception:
+                pass
+
+        labels.append(label)
+
+    return ".".join(labels)
 
 
 def contains_non_ascii(text):
-
-    for character in text:
-
-        if ord(character) > 127:
-
-            return True
-
-    return False
+    return any(
+        ord(character) > 127
+        for character in text
+    )
 
 
-def contains_mixed_scripts(text):
+def get_script(character):
+    if not character.isalpha():
+        return None
 
-    scripts = set()
+    if character.isascii():
+        return "Latin"
 
-    for character in text:
+    try:
+        name = unicodedata.name(
+            character
+        )
 
-        if character.isascii():
+    except ValueError:
+        return None
 
-            scripts.add("Latin")
+    if "LATIN" in name:
+        return "Latin"
 
-            continue
+    if "CYRILLIC" in name:
+        return "Cyrillic"
 
-        try:
+    if "GREEK" in name:
+        return "Greek"
 
-            name = unicodedata.name(character)
+    if "ARMENIAN" in name:
+        return "Armenian"
 
-        except ValueError:
+    if "ARABIC" in name:
+        return "Arabic"
 
-            continue
+    if "HEBREW" in name:
+        return "Hebrew"
 
-        if "CYRILLIC" in name:
+    if (
+        "HIRAGANA" in name
+        or "KATAKANA" in name
+        or "CJK" in name
+        or "IDEOGRAPH" in name
+    ):
+        return "CJK"
 
-            scripts.add("Cyrillic")
+    if "HANGUL" in name:
+        return "Hangul"
 
-        elif "GREEK" in name:
+    return "Other"
 
-            scripts.add("Greek")
 
-        elif "ARMENIAN" in name:
+def contains_confusable_script_mix(text):
+    scripts = {
+        script
+        for character in text
+        if (
+            script := get_script(
+                character
+            )
+        )
+    }
 
-            scripts.add("Armenian")
+    confusable = (
+        scripts
+        & CONFUSABLE_SCRIPTS
+    )
 
-        else:
-
-            scripts.add("Other")
-
-    return len(scripts) > 1
+    return len(confusable) > 1
 
 
 def check_homograph(url):
-
-    """
-    Returns
-
-        has_homograph,
-        status,
-        score
-
-    """
-
     try:
-
         hostname = extract_hostname(url)
 
         if not hostname:
-
             return (
-
                 False,
-
                 "Not Checked",
-
                 0
-
             )
 
-        if hostname.startswith("www."):
+        decoded_hostname = decode_hostname(
+            hostname
+        )
 
-            hostname = hostname[4:]
+        has_unicode = contains_non_ascii(
+            decoded_hostname
+        )
 
-        has_unicode = contains_non_ascii(hostname)
-
-        mixed_scripts = contains_mixed_scripts(hostname)
+        mixed_scripts = (
+            contains_confusable_script_mix(
+                decoded_hostname
+            )
+        )
 
         if has_unicode and mixed_scripts:
-
             return (
-
                 True,
-
                 "🔴 Possible Unicode Homograph Attack",
-
                 25
-
             )
 
         if has_unicode:
-
             return (
-
                 True,
-
-                "🟡 Unicode Characters Detected",
-
+                "🟡 Internationalized Domain Characters Detected",
                 10
-
             )
 
         return (
-
             False,
-
             "🟢 No Homograph Detected",
-
             0
-
         )
 
     except Exception:
-
         return (
-
             False,
-
             "Not Checked",
-
             0
-
         )
