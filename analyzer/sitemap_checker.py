@@ -1,14 +1,17 @@
 import xml.etree.ElementTree as ET
 
+from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urljoin, urlparse
 
 import requests
+
 from analyzer.safe_http import safe_requests
 
 
 MAX_SITEMAP_FILES = 10
 MAX_URLS_PER_SITEMAP = 5000
 MAX_TOTAL_URLS = 10000
+MAX_WORKERS = 4
 
 
 SENSITIVE_SEGMENTS = {
@@ -59,10 +62,6 @@ SENSITIVE_FILES = {
 
 
 def build_default_sitemap_url(url):
-    """
-    Builds the default /sitemap.xml URL.
-    """
-
     try:
         parsed = urlparse(url)
 
@@ -83,10 +82,6 @@ def build_default_sitemap_url(url):
 
 
 def normalize_url(value):
-    """
-    Removes surrounding spaces from a URL.
-    """
-
     if not value:
         return ""
 
@@ -94,10 +89,6 @@ def normalize_url(value):
 
 
 def extract_path_segments(url):
-    """
-    Extracts normalized URL path segments.
-    """
-
     try:
         path = urlparse(url).path.lower()
 
@@ -112,14 +103,6 @@ def extract_path_segments(url):
 
 
 def classify_url(url):
-    """
-    Classifies a sitemap URL.
-
-    Returns:
-        level,
-        reason
-    """
-
     lower_url = url.lower()
     segments = extract_path_segments(url)
 
@@ -151,17 +134,6 @@ def classify_url(url):
 
 
 def parse_sitemap_xml(content):
-    """
-    Parses either:
-
-    - sitemap index
-    - regular URL sitemap
-
-    Returns:
-        sitemap_urls,
-        page_urls
-    """
-
     sitemap_urls = []
     page_urls = []
 
@@ -174,9 +146,14 @@ def parse_sitemap_xml(content):
             page_urls
         )
 
-    root_name = root.tag.split("}")[-1].lower()
+    root_name = (
+        root.tag
+        .split("}")[-1]
+        .lower()
+    )
 
     for element in root.iter():
+
         element_name = (
             element.tag
             .split("}")[-1]
@@ -194,10 +171,14 @@ def parse_sitemap_xml(content):
             continue
 
         if root_name == "sitemapindex":
-            sitemap_urls.append(value)
+            sitemap_urls.append(
+                value
+            )
 
         elif root_name == "urlset":
-            page_urls.append(value)
+            page_urls.append(
+                value
+            )
 
     return (
         sitemap_urls,
@@ -206,19 +187,10 @@ def parse_sitemap_xml(content):
 
 
 def fetch_sitemap(url):
-    """
-    Downloads one sitemap file.
-
-    Returns:
-        response text,
-        status code,
-        final URL
-    """
-
     try:
         response = safe_requests.get(
             url,
-            timeout=8,
+            timeout=(3, 6),
             allow_redirects=True,
             headers={
                 "User-Agent": (
@@ -257,22 +229,6 @@ def check_sitemap(
     url,
     discovered_sitemaps=None
 ):
-    """
-    Analyzes sitemap.xml files.
-
-    Returns:
-        {
-            found,
-            status,
-            score,
-            sitemap_files,
-            url_count,
-            suspicious_urls,
-            attention_urls,
-            errors
-        }
-    """
-
     result = {
         "found": False,
         "status": "Not Checked",
@@ -284,8 +240,10 @@ def check_sitemap(
         "errors": []
     }
 
-    default_sitemap = build_default_sitemap_url(
-        url
+    default_sitemap = (
+        build_default_sitemap_url(
+            url
+        )
     )
 
     if not default_sitemap:
@@ -293,95 +251,221 @@ def check_sitemap(
         return result
 
     queue = []
+    queued = set()
 
     if discovered_sitemaps:
         for sitemap_url in discovered_sitemaps:
+
             normalized = normalize_url(
                 sitemap_url
             )
 
-            if normalized:
-                queue.append(normalized)
+            if (
+                normalized
+                and normalized not in queued
+            ):
+                queue.append(
+                    normalized
+                )
 
-    if default_sitemap not in queue:
-        queue.append(default_sitemap)
+                queued.add(
+                    normalized
+                )
+
+    if default_sitemap not in queued:
+        queue.append(
+            default_sitemap
+        )
+
+        queued.add(
+            default_sitemap
+        )
 
     visited = set()
+
+    page_seen = set()
     all_page_urls = []
+
     suspicious_urls = []
     attention_urls = []
 
-    while (
-        queue
-        and len(visited) < MAX_SITEMAP_FILES
-        and len(all_page_urls) < MAX_TOTAL_URLS
-    ):
-        sitemap_url = queue.pop(0)
+    with ThreadPoolExecutor(
+        max_workers=MAX_WORKERS
+    ) as executor:
 
-        if sitemap_url in visited:
-            continue
+        while (
+            queue
+            and len(visited) < MAX_SITEMAP_FILES
+            and len(all_page_urls) < MAX_TOTAL_URLS
+        ):
 
-        visited.add(sitemap_url)
-
-        content, status_code, final_url = (
-            fetch_sitemap(sitemap_url)
-        )
-
-        if content is None:
-            if status_code not in (404, 410):
-              result["errors"].append(
-        {
-            "url": sitemap_url,
-            "status_code": status_code
-        }
-    )
-            continue
-
-        result["found"] = True
-
-        if final_url not in result["sitemap_files"]:
-         result["sitemap_files"].append(
-        final_url
-    )
-
-        (
-            nested_sitemaps,
-            page_urls
-        ) = parse_sitemap_xml(content)
-
-        for nested_url in nested_sitemaps:
-            if (
-                nested_url not in visited
-                and nested_url not in queue
-                and len(queue) < MAX_SITEMAP_FILES
-            ):
-                queue.append(nested_url)
-
-        for page_url in page_urls[
-            :MAX_URLS_PER_SITEMAP
-        ]:
-            if len(all_page_urls) >= MAX_TOTAL_URLS:
-                break
-
-            if page_url in all_page_urls:
-                continue
-
-            all_page_urls.append(page_url)
-
-            level, reason = classify_url(
-                page_url
+            remaining = (
+                MAX_SITEMAP_FILES
+                - len(visited)
             )
 
-            entry = {
-                "url": page_url,
-                "reason": reason
-            }
+            batch_size = min(
+                MAX_WORKERS,
+                remaining,
+                len(queue)
+            )
 
-            if level == "high":
-                suspicious_urls.append(entry)
+            batch = []
 
-            elif level == "attention":
-                attention_urls.append(entry)
+            while (
+                queue
+                and len(batch) < batch_size
+            ):
+
+                sitemap_url = queue.pop(0)
+
+                if sitemap_url in visited:
+                    continue
+
+                visited.add(
+                    sitemap_url
+                )
+
+                batch.append(
+                    sitemap_url
+                )
+
+            if not batch:
+                continue
+
+            responses = list(
+                executor.map(
+                    fetch_sitemap,
+                    batch
+                )
+            )
+
+            for (
+                sitemap_url,
+                response_data
+            ) in zip(
+                batch,
+                responses
+            ):
+
+                (
+                    content,
+                    status_code,
+                    final_url
+                ) = response_data
+
+                if content is None:
+
+                    if status_code not in (
+                        404,
+                        410
+                    ):
+                        result["errors"].append(
+                            {
+                                "url":
+                                    sitemap_url,
+
+                                "status_code":
+                                    status_code
+                            }
+                        )
+
+                    continue
+
+                result["found"] = True
+
+                if (
+                    final_url
+                    not in result["sitemap_files"]
+                ):
+                    result[
+                        "sitemap_files"
+                    ].append(
+                        final_url
+                    )
+
+                (
+                    nested_sitemaps,
+                    page_urls
+                ) = parse_sitemap_xml(
+                    content
+                )
+
+                for nested_url in nested_sitemaps:
+
+                    normalized = normalize_url(
+                        nested_url
+                    )
+
+                    if not normalized:
+                        continue
+
+                    if (
+                        normalized in visited
+                        or normalized in queued
+                    ):
+                        continue
+
+                    if (
+                        len(visited)
+                        + len(queue)
+                        >= MAX_SITEMAP_FILES
+                    ):
+                        break
+
+                    queue.append(
+                        normalized
+                    )
+
+                    queued.add(
+                        normalized
+                    )
+
+                for page_url in page_urls[
+                    :MAX_URLS_PER_SITEMAP
+                ]:
+
+                    if (
+                        len(all_page_urls)
+                        >= MAX_TOTAL_URLS
+                    ):
+                        break
+
+                    if page_url in page_seen:
+                        continue
+
+                    page_seen.add(
+                        page_url
+                    )
+
+                    all_page_urls.append(
+                        page_url
+                    )
+
+                    (
+                        level,
+                        reason
+                    ) = classify_url(
+                        page_url
+                    )
+
+                    entry = {
+                        "url":
+                            page_url,
+
+                        "reason":
+                            reason
+                    }
+
+                    if level == "high":
+                        suspicious_urls.append(
+                            entry
+                        )
+
+                    elif level == "attention":
+                        attention_urls.append(
+                            entry
+                        )
 
     result["url_count"] = len(
         all_page_urls
@@ -404,41 +488,49 @@ def check_sitemap(
     )
 
     if not result["found"]:
+
         result["status"] = (
             "🟢 Sitemap Not Found"
         )
+
         return result
 
     if suspicious_count >= 5:
+
         result["status"] = (
             "🔴 Multiple Sensitive URLs Listed"
         )
+
         result["score"] = 6
 
     elif suspicious_count > 0:
+
         result["status"] = (
             "🟠 Sensitive URLs Listed"
         )
+
         result["score"] = 4
 
     elif attention_count >= 10:
+
         result["status"] = (
             "🟡 Many Login, API or Test URLs Listed"
         )
+
         result["score"] = 2
 
     elif attention_count > 0:
+
         result["status"] = (
             "🟢 Sitemap Found — "
             "Informational URLs Detected"
         )
-        result["score"] = 0
 
     else:
+
         result["status"] = (
             "🟢 Sitemap Found — "
             "No Sensitive URLs Detected"
         )
-        result["score"] = 0
 
     return result

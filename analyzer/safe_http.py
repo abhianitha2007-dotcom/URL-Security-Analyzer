@@ -1,3 +1,5 @@
+import threading
+
 import requests
 
 from urllib.parse import urljoin
@@ -14,7 +16,9 @@ DEFAULT_TIMEOUT = (
     10
 )
 
+
 MAX_REDIRECTS = 5
+
 
 REDIRECT_STATUS_CODES = {
     301,
@@ -25,39 +29,250 @@ REDIRECT_STATUS_CODES = {
 }
 
 
+# =========================================================
+# EXCEPTIONS
+# =========================================================
+
 class UnsafeTargetError(
     requests.RequestException
 ):
     """
-    Raised when a request or redirect target is not
-    suitable for public URL scanning.
+    Raised when a URL or redirect target is unsafe
+    or resolves to a non-public destination.
     """
 
     pass
 
 
+# =========================================================
+# SAFE REQUEST CLIENT
+# =========================================================
+
 class SafeRequests:
     """
-    Small requests-compatible wrapper used by analyzer
-    modules that contact user-controlled URLs.
+    requests-compatible HTTP wrapper used by analyzers.
 
-    Security goals:
-        - validate the initial target
-        - disable environment proxy inheritance
-        - disable automatic redirects
-        - validate every redirect destination
-        - block redirects to localhost/private networks
-        - limit redirect depth
-        - use bounded connection/read timeouts
+    Security protections:
 
-    Existing analyzer code can use:
+        - validates public targets
+        - blocks localhost/private targets
+        - validates redirects
+        - disables environment proxy inheritance
+        - limits redirects
+        - applies bounded timeouts
 
-        safe_requests.get(...)
-        safe_requests.post(...)
-        safe_requests.head(...)
-        safe_requests.options(...)
-        safe_requests.request(...)
+    Performance:
+
+        persistent=True enables thread-local connection
+        pooling.
+
+        Each worker thread receives its own requests.Session,
+        allowing TCP/TLS connections to be reused safely.
+
+        Ordinary SafeRequests() instances remain temporary,
+        which preserves compatibility with the automated
+        security tests.
     """
+
+    def __init__(
+        self,
+        persistent=False
+    ):
+
+        self.persistent = bool(
+            persistent
+        )
+
+        self._thread_local = (
+            threading.local()
+        )
+
+
+    # =====================================================
+    # SESSION MANAGEMENT
+    # =====================================================
+
+    def _create_session(
+        self
+    ):
+        """
+        Create a hardened requests session.
+
+        Real requests.Session objects receive configured
+        connection pools.
+
+        Lightweight test doubles may not implement mount(),
+        so adapter configuration is applied only when that
+        method exists.
+        """
+
+        session = requests.Session()
+
+
+        # -------------------------------------------------
+        # Disable environment proxy inheritance.
+        #
+        # Fake test sessions generally allow attribute
+        # assignment, while real requests.Session objects
+        # use this setting normally.
+        # -------------------------------------------------
+
+        try:
+
+            session.trust_env = False
+
+        except (
+            AttributeError,
+            TypeError
+        ):
+
+            pass
+
+
+        # -------------------------------------------------
+        # CONNECTION POOLING
+        #
+        # A real requests.Session supports mount().
+        #
+        # Our automated security tests replace Session()
+        # with a lightweight FakeSession that intentionally
+        # does not implement mount(), so this configuration
+        # must remain optional.
+        # -------------------------------------------------
+
+        mount_method = getattr(
+            session,
+            "mount",
+            None
+        )
+
+
+        if callable(
+            mount_method
+        ):
+
+            adapter = (
+                requests.adapters.HTTPAdapter(
+                    pool_connections=20,
+                    pool_maxsize=20,
+                    max_retries=0
+                )
+            )
+
+
+            mount_method(
+                "http://",
+                adapter
+            )
+
+
+            mount_method(
+                "https://",
+                adapter
+            )
+
+
+        return session
+
+
+    def _get_session(
+        self
+    ):
+        """
+        Return:
+
+            session,
+            should_close
+
+        Temporary SafeRequests instances create a new
+        session per request.
+
+        Persistent instances reuse one session per thread.
+        """
+
+        if not self.persistent:
+
+            return (
+                self._create_session(),
+                True
+            )
+
+
+        session = getattr(
+            self._thread_local,
+            "session",
+            None
+        )
+
+
+        if session is None:
+
+            session = (
+                self._create_session()
+            )
+
+
+            self._thread_local.session = (
+                session
+            )
+
+
+        return (
+            session,
+            False
+        )
+
+
+    def close(
+        self
+    ):
+        """
+        Close the persistent session belonging to the
+        current thread, if one exists.
+        """
+
+        session = getattr(
+            self._thread_local,
+            "session",
+            None
+        )
+
+
+        if session is None:
+
+            return
+
+
+        try:
+
+            close_method = getattr(
+                session,
+                "close",
+                None
+            )
+
+
+            if callable(
+                close_method
+            ):
+
+                close_method()
+
+
+        finally:
+
+            try:
+
+                del self._thread_local.session
+
+            except AttributeError:
+
+                pass
+
+
+    # =====================================================
+    # MAIN REQUEST METHOD
+    # =====================================================
 
     def request(
         self,
@@ -65,6 +280,10 @@ class SafeRequests:
         url,
         **kwargs
     ):
+
+        # -------------------------------------------------
+        # METHOD VALIDATION
+        # -------------------------------------------------
 
         if not isinstance(
             method,
@@ -76,7 +295,11 @@ class SafeRequests:
             )
 
 
-        method = method.upper().strip()
+        method = (
+            method
+            .upper()
+            .strip()
+        )
 
 
         if not method:
@@ -113,7 +336,9 @@ class SafeRequests:
             ValueError
         ):
 
-            max_redirects = MAX_REDIRECTS
+            max_redirects = (
+                MAX_REDIRECTS
+            )
 
 
         max_redirects = max(
@@ -141,7 +366,7 @@ class SafeRequests:
 
 
         # -------------------------------------------------
-        # DO NOT ALLOW CALLERS TO SUPPLY PROXY ROUTES
+        # CALLERS CANNOT PROVIDE PROXIES
         # -------------------------------------------------
 
         kwargs.pop(
@@ -151,20 +376,8 @@ class SafeRequests:
 
 
         # -------------------------------------------------
-        # INITIAL TARGET VALIDATION
+        # REQUEST STATE
         # -------------------------------------------------
-
-        if not is_valid_url(
-            url
-        ):
-
-            raise UnsafeTargetError(
-                (
-                    "Blocked unsafe or non-public "
-                    f"request target: {url}"
-                )
-            )
-
 
         current_url = url
 
@@ -178,16 +391,56 @@ class SafeRequests:
 
 
         # -------------------------------------------------
-        # SESSION
-        #
-        # trust_env=False prevents HTTP_PROXY / HTTPS_PROXY
-        # environment variables from silently routing the
-        # scanner through another network endpoint.
+        # GET HTTP SESSION
         # -------------------------------------------------
 
-        http_session = requests.Session()
+        (
+            http_session,
+            should_close
+        ) = self._get_session()
 
-        http_session.trust_env = False
+
+        # -------------------------------------------------
+        # COOKIE ISOLATION
+        #
+        # Shared analyzer sessions reuse TCP/TLS connections,
+        # but cookies from previous independent analyzer
+        # requests should not leak into later requests.
+        # -------------------------------------------------
+
+        if self.persistent:
+
+            cookies = getattr(
+                http_session,
+                "cookies",
+                None
+            )
+
+
+            if cookies is not None:
+
+                clear_method = getattr(
+                    cookies,
+                    "clear",
+                    None
+                )
+
+
+                if callable(
+                    clear_method
+                ):
+
+                    try:
+
+                        clear_method()
+
+                    except (
+                        AttributeError,
+                        KeyError,
+                        ValueError
+                    ):
+
+                        pass
 
 
         try:
@@ -196,46 +449,91 @@ class SafeRequests:
                 max_redirects + 1
             ):
 
-                # Revalidate immediately before every hop.
+                # =========================================
+                # SSRF VALIDATION
+                #
+                # Validate immediately before every actual
+                # outbound request.
+                # =========================================
 
                 if not is_valid_url(
                     current_url
                 ):
 
-                    raise UnsafeTargetError(
-                        (
-                            "Blocked unsafe or non-public "
-                            f"request target: {current_url}"
+                    if redirect_history:
+
+                        message = (
+                            "Blocked redirect to unsafe "
+                            "or non-public target: "
+                            f"{current_url}"
                         )
+
+                    else:
+
+                        message = (
+                            "Blocked unsafe or non-public "
+                            "request target: "
+                            f"{current_url}"
+                        )
+
+
+                    response = (
+                        redirect_history[-1]
+                        if redirect_history
+                        else None
                     )
 
 
-                response = http_session.request(
-                    current_method,
-                    current_url,
-                    allow_redirects=False,
-                    timeout=timeout,
-                    **current_kwargs
+                    raise UnsafeTargetError(
+                        message,
+                        response=response
+                    )
+
+
+                # =========================================
+                # SEND REQUEST
+                # =========================================
+
+                response = (
+                    http_session.request(
+                        current_method,
+                        current_url,
+                        allow_redirects=False,
+                        timeout=timeout,
+                        **current_kwargs
+                    )
                 )
 
 
-                response.history = list(
-                    redirect_history
-                )
+                # -------------------------------------------------
+                # Some test doubles expose history normally,
+                # while real requests.Response objects support
+                # assignment here.
+                # -------------------------------------------------
+
+                try:
+
+                    response.history = list(
+                        redirect_history
+                    )
+
+                except AttributeError:
+
+                    pass
 
 
-                # -----------------------------------------
-                # RETURN WHEN REDIRECT FOLLOWING IS OFF
-                # -----------------------------------------
+                # =========================================
+                # REDIRECT FOLLOWING DISABLED
+                # =========================================
 
                 if not allow_redirects:
 
                     return response
 
 
-                # -----------------------------------------
-                # NOT A REDIRECT
-                # -----------------------------------------
+                # =========================================
+                # NORMAL RESPONSE
+                # =========================================
 
                 if (
                     response.status_code
@@ -245,8 +543,14 @@ class SafeRequests:
                     return response
 
 
-                location = response.headers.get(
-                    "Location"
+                # =========================================
+                # REDIRECT LOCATION
+                # =========================================
+
+                location = (
+                    response.headers.get(
+                        "Location"
+                    )
                 )
 
 
@@ -255,9 +559,9 @@ class SafeRequests:
                     return response
 
 
-                # -----------------------------------------
+                # =========================================
                 # REDIRECT LIMIT
-                # -----------------------------------------
+                # =========================================
 
                 if (
                     redirect_number
@@ -273,12 +577,9 @@ class SafeRequests:
                     )
 
 
-                # -----------------------------------------
-                # BUILD NEXT URL
-                #
-                # Supports both absolute and relative
-                # Location headers.
-                # -----------------------------------------
+                # =========================================
+                # BUILD REDIRECT URL
+                # =========================================
 
                 next_url = urljoin(
                     response.url
@@ -287,45 +588,30 @@ class SafeRequests:
                 )
 
 
-                # -----------------------------------------
-                # VALIDATE REDIRECT DESTINATION BEFORE
-                # SENDING THE NEXT REQUEST.
-                # -----------------------------------------
-
-                if not is_valid_url(
-                    next_url
-                ):
-
-                    raise UnsafeTargetError(
-                        (
-                            "Blocked redirect to unsafe "
-                            f"or non-public target: {next_url}"
-                        ),
-                        response=response
-                    )
-
-
                 redirect_history.append(
                     response
                 )
 
 
-                # -----------------------------------------
-                # MATCH NORMAL BROWSER / requests
-                # REDIRECT METHOD BEHAVIOUR.
-                # -----------------------------------------
+                # =========================================
+                # MATCH NORMAL REDIRECT METHOD BEHAVIOUR
+                # =========================================
 
                 if (
-                    response.status_code == 303
-                    and current_method != "HEAD"
+                    response.status_code
+                    == 303
+                    and current_method
+                    != "HEAD"
                 ):
 
                     current_method = "GET"
+
 
                     current_kwargs.pop(
                         "data",
                         None
                     )
+
 
                     current_kwargs.pop(
                         "json",
@@ -339,15 +625,18 @@ class SafeRequests:
                         301,
                         302
                     }
-                    and current_method == "POST"
+                    and current_method
+                    == "POST"
                 ):
 
                     current_method = "GET"
+
 
                     current_kwargs.pop(
                         "data",
                         None
                     )
+
 
                     current_kwargs.pop(
                         "json",
@@ -355,12 +644,37 @@ class SafeRequests:
                     )
 
 
+                # -------------------------------------------------
+                # The redirected URL will be validated at the
+                # beginning of the next loop iteration before
+                # another outbound connection is made.
+                # -------------------------------------------------
+
                 current_url = next_url
 
 
         finally:
 
-            http_session.close()
+            # -------------------------------------------------
+            # Temporary clients preserve the original behaviour.
+            #
+            # Persistent clients retain their connection pool.
+            # -------------------------------------------------
+
+            if should_close:
+
+                close_method = getattr(
+                    http_session,
+                    "close",
+                    None
+                )
+
+
+                if callable(
+                    close_method
+                ):
+
+                    close_method()
 
 
     # =====================================================
@@ -419,5 +733,18 @@ class SafeRequests:
         )
 
 
-# Shared wrapper instance used throughout analyzer modules.
-safe_requests = SafeRequests()
+# =========================================================
+# SHARED ANALYZER CLIENT
+# =========================================================
+
+# Analyzer modules import this shared object.
+#
+# Persistent mode allows a single thread to reuse TCP/TLS
+# connections between analyzer modules.
+#
+# Thread-local storage also makes this compatible with the
+# concurrency improvements we will add later.
+
+safe_requests = SafeRequests(
+    persistent=True
+)
