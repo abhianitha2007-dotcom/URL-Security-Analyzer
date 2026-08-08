@@ -2,7 +2,7 @@
 
 URL Security Analyzer is a Flask-based cybersecurity web application that analyzes URLs for phishing indicators, suspicious domain behavior, insecure configurations, and malicious reputation signals.
 
-It combines multiple security checks into a final **Risk Score from 0–100** and provides detailed results, scan history, and downloadable PDF security reports.
+It combines multiple security checks into a final **Risk Score from 0–100** and provides detailed analysis results, private scan history, and downloadable PDF security reports.
 
 ## Live Demo
 
@@ -17,24 +17,43 @@ https://url-security-analyzer-1oky.onrender.com
 - HTTPS detection
 - IP address detection
 - Suspicious keyword detection
-- URL length and subdomain analysis
-- Domain age and WHOIS lookup
-- DNS and SSL certificate analysis
-- Typosquatting and domain similarity detection
-- Homograph and punycode detection
-- Redirect and webpage behavior analysis
-- JavaScript and form inspection
+- URL length analysis
+- Subdomain analysis
+- Hyphen and `@` symbol detection
+- URL shortener detection
+- Query parameter analysis
+- Suspicious file extension detection
+- Domain age analysis
+- WHOIS lookup
+- DNS record analysis
+- SSL certificate inspection
+- TLD risk analysis
+- URL entropy analysis
+- Typosquatting detection
+- Domain similarity detection
+- Punycode detection
+- Unicode homograph detection
+- Redirect analysis
+- JavaScript behavior inspection
+- Form analysis
+- Page content analysis
 - Security header analysis
-- Cookie and CORS security checks
+- Response header analysis
+- Cookie security checks
+- CORS security checks
 - Mixed-content detection
-- Sensitive file exposure checks
+- robots.txt analysis
+- Sitemap analysis
+- Sensitive file exposure detection
+- HTTP method analysis
 - Technology detection
 - VirusTotal threat intelligence
 - Risk score calculation
-- Private scan history
-- PDF security reports
+- Private browser-based scan history
+- Downloadable PDF security reports
 - SSRF protection
 - CSRF protection
+- Detailed URL validation errors
 
 ---
 
@@ -48,38 +67,47 @@ https://url-security-analyzer-1oky.onrender.com
 | 51–75 | High Risk |
 | 76–100 | Critical |
 
+The final score is calculated from multiple categories of evidence instead of relying on a single indicator.
+
 ---
 
 ## Tech Stack
 
-**Backend**
+### Backend
+
 - Python
 - Flask
 - Gunicorn
 
-**Frontend**
+### Frontend
+
 - HTML
 - CSS
 - JavaScript
 - Bootstrap 5
 
-**Database**
+### Database
+
 - SQLite
 
-**Security & Analysis**
+### Security & Analysis
+
 - Requests
 - python-whois
 - dnspython
 - BeautifulSoup
 - VirusTotal API
 
-**Reports**
+### Reports
+
 - ReportLab
 
-**Testing**
+### Testing
+
 - pytest
 
-**Deployment**
+### Deployment
+
 - Render
 
 ---
@@ -147,15 +175,25 @@ Create a `.env` file in the project root:
 ```env
 SECRET_KEY=your-secret-key
 VIRUSTOTAL_API_KEY=your-virustotal-api-key
+
 FLASK_DEBUG=true
 SESSION_COOKIE_SECURE=false
 ```
 
 Never upload your real `.env` file or API keys to GitHub.
 
+For production deployment:
+
+```env
+FLASK_DEBUG=false
+SESSION_COOKIE_SECURE=true
+```
+
 ---
 
 ## Run Locally
+
+Start the application:
 
 ```bash
 python app.py
@@ -171,7 +209,7 @@ http://127.0.0.1:5000
 
 ## Testing
 
-Run the automated security and Flask test suite:
+Run the automated test suite:
 
 ```bash
 python -m pytest tests -v
@@ -180,23 +218,72 @@ python -m pytest tests -v
 Current automated test result:
 
 ```text
-33 passed
+42 passed
 ```
+
+The automated tests cover areas including:
+
+- Flask routes
+- SSRF protection
+- Private and local address blocking
+- Safe redirect handling
+- CSRF protection
+- Scan history isolation
+- PDF report routes
+- Request-size limits
+- URL validation
+- DNS failure handling
+- Embedded credential blocking
+- Validation error messages
 
 ---
 
 ## Security
 
-The application includes:
+The application includes multiple protections for safely analyzing user-supplied URLs:
 
 - Private and local IP blocking
+- DNS-based public target validation
 - Redirect SSRF protection
 - Safe HTTP request handling
+- Bounded network timeouts
+- Environment proxy isolation
 - CSRF protection
 - Secure browser sessions
 - Request-size limits
 - Security response headers
 - Environment-based secret management
+
+Network requests are validated before being sent to reduce the risk of Server-Side Request Forgery attacks.
+
+---
+
+## Performance
+
+The analyzer uses:
+
+- HTTP connection reuse
+- Shared WHOIS lookup caching
+- Concurrent network analysis
+- Parallel sitemap processing
+- Bounded worker pools
+
+These optimizations reduce scan time while keeping the security checks and scoring system intact.
+
+---
+
+## Validation
+
+The application distinguishes between different URL validation failures, including:
+
+- Invalid URL format
+- Unsupported URL scheme
+- Private or local network targets
+- Invalid ports
+- Embedded usernames or passwords
+- DNS resolution failures
+
+A valid but unavailable domain is reported separately from an incorrectly formatted URL.
 
 ---
 
@@ -205,6 +292,8 @@ The application includes:
 This project is intended for educational and defensive cybersecurity purposes.
 
 The generated risk score is a security indicator and should not be treated as a guarantee that a website is completely safe or malicious.
+
+External threat-intelligence results may change over time as security vendors update their classifications.
 
 ---
 
