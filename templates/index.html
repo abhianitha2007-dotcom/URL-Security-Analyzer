@@ -18,6 +18,608 @@
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+
+    /* =========================================================
+       INDEX.HTML RESPONSIVE OVERRIDES
+       Only affects the homepage.
+    ========================================================= */
+
+    .home-page .hero-dashboard-url > div:last-child,
+    .home-page .dashboard-engine-footer > div,
+    .home-page .dashboard-scan-name {
+        min-width: 0;
+    }
+
+    .home-page .hero-dashboard-url strong {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+
+    @media (max-width: 991.98px) {
+
+        .home-page .homepage-hero {
+            min-height: auto;
+            padding-top: 110px;
+            padding-bottom: 64px;
+        }
+
+        .home-page .homepage-hero .row {
+            row-gap: 42px;
+        }
+
+        .home-page .hero-title {
+            font-size: clamp(
+                3rem,
+                8vw,
+                4.1rem
+            );
+
+            line-height: 1.02;
+            letter-spacing: -2px;
+        }
+
+        .home-page .hero-description {
+            max-width: 680px;
+        }
+
+        .home-page .hero-dashboard {
+            width: 100%;
+            max-width: 650px;
+
+            margin-left: auto;
+            margin-right: auto;
+        }
+    }
+
+
+    @media (max-width: 767.98px) {
+
+        .home-page .container {
+            width: 100%;
+            max-width: 100%;
+
+            padding-left: 18px;
+            padding-right: 18px;
+        }
+
+
+        /* ================= NAVBAR ================= */
+
+        .home-page .custom-navbar {
+            min-height: 68px;
+        }
+
+        .home-page .custom-navbar .container {
+            flex-wrap: wrap;
+        }
+
+        .home-page .navbar-brand {
+            display: flex;
+            align-items: center;
+
+            max-width: calc(100% - 60px);
+
+            margin-right: 0;
+
+            font-size: .93rem;
+            line-height: 1.15;
+
+            white-space: normal;
+        }
+
+        .home-page .brand-icon {
+            flex: 0 0 auto;
+        }
+
+        .home-page .navbar-toggler {
+            flex: 0 0 auto;
+
+            padding: 5px 8px;
+        }
+
+        .home-page .navbar-collapse {
+            width: 100%;
+
+            padding-top: 10px;
+            padding-bottom: 8px;
+        }
+
+
+        /* ================= HERO ================= */
+
+        .home-page .homepage-hero {
+            padding:
+                98px
+                0
+                48px;
+        }
+
+        .home-page .homepage-hero .row {
+            row-gap: 32px;
+        }
+
+        .home-page .hero-kicker {
+            max-width: 100%;
+
+            padding: 7px 10px;
+
+            font-size: .61rem;
+            line-height: 1.35;
+
+            letter-spacing: .9px;
+
+            white-space: normal;
+        }
+
+        .home-page .hero-title {
+            max-width: 100%;
+
+            margin-bottom: 18px;
+
+            font-size: clamp(
+                2.35rem,
+                11vw,
+                3rem
+            );
+
+            line-height: 1.03;
+            letter-spacing: -1.5px;
+
+            overflow-wrap: break-word;
+        }
+
+        .home-page .hero-title span {
+            margin-top: 5px;
+        }
+
+        .home-page .hero-description {
+            width: 100%;
+            max-width: 100%;
+
+            font-size: .96rem;
+            line-height: 1.65;
+        }
+
+        .home-page .hero-actions {
+            width: 100%;
+
+            margin-top: 23px;
+
+            flex-direction: column;
+
+            gap: 10px;
+        }
+
+        .home-page .hero-actions .btn {
+            width: 100%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            margin: 0;
+        }
+
+        .home-page .hero-points {
+            width: 100%;
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    2,
+                    minmax(0, 1fr)
+                );
+
+            gap:
+                11px
+                12px;
+
+            margin-top: 22px;
+        }
+
+        .home-page .hero-points span {
+            min-width: 0;
+
+            font-size: .76rem;
+        }
+
+
+        /* ================= ANALYSIS PIPELINE ================= */
+
+        .home-page .hero-dashboard {
+            width: 100%;
+            max-width: 100%;
+
+            padding: 19px;
+
+            border-radius: 18px;
+        }
+
+        .home-page .hero-dashboard-top {
+            align-items: flex-start;
+
+            gap: 12px;
+
+            margin-bottom: 18px;
+        }
+
+        .home-page .hero-dashboard-top > div:first-child {
+            flex: 1;
+
+            min-width: 0;
+        }
+
+        .home-page .hero-dashboard-top h4 {
+            font-size: 1.12rem;
+            line-height: 1.25;
+        }
+
+        .home-page .engine-ready {
+            flex: 0 0 auto;
+
+            padding: 5px 8px;
+
+            font-size: .64rem;
+        }
+
+        .home-page .hero-dashboard-url {
+            width: 100%;
+
+            align-items: center;
+
+            padding: 11px;
+
+            gap: 10px;
+        }
+
+        .home-page .dashboard-url-icon {
+            width: 35px;
+            height: 35px;
+
+            flex:
+                0
+                0
+                35px;
+        }
+
+        .home-page .hero-dashboard-url > div:last-child {
+            flex: 1;
+
+            min-width: 0;
+        }
+
+        .home-page .hero-dashboard-url strong {
+            display: block;
+
+            max-width: 100%;
+
+            font-size: .80rem;
+            line-height: 1.35;
+
+            overflow-wrap: anywhere;
+        }
+
+        .home-page .dashboard-scan-row {
+            width: 100%;
+
+            gap: 8px;
+
+            padding:
+                11px
+                0;
+        }
+
+        .home-page .dashboard-scan-name {
+            flex: 1;
+
+            min-width: 0;
+
+            gap: 8px;
+
+            font-size: .83rem;
+        }
+
+        .home-page .dashboard-scan-icon {
+            width: 29px;
+            height: 29px;
+
+            flex:
+                0
+                0
+                29px;
+        }
+
+        .home-page .dashboard-active {
+            flex: 0 0 auto;
+
+            font-size: .56rem;
+        }
+
+        .home-page .dashboard-engine-footer {
+            width: 100%;
+
+            gap: 10px;
+
+            padding: 11px;
+        }
+
+        .home-page .dashboard-engine-footer > div {
+            flex: 1;
+
+            min-width: 0;
+        }
+
+        .home-page .dashboard-engine-footer strong {
+            font-size: .80rem;
+
+            overflow-wrap: anywhere;
+        }
+
+
+        /* ================= SECTIONS ================= */
+
+        .home-page .py-section {
+            padding:
+                52px
+                0;
+        }
+
+        .home-page .section-title {
+            margin-bottom: 30px;
+        }
+
+        .home-page .section-title h2 {
+            font-size: 1.8rem;
+            line-height: 1.2;
+        }
+
+        .home-page .section-title p {
+            font-size: .93rem;
+            line-height: 1.6;
+        }
+
+
+        /* ================= SCANNER ================= */
+
+        .home-page .scanner-card {
+            width: 100%;
+            max-width: 100%;
+
+            padding:
+                27px
+                16px;
+        }
+
+        .home-page .scanner-title h2 {
+            font-size: 1.7rem;
+        }
+
+        .home-page .scanner-title p {
+            font-size: .92rem;
+            line-height: 1.6;
+        }
+
+        .home-page .scanner-alert {
+            font-size: .88rem;
+        }
+
+        .home-page .scanner-shell {
+            width: 100%;
+            max-width: 100%;
+
+            display: flex;
+            flex-direction: column;
+
+            gap: 7px;
+
+            padding: 6px;
+        }
+
+        .home-page .scanner-input-wrapper {
+            width: 100%;
+
+            min-width: 0;
+        }
+
+        .home-page .scanner-input-icon {
+            left: 16px;
+        }
+
+        .home-page .scanner-control {
+            width: 100%;
+            min-width: 0;
+
+            height: 54px;
+
+            padding:
+                0
+                13px
+                0
+                43px;
+
+            font-size: 16px;
+        }
+
+        .home-page .scanner-submit {
+            width: 100%;
+            min-width: 0;
+
+            height: 54px;
+
+            padding:
+                0
+                16px;
+        }
+
+        .home-page .scanner-meta {
+            width: 100%;
+
+            gap:
+                10px
+                14px;
+
+            margin-top: 16px;
+        }
+
+        .home-page .scanner-meta span {
+            font-size: .70rem;
+        }
+
+
+        /* ================= CARDS ================= */
+
+        .home-page .security-feature,
+        .home-page .workflow-card {
+            padding: 20px;
+        }
+
+
+        /* ================= CTA ================= */
+
+        .home-page .homepage-cta {
+            width: 100%;
+
+            padding:
+                38px
+                18px;
+
+            border-radius: 17px;
+        }
+
+        .home-page .homepage-cta h2 {
+            font-size: 1.75rem;
+            line-height: 1.25;
+        }
+
+        .home-page .homepage-cta p {
+            font-size: .92rem;
+            line-height: 1.6;
+        }
+
+        .home-page .homepage-cta .d-flex {
+            width: 100%;
+
+            flex-direction: column;
+        }
+
+        .home-page .homepage-cta .btn {
+            width: 100%;
+
+            margin: 0;
+        }
+
+
+        /* ================= FOOTER ================= */
+
+        .home-page .footer h4 {
+            font-size: 1.1rem;
+        }
+
+        .home-page #backToTop {
+            right: 14px;
+            bottom: 14px;
+        }
+    }
+
+
+    @media (max-width: 430px) {
+
+        .home-page .container {
+            padding-left: 14px;
+            padding-right: 14px;
+        }
+
+        .home-page .navbar-brand {
+            max-width: calc(100% - 52px);
+
+            font-size: .82rem;
+        }
+
+        .home-page .homepage-hero {
+            padding-top: 92px;
+        }
+
+        .home-page .hero-kicker {
+            font-size: .55rem;
+
+            letter-spacing: .7px;
+        }
+
+        .home-page .hero-title {
+            font-size: clamp(
+                2.05rem,
+                10.5vw,
+                2.55rem
+            );
+
+            letter-spacing: -1px;
+        }
+
+        .home-page .hero-description {
+            font-size: .90rem;
+        }
+
+        .home-page .hero-points {
+            grid-template-columns: 1fr;
+        }
+
+        .home-page .hero-dashboard {
+            padding:
+                16px
+                13px;
+        }
+
+        .home-page .hero-dashboard-top h4 {
+            font-size: 1rem;
+        }
+
+        .home-page .engine-ready {
+            font-size: .55rem;
+        }
+
+        .home-page .dashboard-scan-name {
+            font-size: .78rem;
+        }
+
+        .home-page .dashboard-active {
+            font-size: .52rem;
+        }
+
+        .home-page .scanner-card {
+            padding:
+                23px
+                12px;
+        }
+
+        .home-page .scanner-title h2 {
+            font-size: 1.5rem;
+        }
+
+        .home-page .security-feature,
+        .home-page .workflow-card {
+            padding: 18px;
+        }
+
+        .home-page .homepage-cta {
+            padding:
+                31px
+                14px;
+        }
+
+        .home-page .homepage-cta h2 {
+            font-size: 1.5rem;
+        }
+    }
+
+    </style>
+
     <style>
 
         /* =========================================================
@@ -3478,7 +4080,7 @@
 </head>
 
 
-<body>
+<body class="home-page">
 
 
     <!-- =========================================================
