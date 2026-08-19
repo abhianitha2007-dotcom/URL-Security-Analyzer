@@ -5017,3 +5017,548 @@ a {
     }
 
 }
+/* =========================================================
+   HOMEPAGE MOBILE RESPONSIVENESS
+========================================================= */
+
+@media (max-width: 991.98px) {
+
+    .custom-navbar .container {
+        max-width: 100%;
+    }
+
+    .navbar-brand {
+        min-width: 0;
+        max-width: calc(100% - 64px);
+        font-size: 1rem;
+        line-height: 1.2;
+        overflow-wrap: anywhere;
+    }
+
+    .navbar-toggler {
+        flex-shrink: 0;
+    }
+
+    .navbar-collapse {
+        margin-top: 10px;
+        padding: 10px 0 14px;
+    }
+
+    .homepage-hero {
+        min-height: auto;
+        padding-top: 110px;
+        padding-bottom: 60px;
+    }
+
+    .homepage-hero .row {
+        row-gap: 42px !important;
+    }
+
+    .hero-title {
+        font-size: clamp(
+            2.7rem,
+            8vw,
+            4rem
+        );
+
+        line-height: 1.02;
+        letter-spacing: -2px;
+    }
+
+    .hero-description {
+        max-width: 100%;
+    }
+
+    .hero-dashboard {
+        width: 100%;
+        max-width: 680px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+
+@media (max-width: 767.98px) {
+
+    html,
+    body {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+
+    .custom-navbar {
+        min-height: 68px;
+    }
+
+    .navbar-brand {
+        max-width: calc(100% - 58px);
+        font-size: .92rem;
+        letter-spacing: -.2px;
+    }
+
+    .brand-icon {
+        flex-shrink: 0;
+    }
+
+    .homepage-hero {
+        padding:
+            100px
+            0
+            48px;
+    }
+
+    .homepage-hero .row {
+        row-gap: 34px !important;
+    }
+
+    .hero-kicker {
+        max-width: 100%;
+        padding: 7px 10px;
+
+        font-size: .62rem;
+        line-height: 1.4;
+
+        white-space: normal;
+    }
+
+    .hero-title {
+        font-size: clamp(
+            2.35rem,
+            11vw,
+            3.1rem
+        );
+
+        line-height: 1.04;
+        letter-spacing: -1.5px;
+
+        margin-bottom: 20px;
+
+        overflow-wrap: break-word;
+    }
+
+    .hero-title span {
+        margin-top: 6px;
+    }
+
+    .hero-description {
+        width: 100%;
+        max-width: 100%;
+
+        font-size: .97rem;
+        line-height: 1.65;
+    }
+
+    .hero-actions {
+        width: 100%;
+        margin-top: 24px;
+        gap: 10px;
+
+        flex-direction: column;
+    }
+
+    .hero-actions .btn {
+        width: 100%;
+        margin: 0;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .hero-points {
+        width: 100%;
+        margin-top: 22px;
+
+        display: grid;
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+
+        gap:
+            11px
+            14px;
+    }
+
+    .hero-points span {
+        min-width: 0;
+        font-size: .78rem;
+    }
+
+
+    /* HERO DASHBOARD */
+
+    .hero-dashboard {
+        width: 100%;
+        max-width: 100%;
+
+        padding: 20px;
+
+        border-radius: 18px;
+    }
+
+    .hero-dashboard-top {
+        gap: 12px;
+
+        align-items: flex-start;
+    }
+
+    .hero-dashboard-top > div:first-child {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .hero-dashboard-top h4 {
+        font-size: 1.15rem;
+        line-height: 1.3;
+    }
+
+    .engine-ready {
+        flex-shrink: 0;
+
+        padding:
+            5px
+            8px;
+
+        font-size: .66rem;
+    }
+
+    .hero-dashboard-url {
+        width: 100%;
+
+        align-items: flex-start;
+
+        gap: 10px;
+
+        padding: 12px;
+    }
+
+    .hero-dashboard-url > div:last-child {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .dashboard-url-icon {
+        width: 36px;
+        height: 36px;
+
+        flex: 0 0 36px;
+    }
+
+    .hero-dashboard-url strong {
+        max-width: 100%;
+
+        font-size: .84rem;
+        line-height: 1.4;
+
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .dashboard-scan-row {
+        width: 100%;
+
+        gap: 10px;
+
+        padding:
+            12px
+            0;
+    }
+
+    .dashboard-scan-name {
+        min-width: 0;
+        flex: 1;
+
+        gap: 8px;
+
+        font-size: .86rem;
+    }
+
+    .dashboard-scan-icon {
+        width: 30px;
+        height: 30px;
+
+        flex:
+            0
+            0
+            30px;
+    }
+
+    .dashboard-active {
+        flex-shrink: 0;
+
+        font-size: .60rem;
+    }
+
+    .dashboard-engine-footer {
+        gap: 10px;
+
+        padding: 12px;
+    }
+
+    .dashboard-engine-footer > div {
+        min-width: 0;
+    }
+
+    .dashboard-engine-footer strong {
+        overflow-wrap: anywhere;
+    }
+
+
+    /* SCANNER */
+
+    .scanner-card {
+        width: 100%;
+        max-width: 100%;
+
+        padding:
+            28px
+            16px;
+    }
+
+    .scanner-title h2 {
+        font-size: 1.75rem;
+    }
+
+    .scanner-title p {
+        font-size: .93rem;
+        line-height: 1.6;
+    }
+
+    .scanner-shell {
+        width: 100%;
+        max-width: 100%;
+
+        display: flex;
+        flex-direction: column;
+
+        gap: 7px;
+
+        padding: 6px;
+    }
+
+    .scanner-input-wrapper {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .scanner-input-icon {
+        left: 16px;
+    }
+
+    .scanner-control {
+        width: 100%;
+        min-width: 0;
+
+        height: 55px;
+
+        padding:
+            0
+            14px
+            0
+            44px;
+
+        font-size: 16px;
+    }
+
+    .scanner-submit {
+        width: 100%;
+        min-width: 0;
+
+        height: 55px;
+
+        padding:
+            0
+            16px;
+    }
+
+    .scanner-meta {
+        width: 100%;
+
+        gap:
+            10px
+            14px;
+
+        margin-top: 16px;
+    }
+
+    .scanner-meta span {
+        font-size: .72rem;
+    }
+
+
+    /* FEATURE CARDS */
+
+    .security-feature,
+    .workflow-card {
+        padding: 21px;
+
+        height: 100%;
+    }
+
+    .section-title {
+        margin-bottom: 30px;
+    }
+
+    .section-title h2 {
+        font-size: 1.85rem;
+    }
+
+    .section-title p {
+        font-size: .94rem;
+        line-height: 1.6;
+    }
+
+
+    /* CTA */
+
+    .homepage-cta {
+        width: 100%;
+
+        padding:
+            38px
+            18px;
+
+        border-radius: 17px;
+    }
+
+    .homepage-cta h2 {
+        font-size: 1.8rem;
+        line-height: 1.25;
+    }
+
+    .homepage-cta p {
+        font-size: .94rem;
+        line-height: 1.6;
+    }
+
+    .homepage-cta .d-flex {
+        flex-direction: column;
+
+        width: 100%;
+    }
+
+    .homepage-cta .btn {
+        width: 100%;
+
+        margin: 0;
+    }
+
+
+    /* FOOTER */
+
+    .footer {
+        text-align: left;
+    }
+
+    .footer h4 {
+        font-size: 1.15rem;
+    }
+
+    #backToTop {
+        right: 14px;
+        bottom: 14px;
+    }
+}
+
+
+@media (max-width: 430px) {
+
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .navbar-brand {
+        font-size: .84rem;
+    }
+
+    .homepage-hero {
+        padding-top: 94px;
+    }
+
+    .hero-kicker {
+        font-size: .56rem;
+        letter-spacing: .8px;
+    }
+
+    .hero-title {
+        font-size: clamp(
+            2.05rem,
+            10.7vw,
+            2.65rem
+        );
+
+        letter-spacing: -1.2px;
+    }
+
+    .hero-description {
+        font-size: .92rem;
+    }
+
+    .hero-points {
+        grid-template-columns:
+            1fr;
+    }
+
+    .hero-dashboard {
+        padding:
+            17px
+            14px;
+    }
+
+    .hero-dashboard-top {
+        margin-bottom: 17px;
+    }
+
+    .hero-dashboard-top h4 {
+        font-size: 1rem;
+    }
+
+    .engine-ready {
+        font-size: .58rem;
+    }
+
+    .dashboard-scan-name {
+        font-size: .80rem;
+    }
+
+    .dashboard-active {
+        font-size: .55rem;
+    }
+
+    .scanner-card {
+        padding:
+            24px
+            13px;
+    }
+
+    .scanner-title h2 {
+        font-size: 1.55rem;
+    }
+
+    .security-feature,
+    .workflow-card {
+        padding: 19px;
+    }
+
+    .homepage-cta {
+        padding:
+            32px
+            15px;
+    }
+
+    .homepage-cta h2 {
+        font-size: 1.55rem;
+    }
+}
