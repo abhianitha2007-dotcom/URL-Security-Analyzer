@@ -674,6 +674,11 @@ def calculate_from_results(results):
         "suspicious"
     )
 
+    vt_total_engines = get_int(
+        threat_intelligence,
+        "total_engines"
+    )
+
     threat_score = 0
 
     if (
@@ -688,17 +693,29 @@ def calculate_from_results(results):
             45
         )
 
-        if vt_malicious == 1:
-            if vt_suspicious > 0:
+        if (
+            vt_malicious == 1
+            and vt_suspicious == 0
+        ):
+            if vt_total_engines >= 20:
                 threat_score = min(
                     threat_score,
-                    12
+                    5
                 )
             else:
                 threat_score = min(
                     threat_score,
-                    10
+                    8
                 )
+
+        elif (
+            vt_malicious == 1
+            and vt_suspicious > 0
+        ):
+            threat_score = min(
+                threat_score,
+                12
+            )
 
         elif (
             vt_malicious == 0
@@ -713,15 +730,32 @@ def calculate_from_results(results):
         threat_report_found
         and vt_malicious > 0
     ):
-        if vt_malicious == 1:
+        if (
+            vt_malicious == 1
+            and vt_suspicious == 0
+        ):
             add_reason(
                 reasons,
                 True,
                 (
-                    "VirusTotal reports that one security "
-                    "engine classified this URL as malicious."
+                    "VirusTotal reports one isolated malicious "
+                    "classification. A single-engine detection "
+                    "may be a false positive and is treated as "
+                    "weak reputation evidence."
                 )
             )
+
+        elif vt_malicious == 1:
+            add_reason(
+                reasons,
+                True,
+                (
+                    "VirusTotal reports one malicious "
+                    "classification together with additional "
+                    "suspicious reputation signals."
+                )
+            )
+
         else:
             add_reason(
                 reasons,
@@ -746,6 +780,7 @@ def calculate_from_results(results):
                     "reputation signal."
                 )
             )
+
         else:
             add_reason(
                 reasons,
@@ -796,6 +831,7 @@ def calculate_from_results(results):
     )
 
     if threat_report_found:
+
         if vt_malicious >= 10:
             risk_score = max(
                 risk_score,
@@ -821,10 +857,18 @@ def calculate_from_results(results):
             )
 
         elif vt_malicious == 1:
-            risk_score = max(
-                risk_score,
-                25
-            )
+
+            if vt_suspicious >= 5:
+                risk_score = max(
+                    risk_score,
+                    45
+                )
+
+            elif vt_suspicious >= 2:
+                risk_score = max(
+                    risk_score,
+                    35
+                )
 
         elif vt_suspicious >= 5:
             risk_score = max(
@@ -839,10 +883,7 @@ def calculate_from_results(results):
             )
 
         elif vt_suspicious == 1:
-            risk_score = max(
-                risk_score,
-                20
-            )
+            pass
 
     if downgraded_to_http:
         risk_score = max(

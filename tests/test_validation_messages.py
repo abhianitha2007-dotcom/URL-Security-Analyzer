@@ -228,7 +228,7 @@ def test_flask_allows_dns_unavailable_url(
     assert response.status_code == 200
 
     assert (
-        "Analysis Result"
+        "Security Report | URL Security Analyzer"
         in page
     )
 

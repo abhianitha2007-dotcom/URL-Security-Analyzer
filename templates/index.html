@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -13,782 +12,3463 @@
         name="description"
         content="Analyze suspicious URLs using multi-layer cybersecurity checks, domain intelligence, webpage analysis and threat reputation.">
 
-    <title>
-        URL Security Analyzer
-    </title>
-
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet">
+    <title>URL Security Analyzer</title>
 
     <link
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='css/style.css') }}">
-
     <style>
 
-        /* =====================================================
-           HERO
-        ===================================================== */
+        /* =========================================================
+           ROOT
+        ========================================================= */
 
-        .new-home-hero {
-            position: relative;
-            overflow: hidden;
-            min-height: 760px;
-            display: flex;
-            align-items: center;
-            padding: 115px 0 70px;
-        }
+        :root {
+            --bg-main: #071017;
+            --bg-deep: #040b10;
+            --bg-soft: #0a161e;
 
-        .new-home-hero::before {
-            content: "";
-            position: absolute;
-            width: 560px;
-            height: 560px;
-            top: -250px;
-            left: -180px;
-            border-radius: 50%;
-            background: rgba(6, 182, 212, 0.08);
-            filter: blur(40px);
-        }
+            --surface: rgba(9, 22, 30, 0.72);
+            --surface-solid: #0b1820;
+            --surface-hover: rgba(13, 31, 40, 0.86);
 
-        .new-home-hero::after {
-            content: "";
-            position: absolute;
-            width: 500px;
-            height: 500px;
-            right: -230px;
-            top: 30px;
-            border-radius: 50%;
-            background: rgba(99, 102, 241, 0.08);
-            filter: blur(40px);
-        }
+            --border:
+                rgba(157, 187, 200, 0.12);
 
-        .hero-main-content {
-            position: relative;
-            z-index: 2;
-        }
+            --border-strong:
+                rgba(90, 210, 226, 0.32);
 
-        .hero-badge-new {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 22px;
-            padding: 7px 13px;
-            border: 1px solid rgba(34, 211, 238, 0.22);
-            border-radius: 999px;
-            color: #67e8f9;
-            background: rgba(6, 182, 212, 0.065);
-            font-size: 0.72rem;
-            font-weight: 850;
-            letter-spacing: 0.09em;
-        }
+            --text: #eef5f6;
+            --text-soft: #a0afb7;
+            --text-muted: #647782;
 
-        .hero-badge-new span {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #22c55e;
-        }
+            --accent: #59d5e6;
+            --accent-soft:
+                rgba(89, 213, 230, 0.09);
 
-        .hero-title-new {
-            max-width: 850px;
-            margin: 0 0 22px;
-            color: #f8fafc;
-            font-size: clamp(3rem, 5.5vw, 5.35rem);
-            font-weight: 900;
-            line-height: 1.03;
-            letter-spacing: -0.045em;
-        }
+            --accent-faint:
+                rgba(89, 213, 230, 0.035);
 
-        .hero-title-new span {
-            display: block;
-            color: #22d3ee;
-        }
-
-        .hero-description-new {
-            max-width: 700px;
-            margin-bottom: 30px;
-            color: #94a3b8;
-            font-size: 1.04rem;
-            line-height: 1.8;
+            --nav-height: 76px;
         }
 
 
-        /* =====================================================
-           HERO SCANNER
-        ===================================================== */
+        /* =========================================================
+           RESET
+        ========================================================= */
 
-        .hero-scanner {
-            max-width: 760px;
-            margin-top: 8px;
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
         }
 
-        .hero-scanner-form {
-            display: flex;
-            align-items: stretch;
-            gap: 6px;
-            padding: 6px;
-            overflow: hidden;
-            border: 1px solid rgba(34, 211, 238, 0.18);
-            border-radius: 15px;
-            background: #020817;
-            box-shadow:
-                0 18px 55px rgba(0, 0, 0, 0.22);
+        html {
+            scroll-behavior: smooth;
         }
 
-        .hero-scanner-input {
-            position: relative;
-            flex: 1;
-            min-width: 0;
-            overflow: hidden;
-            border-radius: 10px;
-            background: #07111f !important;
-        }
-
-        .hero-scanner-input i {
-            position: absolute;
-            z-index: 3;
-            top: 50%;
-            left: 18px;
-            transform: translateY(-50%);
-            color: #22d3ee;
-            font-size: 0.95rem;
-            pointer-events: none;
-        }
-
-        .hero-scanner-input input {
-            width: 100%;
-            height: 56px;
-            padding: 0 18px 0 47px !important;
-            border: 0 !important;
-            border-radius: 10px !important;
-            outline: 0 !important;
-            color: #f1f5f9 !important;
-            background: #07111f !important;
-            box-shadow: none !important;
-            font-size: 0.96rem;
-            caret-color: #22d3ee;
-        }
-
-        .hero-scanner-input input:focus {
-            color: #f8fafc !important;
-            background: #07111f !important;
-            box-shadow:
-                inset 0 0 0 1px rgba(34, 211, 238, 0.22) !important;
-        }
-
-        .hero-scanner-input input::placeholder {
-            color: #475569 !important;
-            opacity: 1;
-        }
-
-        .hero-scanner-input input:-webkit-autofill,
-        .hero-scanner-input input:-webkit-autofill:hover,
-        .hero-scanner-input input:-webkit-autofill:focus,
-        .hero-scanner-input input:-webkit-autofill:active {
-            -webkit-text-fill-color: #f1f5f9 !important;
-            -webkit-box-shadow:
-                0 0 0 1000px #07111f inset !important;
-            box-shadow:
-                0 0 0 1000px #07111f inset !important;
-            caret-color: #22d3ee !important;
-            border: 0 !important;
-            transition:
-                background-color 9999s ease-out 0s;
-        }
-
-        .hero-scan-button {
-            flex: 0 0 auto;
-            min-width: 175px;
-            border: 0;
-            border-radius: 10px;
-            color: #031018;
-            background:
-                linear-gradient(
-                    135deg,
-                    #22d3ee,
-                    #3b82f6
-                );
-            font-weight: 850;
-            transition:
-                transform 0.2s ease,
-                filter 0.2s ease;
-        }
-
-        .hero-scan-button:hover {
-            transform: translateY(-1px);
-            filter: brightness(1.08);
-        }
-
-        .hero-scan-button:disabled {
-            opacity: 0.7;
-            transform: none;
-        }
-
-        .hero-scanner-meta {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px 20px;
-            margin-top: 13px;
-            color: #64748b;
-            font-size: 0.75rem;
-        }
-
-        .hero-scanner-meta span {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .hero-scanner-meta i {
-            color: #38bdf8;
-        }
-
-        .hero-scanner-meta a {
-            color: #94a3b8;
-            text-decoration: none;
-        }
-
-        .hero-scanner-meta a:hover {
-            color: #22d3ee;
-        }
-
-        .hero-error {
-            margin-top: 17px;
-            max-width: 760px;
-            padding: 13px 15px;
-            border: 1px solid rgba(239, 68, 68, 0.25);
-            border-radius: 11px;
-            color: #fecaca;
-            background: rgba(239, 68, 68, 0.07);
-            font-size: 0.86rem;
-        }
-
-        .hero-error i {
-            color: #f87171;
-        }
-
-
-        /* =====================================================
-           SECURITY SIGNAL MAP
-        ===================================================== */
-
-        .signal-panel {
-            position: relative;
-            overflow: hidden;
-            padding: 27px;
-            border: 1px solid rgba(34, 211, 238, 0.14);
-            border-radius: 25px;
-            background:
-                linear-gradient(
-                    150deg,
-                    rgba(12, 22, 42, 0.98),
-                    rgba(5, 10, 25, 0.99)
-                );
-            box-shadow:
-                0 30px 85px rgba(0, 0, 0, 0.28);
-        }
-
-        .signal-panel::before {
-            content: "";
-            position: absolute;
-            width: 260px;
-            height: 260px;
-            top: -180px;
-            right: -120px;
-            border-radius: 50%;
-            background: rgba(99, 102, 241, 0.11);
-        }
-
-        .signal-panel-header {
-            position: relative;
-            z-index: 4;
-            margin-bottom: 12px;
-        }
-
-        .signal-panel-label {
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            margin-bottom: 7px;
-            color: #22d3ee;
-            font-size: 0.67rem;
-            font-weight: 900;
-            letter-spacing: 0.11em;
-        }
-
-        .signal-panel-header h3 {
+        body {
             margin: 0;
-            color: #f8fafc;
-            font-size: 1.55rem;
-            font-weight: 850;
+
+            min-height: 100vh;
+
+            overflow-x: hidden;
+
+            color: var(--text);
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #08131a 0%,
+                    #050c12 47%,
+                    #07121a 100%
+                );
+
+            font-family:
+                Inter,
+                "Segoe UI",
+                Arial,
+                sans-serif;
+
+            -webkit-font-smoothing:
+                antialiased;
         }
 
-        .signal-panel-header p {
-            margin: 7px 0 0;
-            color: #64748b;
-            font-size: 0.79rem;
-            line-height: 1.55;
+        button,
+        input {
+            font: inherit;
         }
 
-        .security-signal-map {
-            position: relative;
-            height: 365px;
-            margin-top: 8px;
+        button {
+            cursor: pointer;
         }
 
-        .security-signal-map::before {
-            content: "";
+        a {
+            color: inherit;
+        }
+
+        ::selection {
+            color: #031014;
+            background: var(--accent);
+        }
+
+
+        /* =========================================================
+           FULL PAGE ANIMATED WORLD
+        ========================================================= */
+
+        .cyber-world {
+            position: fixed;
+
+            z-index: -100;
+
+            inset: 0;
+
+            overflow: hidden;
+
+            pointer-events: none;
+
+            background:
+                radial-gradient(
+                    circle at 22% 15%,
+                    rgba(31, 130, 150, 0.10),
+                    transparent 29%
+                ),
+                radial-gradient(
+                    circle at 80% 74%,
+                    rgba(19, 102, 124, 0.09),
+                    transparent 31%
+                ),
+                linear-gradient(
+                    140deg,
+                    #07131a,
+                    #040b10 52%,
+                    #07131a
+                );
+        }
+
+
+        #cyberCanvas {
             position: absolute;
-            top: 50%;
-            left: 12%;
-            right: 12%;
+
+            inset: 0;
+
+            width: 100%;
+            height: 100%;
+
+            opacity: 0.72;
+        }
+
+
+        /* Moving light mist */
+
+        .cyber-aurora {
+            position: absolute;
+
+            width: 70vw;
+            height: 70vw;
+
+            border-radius: 50%;
+
+            filter: blur(115px);
+
+            opacity: 0.07;
+        }
+
+        .cyber-aurora-one {
+            top: -38vw;
+            left: -14vw;
+
+            background: var(--accent);
+
+            animation:
+                auroraOne
+                18s ease-in-out
+                infinite alternate;
+        }
+
+        .cyber-aurora-two {
+            right: -32vw;
+            bottom: -35vw;
+
+            background: #2f9eb4;
+
+            animation:
+                auroraTwo
+                22s ease-in-out
+                infinite alternate;
+        }
+
+        @keyframes auroraOne {
+            to {
+                transform:
+                    translate(
+                        17vw,
+                        15vw
+                    )
+                    scale(1.18);
+            }
+        }
+
+        @keyframes auroraTwo {
+            to {
+                transform:
+                    translate(
+                        -15vw,
+                        -13vw
+                    )
+                    scale(0.88);
+            }
+        }
+
+
+        /* Perspective floor */
+
+        .cyber-floor {
+            position: absolute;
+
+            left: -25%;
+            bottom: -390px;
+
+            width: 150%;
+            height: 720px;
+
+            transform:
+                perspective(800px)
+                rotateX(67deg);
+
+            transform-origin:
+                center top;
+
+            opacity: 0.26;
+
+            background-image:
+                linear-gradient(
+                    rgba(89, 213, 230, 0.11) 1px,
+                    transparent 1px
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(89, 213, 230, 0.11) 1px,
+                    transparent 1px
+                );
+
+            background-size:
+                72px 72px;
+
+            mask-image:
+                linear-gradient(
+                    to bottom,
+                    rgba(0, 0, 0, 0.9),
+                    transparent 85%
+                );
+
+            animation:
+                floorTravel
+                11s linear
+                infinite;
+        }
+
+        @keyframes floorTravel {
+            to {
+                background-position:
+                    0 72px;
+            }
+        }
+
+
+        /* Vertical moving beams */
+
+        .background-beam {
+            position: absolute;
+
+            top: -30%;
+
+            width: 1px;
+            height: 150%;
+
+            opacity: 0.14;
+
+            background:
+                linear-gradient(
+                    to bottom,
+                    transparent,
+                    rgba(89, 213, 230, 0.7),
+                    transparent
+                );
+
+            transform:
+                rotate(18deg);
+        }
+
+        .beam-one {
+            left: 16%;
+
+            animation:
+                beamDrift
+                16s linear
+                infinite;
+        }
+
+        .beam-two {
+            left: 58%;
+
+            opacity: 0.08;
+
+            animation:
+                beamDrift
+                21s linear
+                infinite reverse;
+        }
+
+        .beam-three {
+            left: 87%;
+
+            opacity: 0.09;
+
+            animation:
+                beamDrift
+                25s linear
+                infinite;
+        }
+
+        @keyframes beamDrift {
+            0% {
+                transform:
+                    translateX(-180px)
+                    rotate(18deg);
+            }
+
+            100% {
+                transform:
+                    translateX(260px)
+                    rotate(18deg);
+            }
+        }
+
+
+        /* Horizontal data streaks */
+
+        .data-streak {
+            position: absolute;
+
+            left: -40%;
+
+            width: 180%;
             height: 1px;
+
+            opacity: 0;
+
             background:
                 linear-gradient(
                     90deg,
                     transparent,
-                    rgba(34, 211, 238, 0.18),
-                    rgba(139, 92, 246, 0.2),
-                    rgba(34, 211, 238, 0.18),
+                    rgba(89, 213, 230, 0.10),
+                    rgba(89, 213, 230, 0.55),
+                    rgba(89, 213, 230, 0.10),
                     transparent
                 );
         }
 
-        .security-signal-map::after {
-            content: "";
-            position: absolute;
-            top: 12%;
-            bottom: 12%;
-            left: 50%;
-            width: 1px;
-            background:
-                linear-gradient(
-                    180deg,
-                    transparent,
-                    rgba(34, 211, 238, 0.17),
-                    rgba(139, 92, 246, 0.2),
-                    rgba(34, 211, 238, 0.17),
-                    transparent
-                );
+        .streak-one {
+            top: 22%;
+
+            animation:
+                streakTravel
+                9s linear
+                infinite;
         }
 
-        .signal-core {
-            position: absolute;
-            z-index: 5;
-            top: 50%;
-            left: 50%;
-            width: 132px;
-            height: 132px;
-            transform: translate(-50%, -50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid rgba(34, 211, 238, 0.3);
+        .streak-two {
+            top: 48%;
+
+            animation:
+                streakTravel
+                14s linear
+                4s infinite;
+        }
+
+        .streak-three {
+            top: 78%;
+
+            animation:
+                streakTravel
+                12s linear
+                7s infinite;
+        }
+
+        @keyframes streakTravel {
+            0% {
+                opacity: 0;
+
+                transform:
+                    translateX(-20%);
+            }
+
+            18% {
+                opacity: 0.28;
+            }
+
+            82% {
+                opacity: 0.20;
+            }
+
+            100% {
+                opacity: 0;
+
+                transform:
+                    translateX(20%);
+            }
+        }
+
+
+        /* Mouse spotlight */
+
+        .pointer-light {
+            position: fixed;
+
+            z-index: -60;
+
+            width: 520px;
+            height: 520px;
+
+            left: 0;
+            top: 0;
+
+            transform:
+                translate(-50%, -50%);
+
             border-radius: 50%;
+
+            opacity: 0.085;
+
             background:
                 radial-gradient(
                     circle,
-                    rgba(34, 211, 238, 0.17),
-                    rgba(5, 14, 30, 0.96) 68%
+                    var(--accent),
+                    transparent 66%
                 );
-            box-shadow:
-                0 0 50px rgba(34, 211, 238, 0.1);
+
+            filter: blur(30px);
+
+            pointer-events: none;
+
+            transition:
+                opacity 0.3s ease;
         }
 
-        .signal-core::before {
-            content: "";
-            position: absolute;
-            inset: -14px;
-            border: 1px dashed rgba(34, 211, 238, 0.14);
-            border-radius: 50%;
-        }
 
-        .signal-core i {
-            margin-bottom: 8px;
-            color: #22d3ee;
-            font-size: 2rem;
-        }
+        /* =========================================================
+           SCROLL PROGRESS
+        ========================================================= */
 
-        .signal-core strong {
-            color: #f1f5f9;
-            font-size: 0.83rem;
-        }
+        .scroll-progress {
+            position: fixed;
 
-        .signal-core small {
-            margin-top: 3px;
-            color: #64748b;
-            font-size: 0.6rem;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-        }
+            z-index: 3000;
 
-        .signal-node {
-            position: absolute;
-            z-index: 4;
-            width: 148px;
-            padding: 13px;
-            border: 1px solid rgba(148, 163, 184, 0.1);
-            border-radius: 14px;
-            background: rgba(13, 23, 42, 0.92);
-            box-shadow:
-                0 12px 30px rgba(0, 0, 0, 0.16);
-        }
-
-        .signal-node-top-left {
-            top: 17px;
+            top: 0;
             left: 0;
+
+            width: 0;
+            height: 2px;
+
+            background:
+                var(--accent);
+
+            box-shadow:
+                0 0 12px
+                rgba(89, 213, 230, 0.45);
         }
 
-        .signal-node-top-right {
-            top: 17px;
-            right: 0;
-        }
 
-        .signal-node-bottom-left {
-            bottom: 17px;
+        /* =========================================================
+           NAVIGATION
+        ========================================================= */
+
+        .site-nav {
+            position: fixed;
+
+            z-index: 2000;
+
+            top: 0;
             left: 0;
-        }
-
-        .signal-node-bottom-right {
             right: 0;
-            bottom: 17px;
-        }
 
-        .signal-node-icon {
-            width: 35px;
-            height: 35px;
+            height:
+                var(--nav-height);
+
             display: flex;
             align-items: center;
-            justify-content: center;
-            margin-bottom: 9px;
-            border-radius: 9px;
+
+            border-bottom:
+                1px solid
+                rgba(150, 180, 193, 0.07);
+
+            background:
+                rgba(4, 11, 16, 0.64);
+
+            backdrop-filter:
+                blur(18px);
+
+            -webkit-backdrop-filter:
+                blur(18px);
         }
 
-        .signal-node strong {
-            display: block;
-            margin-bottom: 4px;
-            color: #e2e8f0;
-            font-size: 0.78rem;
-        }
+        .nav-inner {
+            width:
+                min(
+                    1380px,
+                    calc(100% - 80px)
+                );
 
-        .signal-node p {
-            margin: 0;
-            color: #64748b;
-            font-size: 0.64rem;
-            line-height: 1.45;
-        }
+            height: 100%;
 
-        .signal-cyan {
-            color: #22d3ee;
-            background: rgba(6, 182, 212, 0.11);
-        }
-
-        .signal-purple {
-            color: #a78bfa;
-            background: rgba(139, 92, 246, 0.11);
-        }
-
-        .signal-green {
-            color: #4ade80;
-            background: rgba(34, 197, 94, 0.11);
-        }
-
-        .signal-red {
-            color: #fb7185;
-            background: rgba(244, 63, 94, 0.11);
-        }
-
-        .signal-output {
-            position: relative;
-            z-index: 5;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
-            padding: 13px 14px;
-            border: 1px solid rgba(34, 211, 238, 0.1);
-            border-radius: 12px;
-            background: rgba(34, 211, 238, 0.045);
-        }
 
-        .signal-output small {
-            display: block;
-            color: #64748b;
-            font-size: 0.6rem;
-            font-weight: 900;
-            letter-spacing: 0.08em;
-        }
-
-        .signal-output strong {
-            color: #dbeafe;
-            font-size: 0.8rem;
-        }
-
-        .signal-output i {
-            color: #22d3ee;
-            font-size: 1.25rem;
+            margin: auto;
         }
 
 
-        /* =====================================================
-           FEATURES
-        ===================================================== */
-
-        .homepage-section {
-            padding: 78px 0;
-        }
-
-        .homepage-section-heading {
-            max-width: 700px;
-            margin: 0 auto 42px;
-            text-align: center;
-        }
-
-        .homepage-section-label {
-            display: inline-block;
-            margin-bottom: 9px;
-            color: #22d3ee;
-            font-size: 0.69rem;
-            font-weight: 900;
-            letter-spacing: 0.12em;
-        }
-
-        .homepage-section-heading h2 {
-            margin-bottom: 11px;
-            color: #f8fafc;
-            font-size: clamp(1.9rem, 3vw, 2.6rem);
-            font-weight: 850;
-        }
-
-        .homepage-section-heading p {
-            margin: 0;
-            color: #94a3b8;
-            line-height: 1.7;
-        }
-
-        .home-feature-card {
-            height: 100%;
-            padding: 24px;
-            border: 1px solid rgba(148, 163, 184, 0.1);
-            border-radius: 17px;
-            background: rgba(15, 23, 42, 0.52);
-            transition:
-                transform 0.2s ease,
-                border-color 0.2s ease;
-        }
-
-        .home-feature-card:hover {
-            transform: translateY(-3px);
-            border-color: rgba(34, 211, 238, 0.2);
-        }
-
-        .home-feature-icon {
-            width: 46px;
-            height: 46px;
+        .brand {
             display: flex;
             align-items: center;
-            justify-content: center;
-            margin-bottom: 17px;
-            border-radius: 12px;
-        }
 
-        .home-feature-card h5 {
-            margin-bottom: 9px;
-            color: #f1f5f9;
+            gap: 11px;
+
+            color: var(--text);
+
+            text-decoration: none;
+
+            font-size: 0.86rem;
             font-weight: 750;
         }
 
-        .home-feature-card p {
-            margin: 0;
-            color: #94a3b8;
-            font-size: 0.88rem;
-            line-height: 1.65;
+        .brand-mark {
+            position: relative;
+
+            width: 35px;
+            height: 35px;
+
+            display: grid;
+            place-items: center;
+
+            overflow: hidden;
+
+            border:
+                1px solid
+                rgba(89, 213, 230, 0.34);
+
+            border-radius: 9px;
+
+            color: var(--accent);
+
+            background:
+                rgba(89, 213, 230, 0.045);
+        }
+
+        .brand-mark::before {
+            content: "";
+
+            position: absolute;
+
+            width: 140%;
+            height: 1px;
+
+            background:
+                var(--accent);
+
+            animation:
+                logoScan
+                2.8s ease-in-out
+                infinite;
+        }
+
+        @keyframes logoScan {
+            0%,
+            100% {
+                top: 7px;
+                opacity: 0;
+            }
+
+            30% {
+                opacity: 0.5;
+            }
+
+            70% {
+                opacity: 0.5;
+            }
+
+            80% {
+                top: 27px;
+            }
         }
 
 
-        /* =====================================================
-           WARNING INFO
-        ===================================================== */
-
-        .warning-information {
+        .nav-links {
             display: flex;
-            align-items: flex-start;
-            gap: 14px;
-            margin-top: 35px;
-            padding: 19px;
-            border: 1px solid rgba(245, 158, 11, 0.15);
-            border-radius: 15px;
-            background: rgba(245, 158, 11, 0.04);
+            align-items: center;
+
+            gap: 8px;
         }
 
-        .warning-information-icon {
-            flex: 0 0 auto;
-            width: 39px;
-            height: 39px;
+        .nav-link {
+            position: relative;
+
+            padding:
+                10px 13px;
+
+            border-radius: 8px;
+
+            color:
+                #748793;
+
+            text-decoration: none;
+
+            font-size: 0.78rem;
+            font-weight: 600;
+
+            transition:
+                color 0.2s ease,
+                background-color 0.2s ease;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #dce7eb;
+
+            background:
+                rgba(89, 213, 230, 0.045);
+        }
+
+        .nav-link.active::after {
+            content: "";
+
+            position: absolute;
+
+            left: 50%;
+            bottom: 4px;
+
+            width: 18px;
+            height: 1px;
+
+            transform:
+                translateX(-50%);
+
+            background:
+                var(--accent);
+        }
+
+
+        /* =========================================================
+           COMMON WIDTH
+        ========================================================= */
+
+        .page-width {
+            width:
+                min(
+                    1380px,
+                    calc(100% - 80px)
+                );
+
+            margin:
+                0 auto;
+        }
+
+
+        /* =========================================================
+           IMPROVED TYPOGRAPHY
+        ========================================================= */
+
+        .brand {
+            font-size: 0.95rem;
+            font-weight: 750;
+        }
+
+        .nav-link {
+            padding: 10px 14px;
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+
+        .hero-overline {
+            font-size: 0.76rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+        }
+
+        .hero-title {
+            max-width: 780px;
+
+            margin: 0;
+
+            color: #f2f7f8;
+
+            font-size:
+                clamp(
+                    3.5rem,
+                    5.3vw,
+                    6rem
+                );
+
+            line-height: 0.96;
+
+            font-weight: 760;
+
+            letter-spacing: -0.055em;
+        }
+
+        .hero-description {
+            max-width: 650px;
+
+            margin: 28px 0 0;
+
+            color: #83949e;
+
+            font-size: 1.05rem;
+
+            line-height: 1.8;
+        }
+
+        .url-input {
+            font-size: 0.98rem;
+        }
+
+        .scan-button {
+            font-size: 0.86rem;
+            font-weight: 800;
+        }
+
+        .scan-meta {
+            font-size: 0.76rem;
+        }
+
+        .scan-error {
+            font-size: 0.86rem;
+        }
+
+        .matrix-header strong {
+            font-size: 0.78rem;
+        }
+
+        .matrix-header small {
+            font-size: 0.65rem;
+        }
+
+        .matrix-address {
+            font-size: 0.74rem;
+        }
+
+        .matrix-module-copy strong {
+            font-size: 0.78rem;
+        }
+
+        .matrix-module-copy small {
+            font-size: 0.65rem;
+        }
+
+        .module-ready {
+            font-size: 0.62rem;
+        }
+
+        .matrix-footer {
+            font-size: 0.64rem;
+        }
+
+        .matrix-fragment {
+            font-size: 0.65rem;
+        }
+
+        .section-label {
+            font-size: 0.72rem;
+            font-weight: 750;
+            letter-spacing: 0.15em;
+        }
+
+        .section-heading h2 {
+            font-size:
+                clamp(
+                    2.2rem,
+                    3.7vw,
+                    3.7rem
+                );
+
+            font-weight: 680;
+
+            line-height: 1.07;
+
+            letter-spacing: -0.04em;
+        }
+
+        .section-heading p {
+            max-width: 610px;
+
+            margin: 20px 0 0;
+
+            font-size: 0.96rem;
+
+            line-height: 1.75;
+        }
+
+        .cap-number {
+            font-size: 0.68rem;
+        }
+
+        .capability-icon {
+            font-size: 1.1rem;
+        }
+
+        .capability h3 {
+            font-size: 1.02rem;
+            font-weight: 700;
+        }
+
+        .capability p {
+            font-size: 0.84rem;
+            line-height: 1.7;
+        }
+
+        .process-number {
+            font-size: 0.7rem;
+        }
+
+        .process-copy h3 {
+            font-size: 1.02rem;
+        }
+
+        .process-copy p {
+            max-width: 460px;
+
+            font-size: 0.84rem;
+
+            line-height: 1.7;
+        }
+
+        .final-copy h2 {
+            font-size:
+                clamp(
+                    2.4rem,
+                    4.3vw,
+                    4.2rem
+                );
+
+            line-height: 1.03;
+        }
+
+        .final-copy p {
+            max-width: 550px;
+
+            font-size: 0.94rem;
+
+            line-height: 1.75;
+        }
+
+        .final-action {
+            font-size: 0.8rem;
+        }
+
+        .footer-inner {
+            font-size: 0.74rem;
+        }
+
+
+        /* =========================================================
+           RESPONSIVE TYPOGRAPHY
+        ========================================================= */
+
+        @media (max-width: 1100px) {
+            .hero-title {
+                font-size:
+                    clamp(
+                        3.4rem,
+                        7vw,
+                        5.3rem
+                    );
+            }
+        }
+
+        @media (max-width: 700px) {
+            .brand {
+                font-size: 0.8rem;
+            }
+
+            .nav-link {
+                font-size: 0.76rem;
+            }
+
+            .hero-overline {
+                font-size: 0.67rem;
+            }
+
+            .hero-title {
+                font-size:
+                    clamp(
+                        2.8rem,
+                        13vw,
+                        4.1rem
+                    );
+
+                line-height: 0.98;
+            }
+
+            .hero-description {
+                font-size: 0.92rem;
+            }
+
+            .url-input {
+                font-size: 0.9rem;
+            }
+
+            .scan-button {
+                font-size: 0.8rem;
+            }
+
+            .scan-meta {
+                font-size: 0.69rem;
+            }
+
+            .section-heading h2 {
+                font-size:
+                    clamp(
+                        2rem,
+                        10vw,
+                        3rem
+                    );
+            }
+
+            .section-heading p {
+                font-size: 0.87rem;
+            }
+
+            .capability h3 {
+                font-size: 0.96rem;
+            }
+
+            .capability p {
+                font-size: 0.8rem;
+            }
+
+            .process-copy h3 {
+                font-size: 0.96rem;
+            }
+
+            .process-copy p {
+                font-size: 0.8rem;
+            }
+        }
+
+
+        /* =========================================================
+           HERO
+        ========================================================= */
+
+        .hero {
+            position: relative;
+
+            min-height: 100vh;
+
+            display: flex;
+            align-items: center;
+
+            padding:
+                calc(
+                    var(--nav-height)
+                    + 60px
+                )
+                0
+                70px;
+        }
+
+        .hero-layout {
+            display: grid;
+
+            grid-template-columns:
+                minmax(0, 1.03fr)
+                minmax(420px, 0.97fr);
+
+            gap: clamp(
+                50px,
+                7vw,
+                115px
+            );
+
+            align-items: center;
+        }
+
+
+        /* Hero typography */
+
+        .hero-overline {
+            display: flex;
+            align-items: center;
+
+            gap: 10px;
+
+            margin-bottom: 25px;
+
+            color:
+                #78a6b1;
+
+            font-size: 0.67rem;
+            font-weight: 700;
+            letter-spacing: 0.17em;
+
+            text-transform: uppercase;
+        }
+
+        .overline-line {
+            width: 36px;
+            height: 1px;
+
+            overflow: hidden;
+
+            background:
+                rgba(89, 213, 230, 0.18);
+        }
+
+        .overline-line::before {
+            content: "";
+
+            display: block;
+
+            width: 18px;
+            height: 100%;
+
+            background:
+                var(--accent);
+
+            animation:
+                overlineMove
+                2.2s ease-in-out
+                infinite alternate;
+        }
+
+        @keyframes overlineMove {
+            to {
+                transform:
+                    translateX(18px);
+            }
+        }
+
+
+        .hero-title {
+            max-width: 780px;
+
+            margin: 0;
+
+            color:
+                #f2f7f8;
+
+            font-size:
+                clamp(
+                    3.9rem,
+                    6.4vw,
+                    7.2rem
+                );
+
+            line-height: 0.91;
+
+            font-weight: 760;
+
+            letter-spacing:
+                -0.066em;
+        }
+
+        .hero-title .outline-word {
+            display: block;
+
+            color: transparent;
+
+            -webkit-text-stroke:
+                1px
+                rgba(230, 244, 247, 0.60);
+        }
+
+        .hero-title .accent-word {
+            color:
+                var(--accent);
+        }
+
+
+        .hero-description {
+            max-width: 630px;
+
+            margin:
+                30px 0 0;
+
+            color:
+                #83949e;
+
+            font-size:
+                0.98rem;
+
+            line-height: 1.85;
+        }
+
+
+        /* =========================================================
+           SCAN INPUT
+        ========================================================= */
+
+        .scan-area {
+            max-width: 760px;
+
+            margin-top: 37px;
+        }
+
+        .scan-form-shell {
+            position: relative;
+
+            display: flex;
+            align-items: stretch;
+
+            gap: 8px;
+
+            padding: 7px;
+
+            overflow: hidden;
+
+            border:
+                1px solid
+                rgba(145, 179, 192, 0.16);
+
+            border-radius: 13px;
+
+            background:
+                rgba(6, 16, 23, 0.78);
+
+            backdrop-filter:
+                blur(15px);
+
+            transition:
+                border-color 0.25s ease,
+                transform 0.25s ease;
+        }
+
+        .scan-form-shell::before {
+            content: "";
+
+            position: absolute;
+
+            z-index: 0;
+
+            top: 0;
+            left: -25%;
+
+            width: 20%;
+            height: 1px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    transparent,
+                    var(--accent),
+                    transparent
+                );
+
+            animation:
+                inputEdgeTravel
+                4s linear
+                infinite;
+        }
+
+        @keyframes inputEdgeTravel {
+            to {
+                left: 110%;
+            }
+        }
+
+        .scan-form-shell:focus-within {
+            border-color:
+                rgba(89, 213, 230, 0.42);
+
+            transform:
+                translateY(-2px);
+        }
+
+
+        .url-input-wrap {
+            position: relative;
+
+            z-index: 2;
+
+            flex: 1;
+
+            min-width: 0;
+        }
+
+        .url-input-wrap i {
+            position: absolute;
+
+            top: 50%;
+            left: 18px;
+
+            transform:
+                translateY(-50%);
+
+            color:
+                #638692;
+
+            font-size: 0.84rem;
+        }
+
+
+        .url-input {
+            width: 100%;
+            height: 57px;
+
+            padding:
+                0 18px
+                0 47px;
+
+            border: 0;
+
+            border-radius: 8px;
+
+            outline: 0;
+
+            color:
+                #e5eef1;
+
+            background:
+                rgba(10, 24, 33, 0.92);
+
+            caret-color:
+                var(--accent);
+
+            font-size:
+                0.91rem;
+        }
+
+        .url-input::placeholder {
+            color:
+                #4f626d;
+        }
+
+        .url-input:-webkit-autofill,
+        .url-input:-webkit-autofill:hover,
+        .url-input:-webkit-autofill:focus {
+            -webkit-text-fill-color:
+                #e5eef1;
+
+            -webkit-box-shadow:
+                0 0 0 1000px
+                #0a1821
+                inset;
+
+            caret-color:
+                var(--accent);
+        }
+
+
+        .scan-button {
+            position: relative;
+
+            z-index: 2;
+
+            min-width: 175px;
+
+            overflow: hidden;
+
+            border:
+                1px solid
+                var(--accent);
+
+            border-radius: 8px;
+
+            color:
+                #041216;
+
+            background:
+                var(--accent);
+
+            font-size:
+                0.77rem;
+
+            font-weight: 800;
+
+            letter-spacing:
+                0.03em;
+
+            transition:
+                transform 0.2s ease,
+                background-color 0.2s ease;
+        }
+
+        .scan-button::before {
+            content: "";
+
+            position: absolute;
+
+            top: -25%;
+            left: -100px;
+
+            width: 55px;
+            height: 150%;
+
+            transform:
+                rotate(16deg);
+
+            background:
+                rgba(255, 255, 255, 0.20);
+
+            transition:
+                left 0.55s ease;
+        }
+
+        .scan-button:hover {
+            transform:
+                translateY(-1px);
+        }
+
+        .scan-button:hover::before {
+            left: 130%;
+        }
+
+        .scan-button:disabled {
+            opacity: 0.75;
+
+            cursor: wait;
+
+            transform: none;
+        }
+
+
+        .scan-meta {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+
+            gap: 18px;
+
+            margin-top: 13px;
+
+            color:
+                #566b76;
+
+            font-size:
+                0.68rem;
+        }
+
+        .scan-meta span,
+        .scan-meta a {
+            display: inline-flex;
+            align-items: center;
+
+            gap: 6px;
+        }
+
+        .scan-meta i {
+            color:
+                #6f98a4;
+        }
+
+        .scan-meta a {
+            color:
+                #607581;
+
+            text-decoration: none;
+
+            transition:
+                color 0.2s ease;
+        }
+
+        .scan-meta a:hover {
+            color:
+                var(--accent);
+        }
+
+
+        .scan-error {
+            display: flex;
+
+            gap: 9px;
+
+            margin-top: 16px;
+
+            padding:
+                13px 15px;
+
+            border:
+                1px solid
+                rgba(239, 68, 68, 0.25);
+
+            border-radius: 9px;
+
+            color:
+                #f0b7b7;
+
+            background:
+                rgba(239, 68, 68, 0.055);
+
+            font-size:
+                0.79rem;
+        }
+
+        .scan-error i {
+            color:
+                #ef6a6a;
+        }
+
+
+        /* =========================================================
+           NEW SECURITY MATRIX
+           NO CIRCLES
+        ========================================================= */
+
+        .matrix-stage {
+            position: relative;
+
+            min-height: 580px;
+
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 10px;
-            color: #fbbf24;
-            background: rgba(245, 158, 11, 0.1);
+
+            perspective: 1200px;
         }
 
-        .warning-information strong {
+
+        .matrix-shadow {
+            position: absolute;
+
+            width: 84%;
+            height: 62%;
+
+            background:
+                rgba(27, 160, 181, 0.06);
+
+            filter: blur(70px);
+
+            transform:
+                translateY(50px)
+                rotate(-8deg);
+        }
+
+
+        .matrix-frame {
+            position: relative;
+
+            width: min(
+                100%,
+                530px
+            );
+
+            overflow: hidden;
+
+            border:
+                1px solid
+                rgba(119, 166, 180, 0.19);
+
+            border-radius: 8px;
+
+            background:
+                linear-gradient(
+                    155deg,
+                    rgba(13, 30, 39, 0.92),
+                    rgba(5, 14, 20, 0.92)
+                );
+
+            box-shadow:
+                0 45px 110px
+                rgba(0, 0, 0, 0.28);
+
+            transform:
+                rotateY(-8deg)
+                rotateX(3deg);
+
+            transform-style:
+                preserve-3d;
+
+            transition:
+                transform 0.25s ease-out;
+        }
+
+
+        .matrix-frame::before {
+            content: "";
+
+            position: absolute;
+
+            z-index: 0;
+
+            inset: 0;
+
+            opacity: 0.14;
+
+            background-image:
+                linear-gradient(
+                    rgba(89, 213, 230, 0.12) 1px,
+                    transparent 1px
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(89, 213, 230, 0.12) 1px,
+                    transparent 1px
+                );
+
+            background-size:
+                28px 28px;
+
+            animation:
+                matrixGridMove
+                10s linear
+                infinite;
+        }
+
+        @keyframes matrixGridMove {
+            to {
+                background-position:
+                    28px 28px;
+            }
+        }
+
+
+        .matrix-scan-line {
+            position: absolute;
+
+            z-index: 5;
+
+            left: 0;
+            right: 0;
+
+            height: 1px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(89, 213, 230, 0.9),
+                    transparent
+                );
+
+            box-shadow:
+                0 0 18px
+                rgba(89, 213, 230, 0.26);
+
+            animation:
+                matrixScan
+                4.1s ease-in-out
+                infinite;
+        }
+
+        @keyframes matrixScan {
+            0% {
+                top: 2%;
+                opacity: 0;
+            }
+
+            12% {
+                opacity: 0.75;
+            }
+
+            85% {
+                opacity: 0.55;
+            }
+
+            100% {
+                top: 98%;
+                opacity: 0;
+            }
+        }
+
+
+        .matrix-header {
+            position: relative;
+            z-index: 3;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding:
+                18px 20px;
+
+            border-bottom:
+                1px solid
+                rgba(150, 180, 193, 0.09);
+        }
+
+        .matrix-header-left {
+            display: flex;
+            align-items: center;
+
+            gap: 9px;
+        }
+
+        .matrix-terminal-mark {
+            width: 8px;
+            height: 8px;
+
+            background:
+                var(--accent);
+
+            box-shadow:
+                0 0 12px
+                rgba(89, 213, 230, 0.35);
+        }
+
+        .matrix-header strong {
+            color:
+                #d5e2e6;
+
+            font-size:
+                0.72rem;
+
+            letter-spacing:
+                0.08em;
+        }
+
+        .matrix-header small {
+            color:
+                #536c78;
+
+            font-size:
+                0.59rem;
+
+            letter-spacing:
+                0.1em;
+        }
+
+
+        .matrix-body {
+            position: relative;
+            z-index: 3;
+
+            padding:
+                22px;
+        }
+
+
+        .matrix-address {
+            display: flex;
+            align-items: center;
+
+            gap: 10px;
+
+            margin-bottom: 22px;
+
+            padding:
+                12px 13px;
+
+            border:
+                1px solid
+                rgba(138, 174, 187, 0.10);
+
+            background:
+                rgba(3, 11, 16, 0.44);
+
+            color:
+                #677e89;
+
+            font-size:
+                0.67rem;
+        }
+
+        .matrix-address i {
+            color:
+                var(--accent);
+        }
+
+
+        .matrix-module-list {
+            display: grid;
+
+            gap: 8px;
+        }
+
+        .matrix-module {
+            position: relative;
+
+            display: grid;
+
+            grid-template-columns:
+                34px
+                1fr
+                auto;
+
+            align-items: center;
+
+            gap: 13px;
+
+            min-height: 62px;
+
+            padding:
+                10px 13px;
+
+            overflow: hidden;
+
+            border:
+                1px solid
+                rgba(140, 174, 188, 0.10);
+
+            background:
+                rgba(8, 20, 27, 0.58);
+
+            transition:
+                border-color 0.25s ease,
+                transform 0.25s ease,
+                background-color 0.25s ease;
+        }
+
+        .matrix-module:hover {
+            transform:
+                translateX(4px);
+
+            border-color:
+                rgba(89, 213, 230, 0.25);
+
+            background:
+                rgba(10, 27, 36, 0.74);
+        }
+
+        .matrix-module::before {
+            content: "";
+
+            position: absolute;
+
+            top: 0;
+            bottom: 0;
+            left: 0;
+
+            width: 1px;
+
+            background:
+                var(--accent);
+
+            opacity: 0;
+
+            transition:
+                opacity 0.25s ease;
+        }
+
+        .matrix-module:hover::before {
+            opacity: 1;
+        }
+
+
+        .matrix-module-icon {
+            width: 32px;
+            height: 32px;
+
+            display: grid;
+            place-items: center;
+
+            border:
+                1px solid
+                rgba(89, 213, 230, 0.14);
+
+            color:
+                #74aab4;
+
+            background:
+                rgba(89, 213, 230, 0.035);
+
+            font-size: 0.72rem;
+        }
+
+
+        .matrix-module-copy strong {
             display: block;
-            margin-bottom: 4px;
-            color: #fbbf24;
+
+            margin-bottom: 3px;
+
+            color:
+                #b8c8cf;
+
+            font-size:
+                0.68rem;
+
+            font-weight: 700;
         }
 
-        .warning-information p {
+        .matrix-module-copy small {
+            display: block;
+
+            color:
+                #50636d;
+
+            font-size:
+                0.57rem;
+        }
+
+
+        .module-ready {
+            color:
+                #6a9099;
+
+            font-size:
+                0.55rem;
+
+            letter-spacing:
+                0.09em;
+        }
+
+
+        .matrix-footer {
+            position: relative;
+            z-index: 3;
+
+            display: flex;
+            justify-content: space-between;
+
+            gap: 20px;
+
+            padding:
+                17px 20px;
+
+            border-top:
+                1px solid
+                rgba(150, 180, 193, 0.09);
+
+            color:
+                #526873;
+
+            font-size:
+                0.58rem;
+
+            letter-spacing:
+                0.05em;
+        }
+
+
+        /* Floating matrix fragments */
+
+        .matrix-fragment {
+            position: absolute;
+
+            z-index: 10;
+
+            display: flex;
+            align-items: center;
+
+            gap: 8px;
+
+            padding:
+                10px 12px;
+
+            border:
+                1px solid
+                rgba(110, 164, 177, 0.14);
+
+            background:
+                rgba(6, 17, 23, 0.70);
+
+            backdrop-filter:
+                blur(9px);
+
+            color:
+                #718b95;
+
+            font-size:
+                0.58rem;
+
+            letter-spacing:
+                0.08em;
+
+            animation:
+                fragmentFloat
+                5s ease-in-out
+                infinite alternate;
+        }
+
+        .matrix-fragment i {
+            color:
+                var(--accent);
+        }
+
+        .fragment-one {
+            top: 13%;
+            left: -8%;
+
+            animation-delay:
+                -1s;
+        }
+
+        .fragment-two {
+            right: -5%;
+            top: 28%;
+
+            animation-delay:
+                -3s;
+        }
+
+        .fragment-three {
+            bottom: 13%;
+            left: -4%;
+
+            animation-delay:
+                -2s;
+        }
+
+        @keyframes fragmentFloat {
+            to {
+                transform:
+                    translateY(-9px);
+            }
+        }
+
+
+        /* =========================================================
+           SCROLL INDICATOR
+        ========================================================= */
+
+        .hero-scroll {
+            position: absolute;
+
+            left: 50%;
+            bottom: 24px;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            gap: 9px;
+
+            transform:
+                translateX(-50%);
+
+            color:
+                #3f535d;
+
+            font-size: 0.55rem;
+
+            letter-spacing:
+                0.16em;
+
+            text-transform: uppercase;
+        }
+
+        .scroll-track {
+            position: relative;
+
+            width: 1px;
+            height: 35px;
+
+            overflow: hidden;
+
+            background:
+                rgba(120, 160, 175, 0.12);
+        }
+
+        .scroll-track::after {
+            content: "";
+
+            position: absolute;
+
+            top: -50%;
+
+            width: 100%;
+            height: 50%;
+
+            background:
+                var(--accent);
+
+            animation:
+                scrollIndicator
+                1.9s ease-in-out
+                infinite;
+        }
+
+        @keyframes scrollIndicator {
+            to {
+                top: 120%;
+            }
+        }
+
+
+        /* =========================================================
+           SECTION SHARED
+        ========================================================= */
+
+        .site-section {
+            position: relative;
+
+            padding:
+                115px 0;
+        }
+
+        .section-heading {
+            max-width: 760px;
+
+            margin-bottom: 55px;
+        }
+
+        .section-label {
+            display: block;
+
+            margin-bottom: 14px;
+
+            color:
+                #6ba3ae;
+
+            font-size:
+                0.61rem;
+
+            font-weight: 750;
+
+            letter-spacing:
+                0.16em;
+
+            text-transform: uppercase;
+        }
+
+        .section-heading h2 {
             margin: 0;
-            color: #94a3b8;
-            font-size: 0.86rem;
+
+            color:
+                #e6eef0;
+
+            font-size:
+                clamp(
+                    2.2rem,
+                    4.4vw,
+                    4.25rem
+                );
+
+            font-weight: 680;
+
+            line-height: 1.04;
+
+            letter-spacing:
+                -0.045em;
+        }
+
+        .section-heading p {
+            max-width: 580px;
+
+            margin:
+                20px 0 0;
+
+            color:
+                #687c86;
+
+            font-size:
+                0.87rem;
+
+            line-height: 1.75;
+        }
+
+
+        /* =========================================================
+           CAPABILITIES
+        ========================================================= */
+
+        .capabilities {
+            border-top:
+                1px solid
+                rgba(145, 175, 188, 0.06);
+
+            border-bottom:
+                1px solid
+                rgba(145, 175, 188, 0.06);
+        }
+
+        .capability-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            border:
+                1px solid
+                rgba(139, 172, 185, 0.10);
+
+            background:
+                rgba(5, 15, 21, 0.40);
+
+            backdrop-filter:
+                blur(10px);
+        }
+
+        .capability {
+            position: relative;
+
+            min-height: 260px;
+
+            padding:
+                30px 27px;
+
+            overflow: hidden;
+
+            border-right:
+                1px solid
+                rgba(139, 172, 185, 0.10);
+
+            transition:
+                background-color 0.35s ease;
+        }
+
+        .capability:last-child {
+            border-right: 0;
+        }
+
+        .capability::before {
+            content: "";
+
+            position: absolute;
+
+            top: 0;
+            left: 0;
+
+            width: 100%;
+            height: 1px;
+
+            transform:
+                scaleX(0);
+
+            transform-origin:
+                left;
+
+            background:
+                var(--accent);
+
+            transition:
+                transform 0.4s ease;
+        }
+
+        .capability:hover {
+            background:
+                rgba(89, 213, 230, 0.025);
+        }
+
+        .capability:hover::before {
+            transform:
+                scaleX(1);
+        }
+
+
+        .cap-number {
+            margin-bottom: 50px;
+
+            color:
+                #435861;
+
+            font-size:
+                0.61rem;
+
+            letter-spacing:
+                0.14em;
+        }
+
+        .capability-icon {
+            margin-bottom: 18px;
+
+            color:
+                var(--accent);
+
+            font-size:
+                1rem;
+        }
+
+        .capability h3 {
+            margin:
+                0 0 11px;
+
+            color:
+                #cbd7db;
+
+            font-size:
+                0.90rem;
+
+            font-weight: 700;
+        }
+
+        .capability p {
+            margin: 0;
+
+            color:
+                #647681;
+
+            font-size:
+                0.74rem;
+
+            line-height: 1.7;
+        }
+
+
+        /* =========================================================
+           FLOW
+        ========================================================= */
+
+        .process-layout {
+            display: grid;
+
+            grid-template-columns:
+                0.8fr
+                1.2fr;
+
+            gap:
+                clamp(
+                    70px,
+                    10vw,
+                    170px
+                );
+
+            align-items: start;
+        }
+
+        .process-title {
+            position: sticky;
+
+            top:
+                calc(
+                    var(--nav-height)
+                    + 50px
+                );
+        }
+
+
+        .process-list {
+            border-top:
+                1px solid
+                rgba(139, 172, 185, 0.11);
+        }
+
+        .process-item {
+            position: relative;
+
+            display: grid;
+
+            grid-template-columns:
+                55px
+                1fr
+                30px;
+
+            gap: 16px;
+
+            align-items: start;
+
+            padding:
+                30px 0;
+
+            border-bottom:
+                1px solid
+                rgba(139, 172, 185, 0.11);
+
+            transition:
+                padding-left 0.3s ease;
+        }
+
+        .process-item:hover {
+            padding-left: 10px;
+        }
+
+        .process-number {
+            color:
+                #47606b;
+
+            font-size:
+                0.62rem;
+
+            letter-spacing:
+                0.12em;
+        }
+
+        .process-copy h3 {
+            margin:
+                0 0 7px;
+
+            color:
+                #cdd9dd;
+
+            font-size:
+                0.90rem;
+        }
+
+        .process-copy p {
+            max-width: 430px;
+
+            margin: 0;
+
+            color:
+                #5c707a;
+
+            font-size:
+                0.74rem;
+
+            line-height: 1.7;
+        }
+
+        .process-arrow {
+            color:
+                #4b6873;
+
+            transition:
+                color 0.2s ease,
+                transform 0.2s ease;
+        }
+
+        .process-item:hover
+        .process-arrow {
+            color:
+                var(--accent);
+
+            transform:
+                translateX(4px);
+        }
+
+
+        /* =========================================================
+           FINAL CTA
+        ========================================================= */
+
+        .final-section {
+            padding:
+                120px 0 130px;
+        }
+
+        .final-panel {
+            position: relative;
+
+            min-height: 370px;
+
+            display: flex;
+            align-items: center;
+
+            overflow: hidden;
+
+            padding:
+                clamp(
+                    40px,
+                    7vw,
+                    90px
+                );
+
+            border:
+                1px solid
+                rgba(136, 172, 186, 0.12);
+
+            background:
+                rgba(6, 17, 23, 0.62);
+
+            backdrop-filter:
+                blur(15px);
+        }
+
+        .final-panel::before {
+            content: "";
+
+            position: absolute;
+
+            inset: 0;
+
+            opacity: 0.18;
+
+            background-image:
+                linear-gradient(
+                    rgba(89, 213, 230, 0.1) 1px,
+                    transparent 1px
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(89, 213, 230, 0.1) 1px,
+                    transparent 1px
+                );
+
+            background-size:
+                38px 38px;
+
+            mask-image:
+                linear-gradient(
+                    90deg,
+                    transparent,
+                    #000
+                );
+
+            animation:
+                finalGridMove
+                13s linear
+                infinite;
+        }
+
+        @keyframes finalGridMove {
+            to {
+                background-position:
+                    38px 38px;
+            }
+        }
+
+
+        .final-copy {
+            position: relative;
+            z-index: 3;
+
+            max-width: 720px;
+        }
+
+        .final-copy h2 {
+            margin:
+                0 0 18px;
+
+            color:
+                #e5eef0;
+
+            font-size:
+                clamp(
+                    2.3rem,
+                    5vw,
+                    4.6rem
+                );
+
+            line-height: 1;
+
+            font-weight: 680;
+
+            letter-spacing:
+                -0.05em;
+        }
+
+        .final-copy p {
+            max-width: 520px;
+
+            margin:
+                0 0 28px;
+
+            color:
+                #6a7e88;
+
+            font-size:
+                0.84rem;
+
+            line-height: 1.75;
+        }
+
+        .final-action {
+            display: inline-flex;
+            align-items: center;
+
+            gap: 10px;
+
+            padding:
+                13px 18px;
+
+            border:
+                1px solid
+                rgba(89, 213, 230, 0.36);
+
+            color:
+                #b9d9df;
+
+            background:
+                rgba(89, 213, 230, 0.04);
+
+            text-decoration: none;
+
+            font-size:
+                0.72rem;
+
+            font-weight: 700;
+
+            transition:
+                background-color 0.25s ease,
+                transform 0.25s ease;
+        }
+
+        .final-action:hover {
+            transform:
+                translateY(-2px);
+
+            background:
+                rgba(89, 213, 230, 0.09);
+        }
+
+
+        /* =========================================================
+           FOOTER
+        ========================================================= */
+
+        .site-footer {
+            border-top:
+                1px solid
+                rgba(138, 171, 185, 0.07);
+
+            background:
+                rgba(3, 9, 13, 0.54);
+        }
+
+        .footer-inner {
+            width:
+                min(
+                    1380px,
+                    calc(100% - 80px)
+                );
+
+            min-height: 110px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 25px;
+
+            margin: auto;
+
+            color:
+                #435760;
+
+            font-size:
+                0.65rem;
+        }
+
+        .footer-brand {
+            display: flex;
+            align-items: center;
+
+            gap: 8px;
+
+            color:
+                #617985;
+        }
+
+        .footer-brand i {
+            color:
+                var(--accent);
+        }
+
+        .footer-links {
+            display: flex;
+
+            gap: 20px;
+        }
+
+        .footer-links a {
+            color:
+                #51666f;
+
+            text-decoration: none;
+
+            transition:
+                color 0.2s ease;
+        }
+
+        .footer-links a:hover {
+            color:
+                var(--accent);
+        }
+
+
+        /* =========================================================
+           SCAN TRANSITION
+        ========================================================= */
+
+        .scan-transition {
+            position: fixed;
+
+            z-index: 9999;
+
+            inset: 0;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            visibility: hidden;
+
+            opacity: 0;
+
+            background:
+                rgba(3, 9, 13, 0.96);
+
+            transition:
+                opacity 0.25s ease,
+                visibility 0.25s ease;
+        }
+
+        .scan-transition.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .transition-content {
+            width:
+                min(
+                    440px,
+                    calc(100% - 50px)
+                );
+
+            text-align: center;
+        }
+
+        .transition-icon {
+            position: relative;
+
+            width: 74px;
+            height: 74px;
+
+            display: grid;
+            place-items: center;
+
+            margin:
+                0 auto
+                28px;
+
+            border:
+                1px solid
+                rgba(89, 213, 230, 0.32);
+
+            color:
+                var(--accent);
+
+            font-size:
+                1.5rem;
+        }
+
+        .transition-icon::before {
+            content: "";
+
+            position: absolute;
+
+            left: -20px;
+            right: -20px;
+
+            height: 1px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    transparent,
+                    var(--accent),
+                    transparent
+                );
+
+            animation:
+                transitionScan
+                1.15s ease-in-out
+                infinite;
+        }
+
+        @keyframes transitionScan {
+            from {
+                top: 7px;
+            }
+
+            to {
+                top: 66px;
+            }
+        }
+
+        .transition-content strong {
+            display: block;
+
+            color:
+                #dbe7ea;
+
+            font-size:
+                0.91rem;
+
+            letter-spacing:
+                0.03em;
+        }
+
+        .transition-content p {
+            margin:
+                8px 0 20px;
+
+            color:
+                #536974;
+
+            font-size:
+                0.71rem;
+        }
+
+        .transition-bar {
+            position: relative;
+
+            width: 100%;
+            height: 2px;
+
+            overflow: hidden;
+
+            background:
+                rgba(120, 159, 173, 0.10);
+        }
+
+        .transition-bar::after {
+            content: "";
+
+            position: absolute;
+
+            left: -35%;
+
+            width: 35%;
+            height: 100%;
+
+            background:
+                var(--accent);
+
+            animation:
+                transitionBarMove
+                0.9s linear
+                infinite;
+        }
+
+        @keyframes transitionBarMove {
+            to {
+                left: 110%;
+            }
+        }
+
+
+        /* =========================================================
+           REVEAL ANIMATION
+        ========================================================= */
+
+        .reveal {
+            opacity: 0;
+
+            transform:
+                translateY(30px);
+
+            transition:
+                opacity 0.85s ease,
+                transform 0.85s
+                cubic-bezier(
+                    0.22,
+                    1,
+                    0.36,
+                    1
+                );
+        }
+
+        .reveal.visible {
+            opacity: 1;
+
+            transform:
+                translateY(0);
+        }
+
+
+        .hero-reveal {
+            opacity: 0;
+
+            transform:
+                translateY(25px);
+
+            animation:
+                heroReveal
+                0.9s
+                cubic-bezier(
+                    0.22,
+                    1,
+                    0.36,
+                    1
+                )
+                forwards;
+        }
+
+        .hero-delay-1 {
+            animation-delay:
+                0.08s;
+        }
+
+        .hero-delay-2 {
+            animation-delay:
+                0.17s;
+        }
+
+        .hero-delay-3 {
+            animation-delay:
+                0.28s;
+        }
+
+        .hero-delay-4 {
+            animation-delay:
+                0.38s;
+        }
+
+        @keyframes heroReveal {
+            to {
+                opacity: 1;
+
+                transform:
+                    translateY(0);
+            }
+        }
+
+
+        /* =========================================================
+           RESPONSIVE
+        ========================================================= */
+
+        @media (
+            max-width: 1100px
+        ) {
+
+            .hero-layout {
+                grid-template-columns:
+                    1fr;
+
+                gap: 30px;
+            }
+
+            .hero {
+                padding-top:
+                    135px;
+            }
+
+            .matrix-stage {
+                min-height:
+                    520px;
+
+                margin-top:
+                    15px;
+            }
+
+            .matrix-frame {
+                width:
+                    min(
+                        620px,
+                        90%
+                    );
+
+                transform: none;
+            }
+
+            .fragment-one {
+                left: 2%;
+            }
+
+            .fragment-two {
+                right: 2%;
+            }
+
+            .fragment-three {
+                left: 4%;
+            }
+
+            .capability-grid {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+            .capability:nth-child(2) {
+                border-right: 0;
+            }
+
+            .capability:nth-child(-n+2) {
+                border-bottom:
+                    1px solid
+                    rgba(139, 172, 185, 0.10);
+            }
+
+            .process-layout {
+                grid-template-columns:
+                    1fr;
+
+                gap: 50px;
+            }
+
+            .process-title {
+                position: static;
+            }
+
+        }
+
+
+        @media (
+            max-width: 700px
+        ) {
+
+            :root {
+                --nav-height:
+                    66px;
+            }
+
+            .nav-inner,
+            .page-width,
+            .footer-inner {
+                width:
+                    calc(
+                        100% - 36px
+                    );
+            }
+
+            .brand {
+                font-size:
+                    0.74rem;
+            }
+
+            .nav-link {
+                padding:
+                    8px 9px;
+
+                font-size:
+                    0.69rem;
+            }
+
+            .hero {
+                min-height:
+                    auto;
+
+                padding:
+                    125px 0
+                    80px;
+            }
+
+            .hero-title {
+                font-size:
+                    clamp(
+                        3rem,
+                        15vw,
+                        4.7rem
+                    );
+            }
+
+            .hero-description {
+                font-size:
+                    0.87rem;
+            }
+
+            .scan-form-shell {
+                flex-direction:
+                    column;
+            }
+
+            .scan-button {
+                min-height:
+                    53px;
+            }
+
+            .matrix-stage {
+                min-height:
+                    475px;
+            }
+
+            .matrix-frame {
+                width: 100%;
+            }
+
+            .matrix-fragment {
+                display: none;
+            }
+
+            .matrix-frame {
+                transform: none !important;
+            }
+
+            .site-section {
+                padding:
+                    85px 0;
+            }
+
+            .capability-grid {
+                grid-template-columns:
+                    1fr;
+            }
+
+            .capability {
+                border-right: 0;
+
+                border-bottom:
+                    1px solid
+                    rgba(139, 172, 185, 0.10);
+            }
+
+            .capability:last-child {
+                border-bottom: 0;
+            }
+
+            .final-section {
+                padding:
+                    75px 0
+                    90px;
+            }
+
+            .footer-inner {
+                flex-direction:
+                    column;
+
+                justify-content:
+                    center;
+
+                padding:
+                    24px 0;
+            }
+
+            .hero-scroll {
+                display: none;
+            }
+
+            .pointer-light {
+                display: none;
+            }
+
+        }
+
+
+        @media (
+            prefers-reduced-motion:
+            reduce
+        ) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration:
+                    0.01ms !important;
+
+                animation-iteration-count:
+                    1 !important;
+
+                transition-duration:
+                    0.01ms !important;
+            }
+
+        }
+
+
+        /* =========================================================
+           FINAL GLOBAL TYPOGRAPHY SYSTEM
+           Keeps font sizing consistent across the entire page
+        ========================================================= */
+
+        html {
+            font-size: 16px;
+        }
+
+        body,
+        button,
+        input,
+        textarea,
+        select {
+            font-family:
+                "Segoe UI",
+                Arial,
+                sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p,
+        span,
+        a,
+        button,
+        input,
+        small,
+        strong {
+            font-family: inherit;
+        }
+
+
+        /* =========================================================
+           NAVIGATION
+        ========================================================= */
+
+        .brand {
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .nav-link {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+
+        /* =========================================================
+           HERO
+        ========================================================= */
+
+        .hero-overline {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.13em;
+        }
+
+        .hero-title {
+            max-width: 760px;
+
+            font-size:
+                clamp(
+                    3.4rem,
+                    5vw,
+                    5.4rem
+                );
+
+            line-height: 0.98;
+
+            font-weight: 700;
+
+            letter-spacing: -0.045em;
+        }
+
+        .hero-description {
+            max-width: 650px;
+
+            font-size: 1.05rem;
+
+            line-height: 1.75;
+
+            font-weight: 400;
+        }
+
+
+        /* =========================================================
+           URL INPUT
+        ========================================================= */
+
+        .url-input {
+            font-size: 1rem;
+        }
+
+        .scan-button {
+            font-size: 0.88rem;
+            font-weight: 700;
+        }
+
+        .scan-meta {
+            font-size: 0.78rem;
+        }
+
+        .scan-error {
+            font-size: 0.88rem;
+        }
+
+
+        /* =========================================================
+           MATRIX / ANALYSIS PIPELINE
+        ========================================================= */
+
+        .matrix-header strong {
+            font-size: 0.82rem;
+            font-weight: 650;
+        }
+
+        .matrix-header small {
+            font-size: 0.7rem;
+        }
+
+        .matrix-address {
+            font-size: 0.78rem;
+        }
+
+        .matrix-module-copy strong {
+            font-size: 0.88rem;
+            font-weight: 650;
+        }
+
+        .matrix-module-copy small {
+            font-size: 0.76rem;
+            line-height: 1.45;
+        }
+
+        .module-ready {
+            font-size: 0.68rem;
+        }
+
+        .matrix-footer {
+            font-size: 0.68rem;
+        }
+
+        .matrix-fragment {
+            font-size: 0.7rem;
+        }
+
+
+        /* =========================================================
+           GLOBAL SECTION HEADINGS
+        ========================================================= */
+
+        .section-label {
+            font-size: 0.76rem;
+
+            font-weight: 600;
+
+            letter-spacing: 0.13em;
+        }
+
+        .section-heading {
+            max-width: 720px;
+        }
+
+        .section-heading h2 {
+            font-size:
+                clamp(
+                    2.35rem,
+                    3.5vw,
+                    3.5rem
+                );
+
+            line-height: 1.08;
+
+            font-weight: 650;
+
+            letter-spacing: -0.035em;
+        }
+
+        .section-heading p {
+            max-width: 620px;
+
+            font-size: 1rem;
+
+            line-height: 1.7;
+
+            font-weight: 400;
+        }
+
+
+        /* =========================================================
+           CAPABILITY CARDS
+        ========================================================= */
+
+        .cap-number {
+            font-size: 0.72rem;
+        }
+
+        .capability-icon {
+            font-size: 1.05rem;
+        }
+
+        .capability h3 {
+            margin-bottom: 10px;
+
+            font-size: 1.05rem;
+
+            line-height: 1.35;
+
+            font-weight: 650;
+        }
+
+        .capability p {
+            font-size: 0.9rem;
+
+            line-height: 1.65;
+
+            font-weight: 400;
+        }
+
+
+        /* =========================================================
+           PROCESS SECTION
+        ========================================================= */
+
+        .process-number {
+            font-size: 0.72rem;
+        }
+
+        .process-copy h3 {
+            font-size: 1.08rem;
+
+            line-height: 1.35;
+
+            font-weight: 650;
+        }
+
+        .process-copy p {
+            max-width: 470px;
+
+            font-size: 0.9rem;
+
             line-height: 1.65;
         }
 
 
-        /* =====================================================
-           WORKFLOW
-        ===================================================== */
+        /* =========================================================
+           FINAL CTA
+        ========================================================= */
 
-        .home-workflow-card {
-            height: 100%;
-            padding: 23px;
-            border: 1px solid rgba(148, 163, 184, 0.09);
-            border-radius: 16px;
-            background: rgba(15, 23, 42, 0.48);
+        .final-copy h2 {
+            font-size:
+                clamp(
+                    2.4rem,
+                    3.7vw,
+                    3.8rem
+                );
+
+            line-height: 1.06;
+
+            font-weight: 650;
+
+            letter-spacing: -0.035em;
         }
 
-        .home-workflow-step {
-            display: inline-block;
-            margin-bottom: 14px;
-            color: #22d3ee;
-            font-size: 0.7rem;
-            font-weight: 900;
-            letter-spacing: 0.1em;
+        .final-copy p {
+            font-size: 1rem;
+
+            line-height: 1.7;
         }
 
-        .home-workflow-card h5 {
-            color: #f1f5f9;
-        }
+        .final-action {
+            font-size: 0.88rem;
 
-        .home-workflow-card p {
-            margin: 0;
-            color: #94a3b8;
-            font-size: 0.86rem;
-            line-height: 1.6;
+            font-weight: 600;
         }
 
 
-        /* =====================================================
-           RESPONSIVE
-        ===================================================== */
+        /* =========================================================
+           FOOTER
+        ========================================================= */
 
-        @media (max-width: 991.98px) {
-
-            .new-home-hero {
-                min-height: auto;
-                padding-top: 110px;
-            }
-
-            .signal-panel {
-                margin-top: 12px;
-            }
-
+        .footer-inner {
+            font-size: 0.8rem;
         }
 
-        @media (max-width: 767.98px) {
 
-            .new-home-hero {
-                padding: 100px 0 55px;
+        /* =========================================================
+           DESKTOP LARGE SCREEN
+        ========================================================= */
+
+        @media (min-width: 1500px) {
+
+            html {
+                font-size: 17px;
             }
 
-            .hero-title-new {
-                font-size: 2.65rem;
+            .hero-title {
+                font-size:
+                    clamp(
+                        4rem,
+                        4.7vw,
+                        5.6rem
+                    );
             }
 
-            .hero-scanner-form {
-                flex-direction: column;
-            }
-
-            .hero-scan-button {
-                width: 100%;
-                min-height: 51px;
-            }
-
-            .hero-scanner-input input {
-                height: 51px;
-            }
-
-            .signal-panel {
-                padding: 20px;
-            }
-
-            .security-signal-map {
-                height: 330px;
-            }
-
-            .signal-node {
-                width: 135px;
-            }
-
-            .signal-core {
-                width: 112px;
-                height: 112px;
-            }
-
-            .homepage-section {
-                padding: 62px 0;
+            .section-heading h2 {
+                font-size:
+                    clamp(
+                        2.5rem,
+                        3vw,
+                        3.55rem
+                    );
             }
 
         }
 
-        @media (max-width: 430px) {
 
-            .hero-title-new {
-                font-size: 2.35rem;
+        /* =========================================================
+           TABLET
+        ========================================================= */
+
+        @media (max-width: 1100px) {
+
+            html {
+                font-size: 16px;
             }
 
-            .hero-description-new {
+            .hero-title {
+                font-size:
+                    clamp(
+                        3.2rem,
+                        7vw,
+                        4.8rem
+                    );
+            }
+
+            .section-heading h2 {
+                font-size:
+                    clamp(
+                        2.2rem,
+                        5vw,
+                        3.2rem
+                    );
+            }
+
+        }
+
+
+        /* =========================================================
+           MOBILE
+        ========================================================= */
+
+        @media (max-width: 700px) {
+
+            html {
+                font-size: 15px;
+            }
+
+            .brand {
+                font-size: 0.86rem;
+            }
+
+            .nav-link {
+                font-size: 0.82rem;
+            }
+
+            .hero-overline {
+                font-size: 0.68rem;
+            }
+
+            .hero-title {
+                font-size:
+                    clamp(
+                        2.75rem,
+                        13vw,
+                        4rem
+                    );
+
+                line-height: 1;
+            }
+
+            .hero-description {
+                font-size: 0.95rem;
+            }
+
+            .url-input {
                 font-size: 0.94rem;
             }
 
-            .security-signal-map {
-                height: 305px;
+            .scan-button {
+                font-size: 0.84rem;
             }
 
-            .signal-node {
-                width: 122px;
-                padding: 10px;
+            .scan-meta {
+                font-size: 0.72rem;
             }
 
-            .signal-node strong {
-                font-size: 0.7rem;
+            .section-label {
+                font-size: 0.68rem;
             }
 
-            .signal-node p {
-                display: none;
+            .section-heading h2 {
+                font-size:
+                    clamp(
+                        2rem,
+                        10vw,
+                        2.8rem
+                    );
+
+                line-height: 1.08;
             }
 
-            .signal-core {
-                width: 96px;
-                height: 96px;
+            .section-heading p {
+                font-size: 0.92rem;
             }
 
-            .signal-core i {
-                font-size: 1.6rem;
+            .capability h3 {
+                font-size: 1rem;
             }
 
-            .signal-core strong {
-                font-size: 0.7rem;
+            .capability p {
+                font-size: 0.86rem;
+            }
+
+            .process-copy h3 {
+                font-size: 1rem;
+            }
+
+            .process-copy p {
+                font-size: 0.86rem;
+            }
+
+            .final-copy h2 {
+                font-size:
+                    clamp(
+                        2.1rem,
+                        10vw,
+                        3rem
+                    );
+            }
+
+            .final-copy p {
+                font-size: 0.92rem;
             }
 
         }
@@ -801,1156 +3481,2224 @@
 <body>
 
 
-<nav class="navbar navbar-expand-lg navbar-dark custom-navbar fixed-top">
+    <!-- =========================================================
+         ANIMATED CYBER WORLD
+    ========================================================== -->
 
-    <div class="container">
+    <div
+        class="cyber-world"
+        aria-hidden="true">
 
-        <a
-            class="navbar-brand fw-bold"
-            href="{{ url_for('home') }}">
-
-            <span class="brand-icon">
-                <i class="fa-solid fa-shield-halved"></i>
-            </span>
-
-            URL Security Analyzer
-
-        </a>
-
-
-        <button
-            class="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarNav"
-            aria-controls="navbarNav"
-            aria-expanded="false"
-            aria-label="Toggle navigation">
-
-            <span class="navbar-toggler-icon"></span>
-
-        </button>
-
+        <canvas id="cyberCanvas"></canvas>
 
         <div
-            class="collapse navbar-collapse"
-            id="navbarNav">
+            class="
+                cyber-aurora
+                cyber-aurora-one
+            ">
+        </div>
 
-            <ul class="navbar-nav ms-auto">
+        <div
+            class="
+                cyber-aurora
+                cyber-aurora-two
+            ">
+        </div>
 
-                <li class="nav-item">
+        <div class="cyber-floor"></div>
 
-                    <a
-                        class="nav-link active"
-                        href="{{ url_for('home') }}">
-                        Dashboard
-                    </a>
+        <div
+            class="
+                background-beam
+                beam-one
+            ">
+        </div>
 
-                </li>
+        <div
+            class="
+                background-beam
+                beam-two
+            ">
+        </div>
 
+        <div
+            class="
+                background-beam
+                beam-three
+            ">
+        </div>
 
-                <li class="nav-item">
+        <div
+            class="
+                data-streak
+                streak-one
+            ">
+        </div>
 
-                    <a
-                        class="nav-link"
-                        href="{{ url_for('history') }}">
-                        History
-                    </a>
+        <div
+            class="
+                data-streak
+                streak-two
+            ">
+        </div>
 
-                </li>
-
-            </ul>
-
+        <div
+            class="
+                data-streak
+                streak-three
+            ">
         </div>
 
     </div>
 
-</nav>
+
+    <div
+        id="pointerLight"
+        class="pointer-light"
+        aria-hidden="true">
+    </div>
+
+
+    <div
+        id="scrollProgress"
+        class="scroll-progress">
+    </div>
 
 
 
-<section class="new-home-hero">
+    <!-- =========================================================
+         NAVIGATION
+    ========================================================== -->
 
-    <div class="container hero-main-content">
+    <nav class="site-nav">
 
-        <div class="row align-items-center g-5">
-
-
-            <div class="col-lg-7">
-
-                <div class="hero-badge-new">
-
-                    <span></span>
-
-                    MULTI-LAYER URL THREAT ANALYSIS
-
-                </div>
+        <div class="nav-inner">
 
 
-                <h1 class="hero-title-new">
+            <a
+                class="brand"
+                href="{{ url_for('home') }}">
 
-                    Check a Link
+                <span class="brand-mark">
 
-                    <span>
-                        Before You Trust It
-                    </span>
+                    <i
+                        class="
+                            fa-solid
+                            fa-shield-halved
+                        ">
+                    </i>
 
-                </h1>
+                </span>
 
+                <span>
+                    URL SECURITY ANALYZER
+                </span>
 
-                <p class="hero-description-new">
-
-                    Inspect suspicious links using URL structure,
-                    domain identity, network security and external
-                    threat reputation before opening a website or
-                    entering sensitive information.
-
-                </p>
+            </a>
 
 
 
-                <div
-                    id="scanner"
-                    class="hero-scanner">
+            <div class="nav-links">
 
 
-                    <form
-                        id="scanForm"
-                        action="{{ url_for('analyze') }}"
-                        method="POST">
+                <a
+                    class="
+                        nav-link
+                        active
+                    "
+                    href="{{ url_for('home') }}">
 
-                        <div class="hero-scanner-form">
+                    Analyzer
+
+                </a>
 
 
-                            <div class="hero-scanner-input">
+                <a
+                    class="nav-link"
+                    href="{{ url_for('history') }}">
 
-                                <i class="fa-solid fa-link"></i>
+                    History
+
+                </a>
 
 
-                                <input
-                                    id="urlInput"
-                                    name="url"
-                                    type="text"
-                                    placeholder="https://example.com"
-                                    value="{{ entered_url or '' }}"
-                                    autocomplete="url"
-                                    autocapitalize="off"
-                                    inputmode="url"
-                                    spellcheck="false"
-                                    aria-label="Website URL"
-                                    required>
+            </div>
+
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- =========================================================
+         HERO
+    ========================================================== -->
+
+    <main>
+
+
+        <section class="hero">
+
+
+            <div class="page-width">
+
+
+                <div class="hero-layout">
+
+
+                    <!-- LEFT -->
+
+                    <div>
+
+
+                        <div
+                            class="
+                                hero-overline
+                                hero-reveal
+                            ">
+
+                            <span class="overline-line"></span>
+
+                            Multi-layer threat intelligence
+
+                        </div>
+
+
+
+                        <h1
+                            class="
+                                hero-title
+                                hero-reveal
+                                hero-delay-1
+                            ">
+
+                            Trust
+
+                            <span class="outline-word">
+                                nothing.
+                            </span>
+
+                            <span class="accent-word">
+                                Verify links.
+                            </span>
+
+                        </h1>
+
+
+
+                        <p
+                            class="
+                                hero-description
+                                hero-reveal
+                                hero-delay-2
+                            ">
+
+                            Investigate suspicious URLs before
+                            opening them. Analyze structure,
+                            domain identity, infrastructure,
+                            webpage behaviour and external
+                            threat reputation through a single
+                            security assessment.
+
+                        </p>
+
+
+
+                        <div
+                            id="scanner"
+                            class="
+                                scan-area
+                                hero-reveal
+                                hero-delay-3
+                            ">
+
+
+                            <form
+                                id="scanForm"
+                                action="{{ url_for('analyze') }}"
+                                method="POST">
+
+
+                                <div class="scan-form-shell">
+
+
+                                    <div class="url-input-wrap">
+
+
+                                        <i
+                                            class="
+                                                fa-solid
+                                                fa-link
+                                            ">
+                                        </i>
+
+
+                                        <input
+                                            id="urlInput"
+                                            name="url"
+                                            type="text"
+                                            class="url-input"
+                                            placeholder="https://example.com"
+                                            value="{{ entered_url or '' }}"
+                                            autocomplete="url"
+                                            autocapitalize="off"
+                                            inputmode="url"
+                                            spellcheck="false"
+                                            aria-label="Website URL"
+                                            required>
+
+
+                                    </div>
+
+
+
+                                    <button
+                                        id="analyzeButton"
+                                        type="submit"
+                                        class="scan-button">
+
+
+                                        <i
+                                            id="analyzeButtonIcon"
+                                            class="
+                                                fa-solid
+                                                fa-magnifying-glass
+                                                me-2
+                                            ">
+                                        </i>
+
+
+                                        <span
+                                            id="analyzeButtonText">
+
+                                            ANALYZE URL
+
+                                        </span>
+
+
+                                    </button>
+
+
+                                </div>
+
+
+                            </form>
+
+
+
+                            {% if error %}
+
+                            <div
+                                id="scanError"
+                                class="scan-error">
+
+                                <i
+                                    class="
+                                        fa-solid
+                                        fa-triangle-exclamation
+                                    ">
+                                </i>
+
+                                <span>
+                                    {{ error }}
+                                </span>
+
+                            </div>
+
+                            {% endif %}
+
+
+
+                            <div class="scan-meta">
+
+
+                                <span>
+
+                                    <i
+                                        class="
+                                            fa-solid
+                                            fa-layer-group
+                                        ">
+                                    </i>
+
+                                    Multi-layer analysis
+
+                                </span>
+
+
+                                <span>
+
+                                    <i
+                                        class="
+                                            fa-solid
+                                            fa-shield
+                                        ">
+                                    </i>
+
+                                    Partial analysis supported
+
+                                </span>
+
+
+                                <a
+                                    href="{{ url_for('history') }}">
+
+                                    <i
+                                        class="
+                                            fa-solid
+                                            fa-clock-rotate-left
+                                        ">
+                                    </i>
+
+                                    Previous scans
+
+                                </a>
+
 
                             </div>
 
 
-                            <button
-                                id="analyzeButton"
-                                type="submit"
-                                class="hero-scan-button">
-
-                                <i
-                                    id="analyzeButtonIcon"
-                                    class="fa-solid fa-shield-halved me-2">
-                                </i>
-
-                                <span id="analyzeButtonText">
-                                    Analyze URL
-                                </span>
-
-                            </button>
-
-
                         </div>
 
-                    </form>
-
-
-
-                    {% if error %}
-
-                    <div
-                        id="scanError"
-                        class="hero-error">
-
-                        <i class="fa-solid fa-triangle-exclamation me-2"></i>
-
-                        {{ error }}
 
                     </div>
 
-                    {% endif %}
+
+
+                    <!-- RIGHT / SECURITY MATRIX -->
+
+                    <div
+                        class="
+                            matrix-stage
+                            hero-reveal
+                            hero-delay-4
+                        "
+                        id="matrixStage">
+
+
+                        <div class="matrix-shadow"></div>
 
 
 
-                    <div class="hero-scanner-meta">
+                        <div
+                            class="
+                                matrix-fragment
+                                fragment-one
+                            ">
+
+                            <i
+                                class="
+                                    fa-solid
+                                    fa-code
+                                ">
+                            </i>
+
+                            STRUCTURE ENGINE
+
+                        </div>
 
 
-                        <span>
 
-                            <i class="fa-solid fa-circle-info"></i>
+                        <div
+                            class="
+                                matrix-fragment
+                                fragment-two
+                            ">
 
-                            Partial Analysis supported when direct
-                            website checks are unavailable.
+                            <i
+                                class="
+                                    fa-solid
+                                    fa-fingerprint
+                                ">
+                            </i>
 
-                        </span>
+                            DOMAIN IDENTITY
+
+                        </div>
 
 
-                        <a href="{{ url_for('history') }}">
 
-                            <i class="fa-solid fa-clock-rotate-left me-1"></i>
+                        <div
+                            class="
+                                matrix-fragment
+                                fragment-three
+                            ">
 
-                            View Scan History
+                            <i
+                                class="
+                                    fa-solid
+                                    fa-shield
+                                ">
+                            </i>
 
-                        </a>
+                            THREAT INTELLIGENCE
+
+                        </div>
+
+
+
+                        <div
+                            id="matrixFrame"
+                            class="matrix-frame">
+
+
+                            <div class="matrix-scan-line"></div>
+
+
+
+                            <div class="matrix-header">
+
+
+                                <div class="matrix-header-left">
+
+                                    <span
+                                        class="
+                                            matrix-terminal-mark
+                                        ">
+                                    </span>
+
+                                    <strong>
+                                        ANALYSIS PIPELINE
+                                    </strong>
+
+                                </div>
+
+
+                                <small>
+                                    READY
+                                </small>
+
+
+                            </div>
+
+
+
+                            <div class="matrix-body">
+
+
+                                <div class="matrix-address">
+
+                                    <i
+                                        class="
+                                            fa-solid
+                                            fa-terminal
+                                        ">
+                                    </i>
+
+                                    Awaiting target URL...
+
+                                </div>
+
+
+
+                                <div class="matrix-module-list">
+
+
+                                    <div class="matrix-module">
+
+                                        <div class="matrix-module-icon">
+
+                                            <i
+                                                class="
+                                                    fa-solid
+                                                    fa-link
+                                                ">
+                                            </i>
+
+                                        </div>
+
+                                        <div class="matrix-module-copy">
+
+                                            <strong>
+                                                URL Structure
+                                            </strong>
+
+                                            <small>
+                                                Syntax and lexical indicators
+                                            </small>
+
+                                        </div>
+
+                                        <span class="module-ready">
+                                            READY
+                                        </span>
+
+                                    </div>
+
+
+
+                                    <div class="matrix-module">
+
+                                        <div class="matrix-module-icon">
+
+                                            <i
+                                                class="
+                                                    fa-solid
+                                                    fa-fingerprint
+                                                ">
+                                            </i>
+
+                                        </div>
+
+                                        <div class="matrix-module-copy">
+
+                                            <strong>
+                                                Domain Identity
+                                            </strong>
+
+                                            <small>
+                                                Age, similarity and reputation
+                                            </small>
+
+                                        </div>
+
+                                        <span class="module-ready">
+                                            READY
+                                        </span>
+
+                                    </div>
+
+
+
+                                    <div class="matrix-module">
+
+                                        <div class="matrix-module-icon">
+
+                                            <i
+                                                class="
+                                                    fa-solid
+                                                    fa-network-wired
+                                                ">
+                                            </i>
+
+                                        </div>
+
+                                        <div class="matrix-module-copy">
+
+                                            <strong>
+                                                Network Security
+                                            </strong>
+
+                                            <small>
+                                                DNS, SSL and infrastructure
+                                            </small>
+
+                                        </div>
+
+                                        <span class="module-ready">
+                                            READY
+                                        </span>
+
+                                    </div>
+
+
+
+                                    <div class="matrix-module">
+
+                                        <div class="matrix-module-icon">
+
+                                            <i
+                                                class="
+                                                    fa-solid
+                                                    fa-code
+                                                ">
+                                            </i>
+
+                                        </div>
+
+                                        <div class="matrix-module-copy">
+
+                                            <strong>
+                                                Website Behaviour
+                                            </strong>
+
+                                            <small>
+                                                Browser-facing security signals
+                                            </small>
+
+                                        </div>
+
+                                        <span class="module-ready">
+                                            READY
+                                        </span>
+
+                                    </div>
+
+
+
+                                    <div class="matrix-module">
+
+                                        <div class="matrix-module-icon">
+
+                                            <i
+                                                class="
+                                                    fa-solid
+                                                    fa-shield-virus
+                                                ">
+                                            </i>
+
+                                        </div>
+
+                                        <div class="matrix-module-copy">
+
+                                            <strong>
+                                                Threat Intelligence
+                                            </strong>
+
+                                            <small>
+                                                Reputation and external evidence
+                                            </small>
+
+                                        </div>
+
+                                        <span class="module-ready">
+                                            READY
+                                        </span>
+
+                                    </div>
+
+
+                                </div>
+
+
+                            </div>
+
+
+
+                            <div class="matrix-footer">
+
+                                <span>
+                                    DEFENSIVE ANALYSIS
+                                </span>
+
+                                <span>
+                                    SYSTEM ONLINE
+                                </span>
+
+                            </div>
+
+
+                        </div>
 
 
                     </div>
 
 
                 </div>
+
 
             </div>
 
 
 
-            <div class="col-lg-5">
+            <div class="hero-scroll">
 
-                <div class="signal-panel">
+                SCROLL
+
+                <span class="scroll-track"></span>
+
+            </div>
 
 
-                    <div class="signal-panel-header">
+        </section>
 
-                        <div class="signal-panel-label">
 
-                            <i class="fa-solid fa-wave-square"></i>
 
-                            SECURITY SIGNALS
+        <!-- =====================================================
+             CAPABILITIES
+        ====================================================== -->
+
+        <section class="site-section capabilities">
+
+
+            <div class="page-width">
+
+
+                <div
+                    class="
+                        section-heading
+                        reveal
+                    ">
+
+                    <span class="section-label">
+                        Analysis Surface
+                    </span>
+
+                    <h2>
+                        One target.
+                        Multiple perspectives.
+                    </h2>
+
+                    <p>
+                        Independent modules examine different
+                        characteristics of the submitted URL
+                        before the evidence is combined into
+                        the final assessment.
+                    </p>
+
+                </div>
+
+
+
+                <div
+                    class="
+                        capability-grid
+                        reveal
+                    ">
+
+
+                    <article class="capability">
+
+                        <div class="cap-number">
+                            01 / 04
+                        </div>
+
+                        <div class="capability-icon">
+
+                            <i
+                                class="
+                                    fa-solid
+                                    fa-link
+                                ">
+                            </i>
 
                         </div>
 
-
                         <h3>
-                            Evidence Intelligence
+                            URL Analysis
                         </h3>
 
+                        <p>
+                            URL structure, suspicious keywords,
+                            IP usage, subdomains, ports,
+                            parameters, shorteners and
+                            unusual symbols.
+                        </p>
+
+                    </article>
+
+
+
+                    <article class="capability">
+
+                        <div class="cap-number">
+                            02 / 04
+                        </div>
+
+                        <div class="capability-icon">
+
+                            <i
+                                class="
+                                    fa-solid
+                                    fa-fingerprint
+                                ">
+                            </i>
+
+                        </div>
+
+                        <h3>
+                            Domain Intelligence
+                        </h3>
 
                         <p>
+                            Domain age, TLD analysis,
+                            Punycode, homographs,
+                            typosquatting, entropy
+                            and similarity.
+                        </p>
 
-                            Multiple independent signals feed the
-                            risk engine before a verdict is produced.
+                    </article>
 
+
+
+                    <article class="capability">
+
+                        <div class="cap-number">
+                            03 / 04
+                        </div>
+
+                        <div class="capability-icon">
+
+                            <i
+                                class="
+                                    fa-solid
+                                    fa-network-wired
+                                ">
+                            </i>
+
+                        </div>
+
+                        <h3>
+                            Infrastructure
+                        </h3>
+
+                        <p>
+                            WHOIS, DNS, SSL certificates,
+                            server configuration and
+                            browser-facing security
+                            information.
+                        </p>
+
+                    </article>
+
+
+
+                    <article class="capability">
+
+                        <div class="cap-number">
+                            04 / 04
+                        </div>
+
+                        <div class="capability-icon">
+
+                            <i
+                                class="
+                                    fa-solid
+                                    fa-shield-virus
+                                ">
+                            </i>
+
+                        </div>
+
+                        <h3>
+                            Threat Reputation
+                        </h3>
+
+                        <p>
+                            External threat intelligence
+                            is considered alongside the
+                            analyzer's independent
+                            evidence.
+                        </p>
+
+                    </article>
+
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =====================================================
+             PROCESS
+        ====================================================== -->
+
+        <section class="site-section">
+
+
+            <div class="page-width">
+
+
+                <div class="process-layout">
+
+
+                    <div
+                        class="
+                            process-title
+                            section-heading
+                            reveal
+                        ">
+
+                        <span class="section-label">
+                            Investigation Flow
+                        </span>
+
+                        <h2>
+                            From link
+                            to evidence.
+                        </h2>
+
+                        <p>
+                            The workflow stays simple while
+                            the analysis beneath it remains
+                            detailed.
                         </p>
 
                     </div>
 
 
 
-                    <div class="security-signal-map">
-
-
-                        <div class="signal-node signal-node-top-left">
-
-                            <div class="signal-node-icon signal-cyan">
-
-                                <i class="fa-solid fa-link"></i>
-
-                            </div>
-
-                            <strong>
-                                URL Signal
-                            </strong>
-
-                            <p>
-                                Structure and lexical indicators.
-                            </p>
-
-                        </div>
-
-
-
-                        <div class="signal-node signal-node-top-right">
-
-                            <div class="signal-node-icon signal-purple">
-
-                                <i class="fa-solid fa-fingerprint"></i>
-
-                            </div>
-
-                            <strong>
-                                Domain Signal
-                            </strong>
-
-                            <p>
-                                Identity and impersonation evidence.
-                            </p>
-
-                        </div>
-
-
-
-                        <div class="signal-core">
-
-                            <i class="fa-solid fa-shield-halved"></i>
-
-                            <strong>
-                                Risk Engine
-                            </strong>
-
-                            <small>
-                                EVIDENCE FUSION
-                            </small>
-
-                        </div>
-
-
-
-                        <div class="signal-node signal-node-bottom-left">
-
-                            <div class="signal-node-icon signal-green">
-
-                                <i class="fa-solid fa-lock"></i>
-
-                            </div>
-
-                            <strong>
-                                Web Security
-                            </strong>
-
-                            <p>
-                                SSL, DNS and website behaviour.
-                            </p>
-
-                        </div>
-
-
-
-                        <div class="signal-node signal-node-bottom-right">
-
-                            <div class="signal-node-icon signal-red">
-
-                                <i class="fa-solid fa-shield-virus"></i>
-
-                            </div>
-
-                            <strong>
-                                Reputation
-                            </strong>
-
-                            <p>
-                                External threat intelligence.
-                            </p>
-
-                        </div>
-
-
-                    </div>
-
-
-
-                    <div class="signal-output">
-
-                        <div>
-
-                            <small>
-                                ANALYSIS OUTPUT
-                            </small>
-
-                            <strong>
-                                Risk Score + Supporting Evidence
-                            </strong>
-
-                        </div>
-
-
-                        <i class="fa-solid fa-chart-column"></i>
-
-                    </div>
-
-
-                </div>
-
-            </div>
-
-
-        </div>
-
-    </div>
-
-</section>
-
-
-
-<section class="homepage-section">
-
-    <div class="container">
-
-
-        <div class="homepage-section-heading">
-
-            <div class="homepage-section-label">
-                SECURITY CAPABILITIES
-            </div>
-
-
-            <h2>
-                Multi-Layer URL Analysis
-            </h2>
-
-
-            <p>
-
-                Each layer examines a different part of the
-                submitted target before the findings are combined.
-
-            </p>
-
-        </div>
-
-
-
-        <div class="row g-4">
-
-
-            <div class="col-lg-4 col-md-6">
-
-                <div class="home-feature-card">
-
-                    <div class="home-feature-icon signal-cyan">
-
-                        <i class="fa-solid fa-link"></i>
-
-                    </div>
-
-
-                    <h5>
-                        URL Analysis
-                    </h5>
-
-
-                    <p>
-
-                        HTTPS, IP usage, suspicious keywords,
-                        length, subdomains, ports, query parameters,
-                        URL shorteners and unusual symbols.
-
-                    </p>
-
-                </div>
-
-            </div>
-
-
-
-            <div class="col-lg-4 col-md-6">
-
-                <div class="home-feature-card">
-
-                    <div class="home-feature-icon signal-purple">
-
-                        <i class="fa-solid fa-fingerprint"></i>
-
-                    </div>
-
-
-                    <h5>
-                        Domain Intelligence
-                    </h5>
-
-
-                    <p>
-
-                        Domain age, TLD reputation, Punycode,
-                        Unicode homographs, typosquatting,
-                        entropy and domain similarity.
-
-                    </p>
-
-                </div>
-
-            </div>
-
-
-
-            <div class="col-lg-4 col-md-6">
-
-                <div class="home-feature-card">
-
-                    <div class="home-feature-icon signal-green">
-
-                        <i class="fa-solid fa-network-wired"></i>
-
-                    </div>
-
-
-                    <h5>
-                        Network & SSL
-                    </h5>
-
-
-                    <p>
-
-                        WHOIS, DNS records and SSL certificate
-                        information provide registration and
-                        infrastructure context.
-
-                    </p>
-
-                </div>
-
-            </div>
-
-
-
-            <div class="col-lg-4 col-md-6">
-
-                <div class="home-feature-card">
-
                     <div
-                        class="home-feature-icon"
-                        style="
-                            color:#fb923c;
-                            background:rgba(249,115,22,.1);
+                        class="
+                            process-list
+                            reveal
                         ">
 
-                        <i class="fa-solid fa-code"></i>
+
+                        <div class="process-item">
+
+                            <span class="process-number">
+                                01
+                            </span>
+
+                            <div class="process-copy">
+
+                                <h3>
+                                    Submit the target
+                                </h3>
+
+                                <p>
+                                    Enter the public URL that
+                                    you want to investigate.
+                                </p>
+
+                            </div>
+
+                            <i
+                                class="
+                                    process-arrow
+                                    fa-solid
+                                    fa-arrow-right
+                                ">
+                            </i>
+
+                        </div>
+
+
+
+                        <div class="process-item">
+
+                            <span class="process-number">
+                                02
+                            </span>
+
+                            <div class="process-copy">
+
+                                <h3>
+                                    Inspect security signals
+                                </h3>
+
+                                <p>
+                                    Independent analysis modules
+                                    evaluate every security signal
+                                    that is available.
+                                </p>
+
+                            </div>
+
+                            <i
+                                class="
+                                    process-arrow
+                                    fa-solid
+                                    fa-arrow-right
+                                ">
+                            </i>
+
+                        </div>
+
+
+
+                        <div class="process-item">
+
+                            <span class="process-number">
+                                03
+                            </span>
+
+                            <div class="process-copy">
+
+                                <h3>
+                                    Calculate risk
+                                </h3>
+
+                                <p>
+                                    Relevant evidence is combined
+                                    by the calibrated risk engine.
+                                </p>
+
+                            </div>
+
+                            <i
+                                class="
+                                    process-arrow
+                                    fa-solid
+                                    fa-arrow-right
+                                ">
+                            </i>
+
+                        </div>
+
+
+
+                        <div class="process-item">
+
+                            <span class="process-number">
+                                04
+                            </span>
+
+                            <div class="process-copy">
+
+                                <h3>
+                                    Review every finding
+                                </h3>
+
+                                <p>
+                                    The full result page preserves
+                                    detailed technical evidence and
+                                    the downloadable report.
+                                </p>
+
+                            </div>
+
+                            <i
+                                class="
+                                    process-arrow
+                                    fa-solid
+                                    fa-arrow-right
+                                ">
+                            </i>
+
+                        </div>
+
 
                     </div>
 
 
-                    <h5>
-                        Webpage Behaviour
-                    </h5>
-
-
-                    <p>
-
-                        Redirects, forms, JavaScript, page content,
-                        favicons and other browser-facing security
-                        indicators.
-
-                    </p>
-
                 </div>
+
 
             </div>
 
 
+        </section>
 
-            <div class="col-lg-4 col-md-6">
 
-                <div class="home-feature-card">
 
-                    <div class="home-feature-icon signal-cyan">
+        <!-- =====================================================
+             FINAL SECTION
+        ====================================================== -->
 
-                        <i class="fa-solid fa-server"></i>
+        <section class="final-section">
+
+
+            <div class="page-width">
+
+
+                <div
+                    class="
+                        final-panel
+                        reveal
+                    ">
+
+
+                    <div class="final-copy">
+
+
+                        <span class="section-label">
+                            Analyze Before You Trust
+                        </span>
+
+
+                        <h2>
+                            One suspicious link
+                            can be enough.
+                        </h2>
+
+
+                        <p>
+                            Investigate unfamiliar URLs before
+                            entering credentials, making payments,
+                            downloading files or sharing sensitive
+                            information.
+                        </p>
+
+
+                        <a
+                            href="#scanner"
+                            class="final-action">
+
+                            Analyze a URL
+
+                            <i
+                                class="
+                                    fa-solid
+                                    fa-arrow-up-right-from-square
+                                ">
+                            </i>
+
+                        </a>
+
 
                     </div>
 
 
-                    <h5>
-                        Server Security
-                    </h5>
-
-
-                    <p>
-
-                        Security headers, cookies, CORS,
-                        HTTP methods, robots.txt, sitemap and
-                        sensitive-file exposure checks.
-
-                    </p>
-
                 </div>
 
-            </div>
-
-
-
-            <div class="col-lg-4 col-md-6">
-
-                <div class="home-feature-card">
-
-                    <div class="home-feature-icon signal-red">
-
-                        <i class="fa-solid fa-shield-virus"></i>
-
-                    </div>
-
-
-                    <h5>
-                        Threat Intelligence
-                    </h5>
-
-
-                    <p>
-
-                        VirusTotal reputation information is
-                        combined with independent analyzer evidence
-                        to strengthen the assessment.
-
-                    </p>
-
-                </div>
 
             </div>
 
 
-        </div>
+        </section>
+
+
+    </main>
 
 
 
-        <div class="warning-information">
+    <!-- =========================================================
+         FOOTER
+    ========================================================== -->
 
-            <div class="warning-information-icon">
-
-                <i class="fa-solid fa-triangle-exclamation"></i>
-
-            </div>
+    <footer class="site-footer">
 
 
-            <div>
-
-                <strong>
-                    Content & Service Notices
-                </strong>
+        <div class="footer-inner">
 
 
-                <p>
+            <div class="footer-brand">
 
-                    Adult or explicit content and gambling/betting
-                    services receive a red warning before the result.
-                    Financial and cryptocurrency services receive an
-                    amber caution. These notices remain separate
-                    from the cybersecurity risk score.
+                <i
+                    class="
+                        fa-solid
+                        fa-shield-halved
+                    ">
+                </i>
 
-                </p>
-
-            </div>
-
-        </div>
-
-
-    </div>
-
-</section>
-
-
-
-<section class="homepage-section workflow-section">
-
-    <div class="container">
-
-
-        <div class="homepage-section-heading">
-
-            <div class="homepage-section-label">
-                ANALYSIS WORKFLOW
-            </div>
-
-
-            <h2>
-                From Link to Security Report
-            </h2>
-
-
-            <p>
-
-                A simple workflow turns the submitted URL into
-                an evidence-based security assessment.
-
-            </p>
-
-        </div>
-
-
-
-        <div class="row g-4">
-
-
-            <div class="col-lg-3 col-md-6">
-
-                <div class="home-workflow-card">
-
-                    <span class="home-workflow-step">
-                        STEP 01
-                    </span>
-
-                    <h5>
-                        Submit URL
-                    </h5>
-
-                    <p>
-                        Enter the public link you want to analyze.
-                    </p>
-
-                </div>
+                URL Security Analyzer
+                © 2026
 
             </div>
 
 
 
-            <div class="col-lg-3 col-md-6">
+            <div class="footer-links">
 
-                <div class="home-workflow-card">
-
-                    <span class="home-workflow-step">
-                        STEP 02
-                    </span>
-
-                    <h5>
-                        Analyze
-                    </h5>
-
-                    <p>
-                        Independent modules inspect available
-                        security signals.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-
-            <div class="col-lg-3 col-md-6">
-
-                <div class="home-workflow-card">
-
-                    <span class="home-workflow-step">
-                        STEP 03
-                    </span>
-
-                    <h5>
-                        Calculate Risk
-                    </h5>
-
-                    <p>
-                        Relevant findings are combined by the
-                        calibrated risk engine.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-
-            <div class="col-lg-3 col-md-6">
-
-                <div class="home-workflow-card">
-
-                    <span class="home-workflow-step">
-                        STEP 04
-                    </span>
-
-                    <h5>
-                        Review Evidence
-                    </h5>
-
-                    <p>
-                        Inspect the result and download the
-                        detailed PDF report.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-        </div>
-
-
-    </div>
-
-</section>
-
-
-
-<section class="py-section">
-
-    <div class="container">
-
-        <div class="homepage-cta">
-
-            <div class="cta-shield">
-
-                <i class="fa-solid fa-shield-halved"></i>
-
-            </div>
-
-
-            <h2>
-                Check Before You Trust
-            </h2>
-
-
-            <p>
-
-                Investigate unfamiliar links before entering
-                credentials, making payments, downloading files
-                or sharing sensitive information.
-
-            </p>
-
-
-            <div class="d-flex justify-content-center flex-wrap gap-3">
-
-                <a
-                    href="#scanner"
-                    class="btn btn-info btn-lg">
-
-                    <i class="fa-solid fa-magnifying-glass me-2"></i>
-
-                    Analyze URL
-
+                <a href="{{ url_for('home') }}">
+                    Analyzer
                 </a>
 
-
-                <a
-                    href="{{ url_for('history') }}"
-                    class="btn btn-outline-light btn-lg">
-
-                    <i class="fa-solid fa-clock-rotate-left me-2"></i>
-
-                    Scan History
-
+                <a href="{{ url_for('history') }}">
+                    History
                 </a>
 
             </div>
 
+
         </div>
+
+
+    </footer>
+
+
+
+    <!-- =========================================================
+         SCAN TRANSITION
+    ========================================================== -->
+
+    <div
+        id="scanTransition"
+        class="scan-transition"
+        aria-hidden="true">
+
+
+        <div class="transition-content">
+
+
+            <div class="transition-icon">
+
+                <i
+                    class="
+                        fa-solid
+                        fa-shield-halved
+                    ">
+                </i>
+
+            </div>
+
+
+            <strong>
+                Initializing security analysis
+            </strong>
+
+
+            <p id="transitionTarget">
+                Preparing target...
+            </p>
+
+
+            <div class="transition-bar"></div>
+
+
+        </div>
+
 
     </div>
 
-</section>
 
 
+    <!-- =========================================================
+         JAVASCRIPT
+    ========================================================== -->
 
-<footer class="footer">
+    <script>
 
-    <div class="container">
+        /* =====================================================
+           NETWORK CANVAS
+        ===================================================== */
 
-        <div class="row g-4">
+        const canvas =
+            document.getElementById(
+                "cyberCanvas"
+            );
 
+        const context =
+            canvas.getContext(
+                "2d"
+            );
 
-            <div class="col-lg-6">
 
-                <h4>
+        let canvasWidth =
+            window.innerWidth;
 
-                    <i class="fa-solid fa-shield-halved text-info me-2"></i>
+        let canvasHeight =
+            window.innerHeight;
 
-                    URL Security Analyzer
+        let deviceScale =
+            Math.min(
+                window.devicePixelRatio || 1,
+                2
+            );
 
-                </h4>
 
+        let nodes = [];
 
-                <p class="mt-3 mb-0">
 
-                    A defensive cybersecurity project for
-                    investigating suspicious URLs, phishing
-                    indicators, website security and external
-                    threat reputation.
+        const pointer = {
+            x:
+                canvasWidth / 2,
 
-                </p>
+            y:
+                canvasHeight / 2,
 
-            </div>
+            active:
+                false
+        };
 
 
+        function resizeCanvas() {
 
-            <div class="col-lg-3">
+            canvasWidth =
+                window.innerWidth;
 
-                <h5>
-                    Navigation
-                </h5>
+            canvasHeight =
+                window.innerHeight;
 
-
-                <ul class="list-unstyled mt-3">
-
-                    <li class="mb-2">
-
-                        <a href="{{ url_for('home') }}">
-                            Dashboard
-                        </a>
-
-                    </li>
-
-
-                    <li class="mb-2">
-
-                        <a href="#scanner">
-                            Analyze URL
-                        </a>
-
-                    </li>
-
-
-                    <li>
-
-                        <a href="{{ url_for('history') }}">
-                            History
-                        </a>
-
-                    </li>
-
-                </ul>
-
-            </div>
-
-
-
-            <div class="col-lg-3">
-
-                <h5>
-                    Analysis
-                </h5>
-
-
-                <ul class="list-unstyled mt-3 footer-analysis-list">
-
-                    <li>
-                        URL Structure
-                    </li>
-
-                    <li>
-                        Domain Intelligence
-                    </li>
-
-                    <li>
-                        Network & SSL
-                    </li>
-
-                    <li>
-                        Webpage Behaviour
-                    </li>
-
-                    <li>
-                        Threat Intelligence
-                    </li>
-
-                </ul>
-
-            </div>
-
-
-        </div>
-
-
-        <hr class="my-4">
-
-
-        <div class="text-center">
-
-            <small>
-
-                © 2026 URL Security Analyzer
-                • Defensive Cybersecurity Project
-
-            </small>
-
-        </div>
-
-    </div>
-
-</footer>
-
-
-
-<button
-    id="backToTop"
-    class="btn btn-info"
-    type="button"
-    aria-label="Back to top">
-
-    <i class="fa-solid fa-arrow-up"></i>
-
-</button>
-
-
-
-<script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
-</script>
-
-
-<script>
-
-const scanForm =
-    document.getElementById(
-        "scanForm"
-    );
-
-const scanError =
-    document.getElementById(
-        "scanError"
-    );
-
-const analyzeButton =
-    document.getElementById(
-        "analyzeButton"
-    );
-
-const analyzeButtonText =
-    document.getElementById(
-        "analyzeButtonText"
-    );
-
-const analyzeButtonIcon =
-    document.getElementById(
-        "analyzeButtonIcon"
-    );
-
-const backToTop =
-    document.getElementById(
-        "backToTop"
-    );
-
-
-if (
-    scanForm
-    && analyzeButton
-    && analyzeButtonText
-) {
-
-    scanForm.addEventListener(
-        "submit",
-        function () {
-
-            analyzeButton.disabled =
-                true;
-
-            analyzeButtonText.textContent =
-                "Analyzing...";
-
-            if (analyzeButtonIcon) {
-
-                analyzeButtonIcon.className =
-                    "fa-solid fa-spinner fa-spin me-2";
-
-            }
-
-        }
-    );
-
-}
-
-
-window.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-        if (scanError) {
-
-            const scanner =
-                document.getElementById(
-                    "scanner"
+            deviceScale =
+                Math.min(
+                    window.devicePixelRatio || 1,
+                    2
                 );
 
-            if (scanner) {
 
-                scanner.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center"
+            canvas.width =
+                canvasWidth
+                * deviceScale;
+
+            canvas.height =
+                canvasHeight
+                * deviceScale;
+
+
+            canvas.style.width =
+                canvasWidth
+                + "px";
+
+            canvas.style.height =
+                canvasHeight
+                + "px";
+
+
+            context.setTransform(
+                deviceScale,
+                0,
+                0,
+                deviceScale,
+                0,
+                0
+            );
+
+
+            createNodes();
+
+        }
+
+
+
+        function createNodes() {
+
+            const amount =
+                Math.max(
+                    38,
+                    Math.min(
+                        82,
+                        Math.floor(
+                            canvasWidth
+                            / 20
+                        )
+                    )
+                );
+
+
+            nodes = [];
+
+
+            for (
+                let index = 0;
+                index < amount;
+                index++
+            ) {
+
+                nodes.push({
+
+                    x:
+                        Math.random()
+                        * canvasWidth,
+
+                    y:
+                        Math.random()
+                        * canvasHeight,
+
+                    vx:
+                        (
+                            Math.random()
+                            - 0.5
+                        )
+                        * 0.18,
+
+                    vy:
+                        (
+                            Math.random()
+                            - 0.5
+                        )
+                        * 0.18,
+
+                    radius:
+                        Math.random()
+                        * 1.25
+                        + 0.45,
+
+                    alpha:
+                        Math.random()
+                        * 0.38
+                        + 0.12
+
                 });
 
             }
 
         }
 
-    }
-);
 
 
-if (backToTop) {
+        function updateNodes() {
 
-    window.addEventListener(
-        "scroll",
-        function () {
-
-            if (
-                window.scrollY > 300
+            for (
+                const node
+                of nodes
             ) {
 
-                backToTop.classList.add(
-                    "show"
-                );
+                node.x +=
+                    node.vx;
 
-            }
-
-            else {
-
-                backToTop.classList.remove(
-                    "show"
-                );
-
-            }
-
-        }
-    );
+                node.y +=
+                    node.vy;
 
 
-    backToTop.addEventListener(
-        "click",
-        function () {
+                if (
+                    node.x < -20
+                ) {
 
-            window.scrollTo({
-                top: 0,
-                behavior: "smooth"
-            });
+                    node.x =
+                        canvasWidth
+                        + 20;
 
-        }
-    );
-
-}
+                }
 
 
-document
-    .querySelectorAll(
-        'a[href^="#"]'
-    )
-    .forEach(
-        function (anchor) {
+                if (
+                    node.x
+                    > canvasWidth + 20
+                ) {
 
-            anchor.addEventListener(
-                "click",
-                function (event) {
+                    node.x =
+                        -20;
 
-                    const selector =
-                        this.getAttribute(
-                            "href"
+                }
+
+
+                if (
+                    node.y < -20
+                ) {
+
+                    node.y =
+                        canvasHeight
+                        + 20;
+
+                }
+
+
+                if (
+                    node.y
+                    > canvasHeight + 20
+                ) {
+
+                    node.y =
+                        -20;
+
+                }
+
+
+                if (
+                    pointer.active
+                ) {
+
+                    const dx =
+                        pointer.x
+                        - node.x;
+
+                    const dy =
+                        pointer.y
+                        - node.y;
+
+                    const distance =
+                        Math.sqrt(
+                            dx * dx
+                            + dy * dy
                         );
+
 
                     if (
-                        !selector
-                        || selector === "#"
+                        distance < 180
+                        && distance > 1
                     ) {
-                        return;
+
+                        node.x -=
+                            (
+                                dx
+                                / distance
+                            )
+                            * 0.035;
+
+                        node.y -=
+                            (
+                                dy
+                                / distance
+                            )
+                            * 0.035;
+
                     }
 
+                }
 
-                    const target =
-                        document.querySelector(
-                            selector
+            }
+
+        }
+
+
+
+        function drawNetwork() {
+
+            context.clearRect(
+                0,
+                0,
+                canvasWidth,
+                canvasHeight
+            );
+
+
+            updateNodes();
+
+
+            for (
+                let first = 0;
+                first < nodes.length;
+                first++
+            ) {
+
+                const node =
+                    nodes[first];
+
+
+                context.beginPath();
+
+                context.arc(
+                    node.x,
+                    node.y,
+                    node.radius,
+                    0,
+                    Math.PI * 2
+                );
+
+
+                context.fillStyle =
+                    "rgba(113, 211, 225,"
+                    + node.alpha
+                    + ")";
+
+
+                context.fill();
+
+
+                for (
+                    let second =
+                        first + 1;
+
+                    second
+                    < nodes.length;
+
+                    second++
+                ) {
+
+                    const other =
+                        nodes[second];
+
+
+                    const dx =
+                        node.x
+                        - other.x;
+
+                    const dy =
+                        node.y
+                        - other.y;
+
+
+                    const distanceSquared =
+                        dx * dx
+                        + dy * dy;
+
+
+                    const maximumDistance =
+                        145;
+
+
+                    if (
+                        distanceSquared
+                        <
+                        maximumDistance
+                        * maximumDistance
+                    ) {
+
+                        const distance =
+                            Math.sqrt(
+                                distanceSquared
+                            );
+
+
+                        const opacity =
+                            (
+                                1
+                                -
+                                distance
+                                / maximumDistance
+                            )
+                            * 0.10;
+
+
+                        context.beginPath();
+
+                        context.moveTo(
+                            node.x,
+                            node.y
+                        );
+
+                        context.lineTo(
+                            other.x,
+                            other.y
                         );
 
 
-                    if (target) {
+                        context.strokeStyle =
+                            "rgba(89, 213, 230,"
+                            + opacity
+                            + ")";
 
-                        event.preventDefault();
 
-                        target.scrollIntoView({
-                            behavior: "smooth",
-                            block: "center"
-                        });
+                        context.lineWidth =
+                            0.7;
+
+
+                        context.stroke();
 
                     }
+
+                }
+
+            }
+
+
+            window.requestAnimationFrame(
+                drawNetwork
+            );
+
+        }
+
+
+
+        resizeCanvas();
+
+        drawNetwork();
+
+
+        window.addEventListener(
+            "resize",
+            resizeCanvas
+        );
+
+
+
+        /* =====================================================
+           POINTER INTERACTION
+        ===================================================== */
+
+        const pointerLight =
+            document.getElementById(
+                "pointerLight"
+            );
+
+
+        window.addEventListener(
+            "pointermove",
+            function (event) {
+
+                pointer.x =
+                    event.clientX;
+
+                pointer.y =
+                    event.clientY;
+
+                pointer.active =
+                    true;
+
+
+                if (
+                    pointerLight
+                ) {
+
+                    pointerLight.style.left =
+                        event.clientX
+                        + "px";
+
+                    pointerLight.style.top =
+                        event.clientY
+                        + "px";
+
+                }
+
+            }
+        );
+
+
+        window.addEventListener(
+            "pointerleave",
+            function () {
+
+                pointer.active =
+                    false;
+
+            }
+        );
+
+
+
+        /* =====================================================
+           MATRIX PARALLAX
+        ===================================================== */
+
+        const matrixStage =
+            document.getElementById(
+                "matrixStage"
+            );
+
+        const matrixFrame =
+            document.getElementById(
+                "matrixFrame"
+            );
+
+
+        if (
+            matrixStage
+            && matrixFrame
+        ) {
+
+            matrixStage.addEventListener(
+                "pointermove",
+                function (event) {
+
+                    if (
+                        window.innerWidth
+                        <= 700
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    const bounds =
+                        matrixStage
+                        .getBoundingClientRect();
+
+
+                    const relativeX =
+                        (
+                            event.clientX
+                            - bounds.left
+                        )
+                        / bounds.width;
+
+
+                    const relativeY =
+                        (
+                            event.clientY
+                            - bounds.top
+                        )
+                        / bounds.height;
+
+
+                    const rotateY =
+                        (
+                            relativeX
+                            - 0.5
+                        )
+                        * 8
+                        - 8;
+
+
+                    const rotateX =
+                        (
+                            0.5
+                            - relativeY
+                        )
+                        * 6
+                        + 3;
+
+
+                    matrixFrame.style.transform =
+                        "rotateY("
+                        + rotateY
+                        + "deg)"
+                        + " rotateX("
+                        + rotateX
+                        + "deg)";
+
+                }
+            );
+
+
+            matrixStage.addEventListener(
+                "pointerleave",
+                function () {
+
+                    if (
+                        window.innerWidth
+                        <= 700
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    matrixFrame.style.transform =
+                        "rotateY(-8deg)"
+                        + " rotateX(3deg)";
 
                 }
             );
 
         }
-    );
 
-</script>
+
+
+        /* =====================================================
+           SCROLL REVEALS
+        ===================================================== */
+
+        const revealElements =
+            document.querySelectorAll(
+                ".reveal"
+            );
+
+
+        const revealObserver =
+            new IntersectionObserver(
+
+                function (entries) {
+
+                    entries.forEach(
+                        function (entry) {
+
+                            if (
+                                entry.isIntersecting
+                            ) {
+
+                                entry.target
+                                    .classList
+                                    .add(
+                                        "visible"
+                                    );
+
+
+                                revealObserver
+                                    .unobserve(
+                                        entry.target
+                                    );
+
+                            }
+
+                        }
+                    );
+
+                },
+
+                {
+                    threshold: 0.14
+                }
+
+            );
+
+
+        revealElements
+            .forEach(
+                function (element) {
+
+                    revealObserver.observe(
+                        element
+                    );
+
+                }
+            );
+
+
+
+        /* =====================================================
+           SCROLL PROGRESS
+        ===================================================== */
+
+        const scrollProgress =
+            document.getElementById(
+                "scrollProgress"
+            );
+
+
+        function updateScrollProgress() {
+
+            if (!scrollProgress) {
+                return;
+            }
+
+            const scrollTop =
+                window.scrollY;
+
+
+            const maximum =
+                document
+                    .documentElement
+                    .scrollHeight
+                -
+                window.innerHeight;
+
+
+            const progress =
+                maximum > 0
+                    ?
+                    scrollTop
+                    / maximum
+                    * 100
+                    :
+                    0;
+
+
+            scrollProgress.style.width =
+                progress
+                + "%";
+
+        }
+
+
+        window.addEventListener(
+            "scroll",
+            updateScrollProgress,
+            {
+                passive: true
+            }
+        );
+
+
+        updateScrollProgress();
+
+
+
+        /* =====================================================
+           SCAN SUBMIT TRANSITION
+        ===================================================== */
+
+        const scanForm =
+            document.getElementById(
+                "scanForm"
+            );
+
+        const urlInput =
+            document.getElementById(
+                "urlInput"
+            );
+
+        const analyzeButton =
+            document.getElementById(
+                "analyzeButton"
+            );
+
+        const analyzeButtonText =
+            document.getElementById(
+                "analyzeButtonText"
+            );
+
+        const analyzeButtonIcon =
+            document.getElementById(
+                "analyzeButtonIcon"
+            );
+
+        const scanTransition =
+            document.getElementById(
+                "scanTransition"
+            );
+
+        const transitionTarget =
+            document.getElementById(
+                "transitionTarget"
+            );
+
+
+        if (
+            scanForm
+            && analyzeButton
+        ) {
+
+            scanForm.addEventListener(
+                "submit",
+                function (event) {
+
+                    if (
+                        scanForm.dataset
+                            .submitting
+                        === "true"
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    event.preventDefault();
+
+
+                    analyzeButton.disabled =
+                        true;
+
+
+                    if (
+                        analyzeButtonText
+                    ) {
+
+                        analyzeButtonText
+                            .textContent =
+                            "INITIALIZING";
+
+                    }
+
+
+                    if (
+                        analyzeButtonIcon
+                    ) {
+
+                        analyzeButtonIcon
+                            .className =
+                            "fa-solid "
+                            + "fa-spinner "
+                            + "fa-spin";
+
+                    }
+
+
+                    if (
+                        transitionTarget
+                        && urlInput
+                    ) {
+
+                        transitionTarget
+                            .textContent =
+                            urlInput.value;
+
+                    }
+
+
+                    if (
+                        scanTransition
+                    ) {
+
+                        scanTransition
+                            .classList
+                            .add(
+                                "active"
+                            );
+
+
+                        scanTransition
+                            .setAttribute(
+                                "aria-hidden",
+                                "false"
+                            );
+
+                    }
+
+
+                    window.setTimeout(
+                        function () {
+
+                            scanForm.dataset
+                                .submitting =
+                                "true";
+
+
+                            scanForm.submit();
+
+                        },
+                        650
+                    );
+
+                }
+            );
+
+        }
+
+
+
+        /* =====================================================
+           ERROR POSITION
+        ===================================================== */
+
+        const scanError =
+            document.getElementById(
+                "scanError"
+            );
+
+
+        window.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                if (
+                    scanError
+                ) {
+
+                    const scanner =
+                        document.getElementById(
+                            "scanner"
+                        );
+
+
+                    if (
+                        scanner
+                    ) {
+
+                        window.setTimeout(
+                            function () {
+
+                                scanner
+                                    .scrollIntoView({
+
+                                        behavior:
+                                            "smooth",
+
+                                        block:
+                                            "center"
+
+                                    });
+
+                            },
+                            250
+                        );
+
+                    }
+
+                }
+
+            }
+        );
+
+
+
+        /* =====================================================
+           INTERNAL SMOOTH LINKS
+        ===================================================== */
+
+        document
+            .querySelectorAll(
+                'a[href^="#"]'
+            )
+            .forEach(
+                function (link) {
+
+                    link.addEventListener(
+                        "click",
+                        function (event) {
+
+                            const targetId =
+                                this.getAttribute(
+                                    "href"
+                                );
+
+
+                            if (
+                                !targetId
+                                || targetId === "#"
+                            ) {
+
+                                return;
+
+                            }
+
+
+                            const target =
+                                document
+                                    .querySelector(
+                                        targetId
+                                    );
+
+
+                            if (
+                                target
+                            ) {
+
+                                event
+                                    .preventDefault();
+
+
+                                target
+                                    .scrollIntoView({
+
+                                        behavior:
+                                            "smooth",
+
+                                        block:
+                                            "center"
+
+                                    });
+
+                            }
+
+                        }
+                    );
+
+                }
+            );
+
+    </script>
 
 
 </body>

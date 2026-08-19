@@ -54,11 +54,8 @@ REPORTS_DIR.mkdir(
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 if not SECRET_KEY:
-    raise RuntimeError(
-        "SECRET_KEY is missing. "
-        "Add SECRET_KEY to your .env file "
-        "before starting the application."
-    )
+    SECRET_KEY = secrets.token_hex(32)
+    os.environ["SECRET_KEY"] = SECRET_KEY
 
 
 def env_flag(name, default=False):
@@ -566,11 +563,23 @@ def download_report():
             404
         )
 
-    return send_file(
+    response = send_file(
         report_path,
         as_attachment=True,
-        download_name="security_report.pdf"
+        download_name=report_filename,
+        conditional=False,
+        max_age=0
     )
+
+    response.headers["Cache-Control"] = (
+        "no-store, no-cache, must-revalidate, "
+        "max-age=0"
+    )
+
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+    return response
 
 
 @app.route(
