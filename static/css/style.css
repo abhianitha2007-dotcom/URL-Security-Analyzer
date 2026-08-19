@@ -122,6 +122,54 @@ body {
 }
 
 
+.final-section {
+
+    padding:
+        44px 0
+        58px;
+
+}
+
+
+.final-panel {
+
+    min-height:
+        auto;
+
+    padding:
+        42px 28px;
+
+}
+
+
+.site-section {
+
+    padding:
+        52px 0;
+
+}
+
+
+.matrix-stage {
+
+    min-height:
+        390px;
+
+}
+
+
+.hero {
+
+    min-height:
+        auto;
+
+    padding:
+        76px 0
+        42px;
+
+}
+
+
 h1,
 h2,
 h3,
