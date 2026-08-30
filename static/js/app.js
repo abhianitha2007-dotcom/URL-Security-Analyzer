@@ -1,4 +1,15 @@
 (() => {
+    const warningGate = document.querySelector("[data-warning-gate]");
+    const warningDismiss = document.querySelector("[data-warning-dismiss]");
+    if (warningGate && warningDismiss) {
+        warningDismiss.focus();
+        warningDismiss.addEventListener("click", () => {
+            warningGate.hidden = true;
+            document.body.classList.remove("warning-pending");
+            document.querySelector("#main-content a, #main-content button")?.focus();
+        });
+    }
+
     const overlay = document.querySelector("[data-scan-overlay]");
     document.querySelectorAll("[data-scan-form]").forEach((form) => {
         form.addEventListener("submit", () => {

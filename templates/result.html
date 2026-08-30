@@ -2,6 +2,7 @@
 {% from "_macros.html" import status_row, verdict_class %}
 
 {% block title %}{{ verdict }} · URL analysis{% endblock %}
+{% block body_class %}result-page{% if content_warning and content_warning.show %} warning-pending{% endif %}{% endblock %}
 
 {% block content %}
 {% set r = analysis_results or {} %}
@@ -11,46 +12,83 @@
 {% set snapshot = r.get('snapshot', {}) %}
 {% set risk_tone = verdict_class(verdict) %}
 
-<section class="report-head shell">
-    <div class="report-title">
-        <span class="complete-badge"><i></i> Complete analysis</span>
-        <h1>Security assessment</h1>
-        <p class="report-url" title="{{ url }}">{{ url }}</p>
+{% if warning.show %}
+<div class="warning-gate warning-{{ warning.type }}" data-warning-gate role="dialog" aria-modal="true" aria-labelledby="warning-title">
+    <div class="warning-gate-panel">
+        <div class="warning-gate-top"><span>SENSITIVE CONTENT ADVISORY</span><b>REVIEW REQUIRED</b></div>
+        <div class="warning-gate-icon" aria-hidden="true">{{ warning.icon or '!' }}</div>
+        <p class="eyebrow"><span></span> Content classification</p>
+        <h2 id="warning-title">{{ warning.title }}</h2>
+        <p>{{ warning.message }}</p>
+        <div class="warning-gate-url" title="{{ url }}">{{ url }}</div>
+        <div class="warning-separation-note">
+            <strong>Not a malware verdict</strong>
+            <span>{{ warning.not_threat_verdict or 'This advisory does not change the threat-risk score.' }}</span>
+        </div>
+        <div class="warning-gate-actions">
+            <a class="button secondary" href="{{ url_for('home') }}">Go back</a>
+            <button class="button warning-button" type="button" data-warning-dismiss>View security report</button>
+        </div>
     </div>
-    <div class="report-actions">
-        {% if pdf_available %}<a class="button primary" href="{{ url_for('download_report') }}">Download PDF</a>{% endif %}
-        <a class="button secondary" href="{{ url_for('home') }}">New analysis</a>
+</div>
+{% endif %}
+
+<section class="report-hero shell">
+    <div class="report-intro">
+        <span class="complete-badge"><i></i> Security analysis complete</span>
+        <p class="eyebrow"><span></span> Deterministic report</p>
+        <h1>Security <em>intelligence.</em></h1>
+        <p class="report-description">Every required layer completed. Threat evidence, website hardening, and sensitive-content classification are reported independently.</p>
+        <div class="target-command">
+            <div><small>ANALYZED TARGET</small><strong title="{{ url }}">{{ url }}</strong></div>
+            <span>VERIFIED</span>
+        </div>
+        <div class="intro-statuses">
+            <span class="verdict-pill {{ risk_tone }}">{{ verdict }}</span>
+            <span class="coverage-pill"><i></i> Complete analysis</span>
+        </div>
     </div>
+
+    <article class="risk-terminal {{ risk_tone }}">
+        <div class="terminal-scan" aria-hidden="true"></div>
+        <div class="terminal-header"><strong>Threat Risk / Output 01</strong><span><i></i> ACTIVE</span></div>
+        <div class="risk-data">
+            <div class="risk-score-side">
+                <span>CALCULATED RISK</span>
+                <div class="risk-number">{{ risk_score }}<small>/100</small></div>
+                <strong>{{ verdict }}</strong>
+                <div class="risk-meter" style="--risk-score: {{ risk_score }}"><span></span></div>
+            </div>
+            <div class="risk-spectrum" aria-label="Risk spectrum">
+                <span>THREAT SPECTRUM</span>
+                <div class="spectrum-row{% if risk_score == 0 %} active{% endif %}"><b>SAFE</b><i><em></em></i></div>
+                <div class="spectrum-row{% if risk_score > 0 and risk_score <= 24 %} active{% endif %}"><b>LOW</b><i><em></em></i></div>
+                <div class="spectrum-row{% if risk_score > 24 and risk_score <= 49 %} active{% endif %}"><b>MEDIUM</b><i><em></em></i></div>
+                <div class="spectrum-row{% if risk_score > 49 and risk_score <= 75 %} active{% endif %}"><b>HIGH</b><i><em></em></i></div>
+                <div class="spectrum-row{% if risk_score > 75 %} active{% endif %}"><b>CRITICAL</b><i><em></em></i></div>
+            </div>
+        </div>
+        <div class="terminal-footer"><span>ENGINE {{ engine_version }}</span><span>REPORT READY</span></div>
+    </article>
 </section>
 
-<section class="shell assessment-grid" aria-label="Assessment summary">
-    <article class="assessment-card threat-summary {{ risk_tone }}">
-        <div class="assessment-label"><span>Threat Risk</span><small>Malware & phishing</small></div>
-        <div class="risk-dial" style="--risk-score: {{ risk_score }}">
-            <div><strong>{{ risk_score }}</strong><span>/100</span></div>
-        </div>
-        <div class="assessment-result">
-            <strong>{{ verdict }}</strong>
-            <p>Based only on corroborated threat evidence.</p>
-        </div>
-    </article>
-
+<section class="shell assessment-grid supporting-assessments" aria-label="Independent assessment summary">
     <article class="assessment-card posture-summary">
-        <div class="assessment-label"><span>Security Posture</span><small>Site hardening</small></div>
+        <div class="assessment-label"><span>Security Posture</span><small>Independent grade</small></div>
         <div class="posture-score"><strong>{{ posture.score }}</strong><span>/100</span></div>
-        <div class="assessment-result">
-            <strong>{{ posture.grade }}</strong>
-            <p>TLS, headers, cookies, CORS, and mixed content.</p>
-        </div>
+        <div class="assessment-result"><strong>{{ posture.grade }}</strong><p>TLS, headers, cookies, CORS, and mixed content.</p></div>
     </article>
 
     <article class="assessment-card content-summary{% if warning.show %} warning-{{ warning.type }}{% endif %}">
         <div class="assessment-label"><span>Content Warning</span><small>Separate classification</small></div>
         <div class="content-symbol" aria-hidden="true">{{ warning.icon or '—' }}</div>
-        <div class="assessment-result">
-            <strong>{{ warning.title or 'No warning detected' }}</strong>
-            <p>{% if warning.show %}Does not alter the threat score.{% else %}No sensitive category was identified.{% endif %}</p>
-        </div>
+        <div class="assessment-result"><strong>{{ warning.title or 'No advisory detected' }}</strong><p>{% if warning.show %}Does not alter threat risk.{% else %}No sensitive category was identified.{% endif %}</p></div>
+    </article>
+
+    <article class="assessment-card integrity-summary">
+        <div class="assessment-label"><span>Scan Integrity</span><small>No partial output</small></div>
+        <div class="integrity-symbol" aria-hidden="true"><span>✓</span></div>
+        <div class="assessment-result"><strong>Complete</strong><p>All required analysis layers returned usable evidence.</p></div>
     </article>
 </section>
 
@@ -59,7 +97,7 @@
     <div class="content-alert warning-{{ warning.type }}" role="note">
         <div class="warning-mark" aria-hidden="true">{{ warning.icon }}</div>
         <div>
-            <p class="eyebrow">Sensitive website warning</p>
+            <p class="eyebrow"><span></span> Sensitive website advisory</p>
             <h2>{{ warning.title }}</h2>
             <p>{{ warning.message }}</p>
             <strong>{{ warning.not_threat_verdict }}</strong>
@@ -68,23 +106,33 @@
 </section>
 {% endif %}
 
+<nav class="report-nav shell" aria-label="Report sections">
+    <a href="#evidence">Evidence</a>
+    <a href="#modules">Analysis layers</a>
+    <a href="#reputation">Reputation</a>
+    <a href="#provenance">Versions</a>
+    {% if pdf_available %}<a class="report-nav-action" href="{{ url_for('download_report') }}">Download PDF ↓</a>{% endif %}
+</nav>
+
 <section class="shell report-layout">
     <div class="report-main">
-        <article class="report-panel evidence-panel">
+        <article class="report-panel evidence-panel" id="evidence">
+            <div class="chapter-marker"><span>01</span><b>ASSESSMENT EVIDENCE</b></div>
             <div class="panel-heading">
-                <div><p class="eyebrow">Decision evidence</p><h2>Why this verdict</h2></div>
+                <div><p class="eyebrow"><span></span> Decision evidence</p><h2>Why this verdict</h2></div>
                 <span class="verdict-pill {{ risk_tone }}">{{ verdict }}</span>
             </div>
             <ol class="reason-list">
                 {% for reason in reasons %}
-                <li><span>{{ '%02d'|format(loop.index) }}</span><p>{{ reason }}</p></li>
+                <li><span>{{ '%02d'|format(loop.index) }}</span><p>{{ reason }}</p><small>SIGNAL</small></li>
                 {% endfor %}
             </ol>
             <p class="assessment-caveat">A score summarizes observed evidence at scan time; it cannot guarantee that a destination is safe.</p>
         </article>
 
-        <article class="report-panel">
-            <div class="panel-heading"><div><p class="eyebrow">Detailed evidence</p><h2>Analysis modules</h2></div></div>
+        <article class="report-panel" id="modules">
+            <div class="chapter-marker"><span>02</span><b>ANALYSIS LAYERS</b></div>
+            <div class="panel-heading"><div><p class="eyebrow"><span></span> Detailed evidence</p><h2>Security modules</h2></div></div>
 
             <details class="signal-group" open>
                 <summary><span>URL & domain signals</span><small>Lexical and structural context</small></summary>
@@ -148,8 +196,8 @@
     </div>
 
     <aside class="report-aside">
-        <article class="side-panel reputation-panel">
-            <p class="eyebrow">Reputation</p>
+        <article class="side-panel reputation-panel" id="reputation">
+            <p class="eyebrow"><span></span> Reputation</p>
             <h2>VirusTotal</h2>
             <div class="vendor-grid">
                 <div><strong>{{ threat.get('malicious', 0) }}</strong><span>Malicious</span></div>
@@ -161,15 +209,15 @@
         </article>
 
         <article class="side-panel posture-panel">
-            <p class="eyebrow">Posture observations</p>
+            <p class="eyebrow"><span></span> Posture observations</p>
             <h2>{{ posture.grade }}</h2>
             {% if posture.issues %}
             <ul class="compact-list">{% for issue in posture.issues %}<li>{{ issue }}</li>{% endfor %}</ul>
             {% else %}<p>No material hardening issues were identified.</p>{% endif %}
         </article>
 
-        <article class="side-panel provenance-panel">
-            <p class="eyebrow">Reproducibility</p>
+        <article class="side-panel provenance-panel" id="provenance">
+            <p class="eyebrow"><span></span> Reproducibility</p>
             <h2>Evidence versions</h2>
             <dl>
                 <div><dt>Engine</dt><dd>{{ engine_version }}</dd></div>

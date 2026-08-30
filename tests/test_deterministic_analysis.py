@@ -138,6 +138,27 @@ def test_page_modules_share_one_snapshot(monkeypatch):
     assert all(value is page for value in consumers.values())
     assert result["snapshot"]["redirect_count"] == 1
     assert len(result["snapshot"]["body_sha256"]) == 64
+    assert result["redirects"] == {
+        "count": 1,
+        "final_url": page.url,
+        "status": "Complete",
+        "score": 0,
+    }
+    assert result["forms"] == {
+        "issues": [],
+        "status": "Complete",
+        "score": 0,
+    }
+    assert result["javascript"] == {
+        "patterns": [],
+        "status": "Complete",
+        "score": 0,
+    }
+    assert result["security_headers"] == {
+        "missing": [],
+        "status": "Complete",
+        "score": 0,
+    }
 
 
 def test_required_module_exception_is_not_replaced_with_zero():
@@ -150,4 +171,15 @@ def test_required_module_exception_is_not_replaced_with_zero():
         manager._required(future, "javascript")
 
     assert captured.value.failed_checks == ("javascript",)
+    assert "No risk score" in captured.value.message
+
+
+def test_malformed_legacy_checker_result_never_becomes_a_score():
+    with pytest.raises(AnalysisIncompleteError) as captured:
+        manager._normalize_network_result(
+            "redirects",
+            (1, "https://example.com"),
+        )
+
+    assert captured.value.failed_checks == ("redirects",)
     assert "No risk score" in captured.value.message

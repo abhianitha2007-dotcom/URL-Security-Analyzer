@@ -56,14 +56,14 @@ FAILURE_MARKERS = (
     "parsing failed",
     "invalid url",
 )
-TUPLE_STATUS_INDEX = {
-    "redirects": 2,
-    "shortener": 1,
-    "javascript": 1,
-    "forms": 1,
-    "content": 1,
-    "favicon": 1,
-    "security_headers": 1,
+TUPLE_RESULT_FIELDS = {
+    "redirects": ("count", "final_url", "status", "score"),
+    "shortener": ("detected", "status", "score"),
+    "javascript": ("patterns", "status", "score"),
+    "forms": ("issues", "status", "score"),
+    "content": ("matches", "status", "score"),
+    "favicon": ("url", "status", "score"),
+    "security_headers": ("missing", "status", "score"),
 }
 
 
@@ -93,12 +93,23 @@ def _required(future, name):
 
 
 def _status(name, value):
-    if name in TUPLE_STATUS_INDEX and isinstance(value, tuple):
-        index = TUPLE_STATUS_INDEX[name]
-        return str(value[index]) if len(value) > index else ""
     if isinstance(value, dict):
         return str(value.get("status", ""))
     return ""
+
+
+def _normalize_network_result(name, value):
+    """Convert legacy checker tuples into the shared result schema."""
+    fields = TUPLE_RESULT_FIELDS.get(name)
+    if fields is None or isinstance(value, dict):
+        return value
+    if not isinstance(value, (tuple, list)) or len(value) != len(fields):
+        raise AnalysisIncompleteError(
+            f"The {name.replace('_', ' ')} check returned an invalid result. "
+            "No risk score was produced.",
+            (name,),
+        )
+    return dict(zip(fields, value))
 
 
 def _validate_complete_network_results(url, results):
@@ -210,7 +221,7 @@ def run_full_network_checks(url):
         )
 
         results = {
-            name: _required(future, name)
+            name: _normalize_network_result(name, _required(future, name))
             for name, future in futures.items()
             if name != "robots"
         }

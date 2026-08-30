@@ -4,67 +4,110 @@
 {% block body_class %}home-page{% endblock %}
 
 {% block content %}
-<section class="hero shell">
+<section class="hero shell" aria-labelledby="hero-title">
     <div class="hero-copy">
-        <p class="eyebrow"><span></span> Deterministic security analysis</p>
-        <h1>Know what a URL means <em>before</em> you trust it.</h1>
-        <p class="hero-lead">One complete scan separates malicious-threat evidence, website security posture, and sensitive-content warnings—without turning normal login words into automatic risk.</p>
+        <p class="eyebrow"><span></span> Multi-layer threat intelligence</p>
+        <h1 id="hero-title">Trust <span class="outline-word">nothing.</span><em>Verify links.</em></h1>
+        <p class="hero-lead">Investigate a URL before opening it. One complete scan examines structure, domain identity, page behavior, security posture, and external reputation—then keeps each conclusion in its proper lane.</p>
+
+        <div class="scan-area">
+            <div class="panel-topline">
+                <span>Target command</span>
+                <span class="live-label"><i></i> Engine ready</span>
+            </div>
+            {% if error %}
+            <div class="alert alert-error" role="alert">
+                <strong>Check the URL</strong>
+                <span>{{ error }}</span>
+            </div>
+            {% endif %}
+            <form class="url-form" action="{{ url_for('analyze') }}" method="post" data-scan-form>
+                <label for="url">Website URL</label>
+                <div class="input-combo">
+                    <span class="input-icon" aria-hidden="true">⌁</span>
+                    <input id="url" name="url" type="text" inputmode="url" autocomplete="url" spellcheck="false" placeholder="https://example.com" value="{{ entered_url or '' }}" required maxlength="2048">
+                    <button type="submit"><span>Analyze URL</span><b aria-hidden="true">→</b></button>
+                </div>
+                <div class="scan-meta">
+                    <span><i></i> One page snapshot</span>
+                    <span><i></i> Complete checks only</span>
+                    <a href="{{ url_for('history') }}">Previous scans ↗</a>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <div class="analyzer-panel">
-        <div class="panel-topline">
-            <span>Analyze destination</span>
-            <span class="live-label"><i></i> Engine ready</span>
+    <aside class="security-console" aria-label="Analysis layers">
+        <div class="console-glow" aria-hidden="true"></div>
+        <div class="console-header">
+            <span>Security matrix / 01</span>
+            <span class="console-live"><i></i> Online</span>
         </div>
-        {% if error %}
-        <div class="alert alert-error" role="alert">
-            <strong>Check the URL</strong>
-            <span>{{ error }}</span>
+        <div class="console-target">
+            <small>ANALYSIS PROTOCOL</small>
+            <strong>COMPLETE_SCAN</strong>
+            <span>One target · one snapshot · one result</span>
         </div>
-        {% endif %}
-        <form class="url-form" action="{{ url_for('analyze') }}" method="post" data-scan-form>
-            <label for="url">Website URL</label>
-            <div class="input-combo">
-                <span class="input-icon" aria-hidden="true">↗</span>
-                <input id="url" name="url" type="text" inputmode="url" autocomplete="url" spellcheck="false" placeholder="https://example.com" value="{{ entered_url or '' }}" required maxlength="2048">
-                <button type="submit">Analyze URL <span aria-hidden="true">→</span></button>
-            </div>
-            <p class="field-note">Public HTTP or HTTPS destinations only. Reputation checks query VirusTotal. A report is produced only when every required check completes.</p>
-        </form>
+        <div class="matrix-list">
+            <div><b>01</b><span><strong>URL structure</strong><small>Lexical & deceptive patterns</small></span><i>ARMED</i></div>
+            <div><b>02</b><span><strong>Domain identity</strong><small>DNS, WHOIS & certificate</small></span><i>ARMED</i></div>
+            <div><b>03</b><span><strong>Page behavior</strong><small>Forms, scripts & redirects</small></span><i>ARMED</i></div>
+            <div><b>04</b><span><strong>Threat reputation</strong><small>External engine consensus</small></span><i>ARMED</i></div>
+            <div><b>05</b><span><strong>Security posture</strong><small>Hardening & transport</small></span><i>ARMED</i></div>
+        </div>
+        <div class="console-footer">
+            <span>NO PARTIAL OUTPUT</span><span>POLICY VERSIONED</span>
+        </div>
+    </aside>
+</section>
+
+<section class="trust-strip" aria-label="Analysis promises">
+    <div class="shell">
+        <span>Deterministic scoring</span>
+        <span>Corroborated evidence</span>
+        <span>Clear content advisories</span>
+        <span>Reproducible reports</span>
     </div>
 </section>
 
 <section class="separation shell" aria-labelledby="separation-title">
     <div class="section-heading">
-        <p class="eyebrow">Three independent outcomes</p>
-        <h2 id="separation-title">Clear labels, no mixed meanings.</h2>
+        <div>
+            <p class="eyebrow"><span></span> Three independent outcomes</p>
+            <h2 id="separation-title">One scan. <em>Clear meanings.</em></h2>
+        </div>
+        <p>Weak hardening is not automatically malicious, and sensitive content is not automatically a cyber threat. The report keeps those judgments visibly separate.</p>
     </div>
     <div class="outcome-grid">
         <article class="outcome-card threat-card">
-            <span class="card-index">01</span>
+            <span class="card-index">01 / THREAT</span>
             <div class="outcome-icon" aria-hidden="true">◎</div>
             <h3>Threat Risk</h3>
-            <p>Phishing, malware, deceptive structure, behavior, and reputation evidence.</p>
+            <p>Phishing, malware, deceptive structure, suspicious behavior, and reputation evidence.</p>
             <small>Scored 0–100</small>
         </article>
         <article class="outcome-card posture-card">
-            <span class="card-index">02</span>
+            <span class="card-index">02 / POSTURE</span>
             <div class="outcome-icon" aria-hidden="true">⌁</div>
             <h3>Security Posture</h3>
-            <p>TLS, headers, cookies, CORS, mixed content, and server hardening.</p>
+            <p>TLS, security headers, cookies, CORS, mixed content, and server hardening.</p>
             <small>Graded independently</small>
         </article>
         <article class="outcome-card content-card">
-            <span class="card-index">03</span>
+            <span class="card-index">03 / CONTENT</span>
             <div class="outcome-icon" aria-hidden="true">!</div>
-            <h3>Content Warning</h3>
-            <p>Adult, gambling, or financial context shown without calling it malicious.</p>
+            <h3>Content Advisory</h3>
+            <p>Adult, gambling, or financial context shown prominently without calling it malicious.</p>
             <small>Clearly separated</small>
         </article>
     </div>
 </section>
 
-<section class="method-strip">
+<section class="method-strip" aria-labelledby="method-title">
+    <div class="shell method-heading">
+        <p class="eyebrow"><span></span> Complete-analysis protocol</p>
+        <h2 id="method-title">No score until every required layer answers.</h2>
+    </div>
     <div class="shell method-grid">
         <div><strong>01</strong><span>Validate public target</span></div>
         <div><strong>02</strong><span>Capture one snapshot</span></div>

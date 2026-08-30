@@ -236,6 +236,11 @@ def analyze():
     try:
         results = run_all_checks(url)
         risk_score, verdict, reasons = calculate_risk(results)
+        posture = calculate_posture(results)
+        policy = load_scoring_policy()
+        report_data = build_report_data(
+            url, results, risk_score, verdict, reasons, posture, policy
+        )
     except AnalysisIncompleteError as error:
         return render_template(
             "analysis_error.html",
@@ -243,24 +248,45 @@ def analyze():
             message=error.message,
             failed_checks=error.failed_checks,
         ), 503
+    except Exception as error:
+        app.logger.exception("Complete analysis failed before reporting: %s", error)
+        return render_template(
+            "analysis_error.html",
+            url=url,
+            message=(
+                "The completed checks could not be assembled into a trustworthy "
+                "report. No result was saved. Please retry."
+            ),
+            failed_checks=("analysis_engine",),
+        ), 503
 
-    posture = calculate_posture(results)
-    policy = load_scoring_policy()
-    report_data = build_report_data(
-        url, results, risk_score, verdict, reasons, posture, policy
-    )
-    save_scan(url, risk_score, verdict, history_session_id)
+    try:
+        save_scan(url, risk_score, verdict, history_session_id)
+    except Exception as error:
+        app.logger.exception("Scan history could not be saved: %s", error)
     pdf_available = create_pdf(report_data)
 
-    return render_template(
-        "result.html",
-        validation="Valid URL",
-        pdf_available=pdf_available,
-        whois_info=report_data["whois"],
-        dns_records=report_data["dns"],
-        ssl_info=report_data["ssl"],
-        **report_data,
-    )
+    try:
+        return render_template(
+            "result.html",
+            validation="Valid URL",
+            pdf_available=pdf_available,
+            whois_info=report_data["whois"],
+            dns_records=report_data["dns"],
+            ssl_info=report_data["ssl"],
+            **report_data,
+        )
+    except Exception as error:
+        app.logger.exception("Completed result could not be rendered: %s", error)
+        return render_template(
+            "analysis_error.html",
+            url=url,
+            message=(
+                "The complete report could not be displayed. No partial result "
+                "was shown. Please retry."
+            ),
+            failed_checks=("report_rendering",),
+        ), 503
 
 
 @app.get("/download-report")

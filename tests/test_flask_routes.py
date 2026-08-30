@@ -527,6 +527,65 @@ def test_result_page_renders_separate_assessments(
     assert "Partial Analysis" not in page
 
 
+def test_history_storage_failure_does_not_hide_a_complete_report(
+    client,
+    monkeypatch,
+    tmp_path,
+):
+    results = fake_analysis_results()
+    monkeypatch.setattr(app_module, "is_valid_url", lambda url: True)
+    monkeypatch.setattr(app_module, "run_all_checks", lambda url: results)
+    monkeypatch.setattr(
+        app_module,
+        "calculate_risk",
+        lambda value: (0, "Safe", ["No corroborated threat evidence."]),
+    )
+    monkeypatch.setattr(
+        app_module,
+        "save_scan",
+        lambda *args: (_ for _ in ()).throw(OSError("database unavailable")),
+    )
+    monkeypatch.setattr(app_module, "generate_pdf", lambda *args: None)
+    monkeypatch.setattr(
+        app_module,
+        "get_report_path",
+        lambda filename: tmp_path / filename,
+    )
+
+    response = client.post("/analyze", data={"url": "https://example.com"})
+
+    assert response.status_code == 200
+    assert b"Threat Risk" in response.data
+
+
+def test_unexpected_report_assembly_failure_returns_complete_only_error(
+    client,
+    monkeypatch,
+):
+    monkeypatch.setattr(app_module, "is_valid_url", lambda url: True)
+    monkeypatch.setattr(
+        app_module,
+        "run_all_checks",
+        lambda url: fake_analysis_results(),
+    )
+    monkeypatch.setattr(
+        app_module,
+        "calculate_risk",
+        lambda value: (0, "Safe", ["No corroborated threat evidence."]),
+    )
+    monkeypatch.setattr(
+        app_module,
+        "calculate_posture",
+        lambda value: (_ for _ in ()).throw(RuntimeError("bad schema")),
+    )
+
+    response = client.post("/analyze", data={"url": "https://example.com"})
+
+    assert response.status_code == 503
+    assert b"No risk score was produced" in response.data
+    assert b"analysis_engine" not in response.data
+
+
 # =========================================================
 # HISTORY SESSION SCOPING
 # =========================================================
