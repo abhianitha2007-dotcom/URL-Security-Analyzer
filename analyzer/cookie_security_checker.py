@@ -2,7 +2,7 @@ import requests
 from analyzer.safe_http import safe_requests
 
 
-def check_cookie_security(url):
+def check_cookie_security(url, response=None):
     """
     Analyze cookies returned by a website.
 
@@ -32,20 +32,21 @@ def check_cookie_security(url):
 
     try:
 
-        response = safe_requests.get(
-            url,
-            timeout=8,
-            allow_redirects=True,
-            headers={
-                "User-Agent": (
-                    "Mozilla/5.0 "
-                    "(Windows NT 10.0; Win64; x64) "
-                    "AppleWebKit/537.36 "
-                    "(KHTML, like Gecko) "
-                    "Chrome/120 Safari/537.36"
-                )
-            }
-        )
+        if response is None:
+            response = safe_requests.get(
+                url,
+                timeout=8,
+                allow_redirects=True,
+                headers={
+                    "User-Agent": (
+                        "Mozilla/5.0 "
+                        "(Windows NT 10.0; Win64; x64) "
+                        "AppleWebKit/537.36 "
+                        "(KHTML, like Gecko) "
+                        "Chrome/120 Safari/537.36"
+                    )
+                }
+            )
 
     except requests.RequestException:
 

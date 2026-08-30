@@ -1,101 +1,21 @@
-from urllib.parse import parse_qs, urlparse
+"""Describe query parameters without labeling normal parameter names as threats."""
 
-
-SUSPICIOUS_PARAMETERS = {
-    "token",
-    "session",
-    "sessionid",
-    "auth",
-    "authentication",
-    "password",
-    "passwd",
-    "otp",
-    "pin",
-    "redirect",
-    "redirect_url",
-    "return",
-    "return_url",
-    "next",
-    "continue",
-    "callback",
-    "verify",
-    "verification",
-    "account",
-    "email",
-    "username",
-    "userid"
-}
+from urllib.parse import parse_qsl, urlparse
 
 
 def check_query_parameters(url):
-    """
-    Checks suspicious query parameters.
-
-    Returns:
-        parameter_count,
-        suspicious_parameters,
-        status,
-        score
-    """
-
     try:
-        parsed = urlparse(url)
-        parameters = parse_qs(parsed.query, keep_blank_values=True)
-
-        if not parameters:
-            return (
-                0,
-                [],
-                "🟢 No Query Parameters",
-                0
-            )
-
-        found = []
-
-        for parameter in parameters:
-            normalized = parameter.lower().strip()
-
-            if normalized in SUSPICIOUS_PARAMETERS:
-                found.append(normalized)
-
-        found = sorted(set(found))
-        count = len(found)
-
-        if count == 0:
-            return (
-                0,
-                [],
-                "🟢 No Suspicious Parameters",
-                0
-            )
-
-        if count == 1:
-            return (
-                1,
-                found,
-                "🟡 One Suspicious Parameter",
-                5
-            )
-
-        if count <= 3:
-            return (
-                count,
-                found,
-                "🟠 Multiple Suspicious Parameters",
-                10
-            )
-
-        return (
-            count,
-            found,
-            "🔴 Many Suspicious Parameters",
-            18
+        parameters = parse_qsl(
+            urlparse(url).query,
+            keep_blank_values=True,
+            max_num_fields=200,
         )
+    except (TypeError, ValueError):
+        return 0, [], "Not checked", 0
 
-    except Exception:
-        return (
-            0,
-            [],
-            "Not Checked",
-            0
-        )
+    if not parameters:
+        return 0, [], "No query parameters", 0
+
+    names = sorted({name for name, _ in parameters})
+    count = len(parameters)
+    return count, names, f"{count} query parameter(s) observed", 0

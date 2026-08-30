@@ -162,6 +162,8 @@ def test_security_headers_are_added(client):
         == "camera=(), microphone=(), geolocation=()"
     )
 
+    assert "default-src 'self'" in response.headers["Content-Security-Policy"]
+
 
 # =========================================================
 # PRIVATE / LOCAL URL REJECTION
@@ -471,6 +473,58 @@ def test_valid_analysis_route(
     assert saved_score == 0
     assert saved_verdict == "Safe"
     assert saved_sid
+
+
+def test_result_page_renders_separate_assessments(
+    client,
+    monkeypatch,
+    tmp_path
+):
+    results = fake_analysis_results()
+    results["https"]["detected"] = True
+    results["ip_address"]["detected"] = False
+    results["scan_status"] = {
+        "complete": True,
+        "label": "Complete Analysis"
+    }
+    results["content_warning"] = {
+        "show": True,
+        "type": "adult",
+        "icon": "18+",
+        "title": "Adult / 18+ Content",
+        "message": "This website may contain adult material.",
+        "not_threat_verdict": (
+            "This content label does not by itself mean "
+            "the website is malicious."
+        ),
+        "policy_version": "test-policy"
+    }
+
+    monkeypatch.setattr(app_module, "is_valid_url", lambda url: True)
+    monkeypatch.setattr(app_module, "run_all_checks", lambda url: results)
+    monkeypatch.setattr(
+        app_module,
+        "calculate_risk",
+        lambda value: (0, "Safe", ["No corroborated threat evidence."])
+    )
+    monkeypatch.setattr(app_module, "save_scan", lambda *args: True)
+    monkeypatch.setattr(app_module, "generate_pdf", lambda *args: None)
+    monkeypatch.setattr(
+        app_module,
+        "get_report_path",
+        lambda filename: tmp_path / filename
+    )
+
+    response = client.post("/analyze", data={"url": "https://example.com"})
+    page = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    assert "Threat Risk" in page
+    assert "Security Posture" in page
+    assert "Content Warning" in page
+    assert "Adult / 18+ Content" in page
+    assert "does not by itself mean" in page
+    assert "Partial Analysis" not in page
 
 
 # =========================================================

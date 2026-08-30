@@ -333,7 +333,7 @@ class MixedContentParser(HTMLParser):
             )
 
 
-def check_mixed_content(url):
+def check_mixed_content(url, response=None):
     """
     Check whether an HTTPS webpage loads insecure
     HTTP resources.
@@ -412,20 +412,21 @@ def check_mixed_content(url):
 
     try:
 
-        response = safe_requests.get(
-            url,
-            timeout=10,
-            allow_redirects=True,
-            headers={
-                "User-Agent": (
-                    "Mozilla/5.0 "
-                    "(Windows NT 10.0; Win64; x64) "
-                    "AppleWebKit/537.36 "
-                    "(KHTML, like Gecko) "
-                    "Chrome/120 Safari/537.36"
-                )
-            }
-        )
+        if response is None:
+            response = safe_requests.get(
+                url,
+                timeout=10,
+                allow_redirects=True,
+                headers={
+                    "User-Agent": (
+                        "Mozilla/5.0 "
+                        "(Windows NT 10.0; Win64; x64) "
+                        "AppleWebKit/537.36 "
+                        "(KHTML, like Gecko) "
+                        "Chrome/120 Safari/537.36"
+                    )
+                }
+            )
 
     except requests.RequestException:
 

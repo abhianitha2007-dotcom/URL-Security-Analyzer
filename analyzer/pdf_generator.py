@@ -18,10 +18,12 @@ from reportlab.platypus import (
     TableStyle,
 )
 
+from analyzer.scoring_policy import load_scoring_policy
+
 
 PAGE_WIDTH, PAGE_HEIGHT = A4
-REPORT_VERSION = "3.0"
-ENGINE_NAME = "Multi-Layer URL Threat Detection Engine"
+REPORT_VERSION = "4.0"
+ENGINE_NAME = "Deterministic URL Evidence Engine"
 
 # Brand palette
 NAVY = colors.HexColor("#07111F")
@@ -158,28 +160,29 @@ def normalize_score(value):
 
 def get_risk_details(score):
     score = normalize_score(score)
-    if score > 75:
+    band = score_band(score)
+    if band == "Critical":
         return {
             "label": "CRITICAL",
             "color": RED,
             "soft": RED_SOFT,
             "recommendation": "Do not visit this website or provide any sensitive information.",
         }
-    if score > 50:
+    if band == "High Risk":
         return {
             "label": "HIGH RISK",
             "color": RED,
             "soft": RED_SOFT,
             "recommendation": "Avoid credentials, payments and downloads until the URL is independently verified.",
         }
-    if score > 30:
+    if band == "Medium Risk":
         return {
             "label": "MEDIUM RISK",
             "color": AMBER,
             "soft": AMBER_SOFT,
             "recommendation": "Proceed carefully and independently verify the domain and organization.",
         }
-    if score > 15:
+    if band == "Low Risk":
         return {
             "label": "LOW RISK",
             "color": BLUE,
@@ -196,14 +199,9 @@ def get_risk_details(score):
 
 def score_band(score):
     score = normalize_score(score)
-    if score <= 15:
-        return "Safe"
-    if score <= 30:
-        return "Low"
-    if score <= 50:
-        return "Medium"
-    if score <= 75:
-        return "High"
+    for band in load_scoring_policy()["verdict_bands"]:
+        if score <= int(band["maximum"]):
+            return band["verdict"]
     return "Critical"
 
 
@@ -442,20 +440,19 @@ def add_detection_table(story, rows, styles):
     data = [[
         Paragraph("DETECTION MODULE", styles["WhiteSmallBold"]),
         Paragraph("RESULT", styles["WhiteSmallBold"]),
-        Paragraph("CHECK SCORE", styles["WhiteSmallBold"]),
+        Paragraph("SCORING ROLE", styles["WhiteSmallBold"]),
     ]]
 
-    for name, result, score in rows:
-        score_num = normalize_score(score)
+    for name, result, role in rows:
         data.append([
             Paragraph(pdf_text(name), styles["BodySmallBold"]),
             Paragraph(pdf_text(result), styles["BodySmall"]),
-            Paragraph(str(score_num), styles["BodySmallBold"]),
+            Paragraph(pdf_text(role), styles["BodySmallBold"]),
         ])
 
     table = Table(
         data,
-        colWidths=[47 * mm, 113 * mm, 20 * mm],
+        colWidths=[43 * mm, 107 * mm, 30 * mm],
         repeatRows=1,
         hAlign="LEFT",
     )
@@ -493,7 +490,7 @@ def add_cover_header(story, url, generated_time, styles):
             Paragraph("URL Security Analyzer", styles["ReportTitle"]),
         ], [
             Paragraph(
-                "Comprehensive URL, domain, network, webpage and threat-intelligence analysis",
+                "Complete threat-risk, security-posture and content-context assessment",
                 styles["ReportSubtitle"],
             ),
         ], [
@@ -528,7 +525,7 @@ def add_risk_dashboard(story, score, verdict, styles):
     score = normalize_score(score)
 
     score_card = Table([
-        [Paragraph("CALCULATED RISK", styles["RiskLabel"])],
+        [Paragraph("THREAT RISK", styles["RiskLabel"])],
         [Paragraph(f"{score}<font size='12'> / 100</font>", styles["RiskScore"])],
         [Paragraph(pdf_text(verdict), styles["RiskLabel"])],
     ], colWidths=[48 * mm], rowHeights=[10 * mm, 18 * mm, 9 * mm])
@@ -582,17 +579,16 @@ def add_risk_dashboard(story, score, verdict, styles):
 
 
 def add_summary_cards(story, report_data, analysis, styles):
-    https_status = report_data.get("https_status", "Not Checked")
-    tld = report_data.get("tld", "Unknown")
-    subdomains = report_data.get("subdomain_count", 0)
+    posture = report_data.get("posture", {})
+    warning = report_data.get("content_warning", {})
     threat = get_section(analysis, "threat_intelligence")
     vt_malicious = threat.get("malicious", 0)
 
     cards = []
     for label, value in [
-        ("HTTPS", https_status),
-        ("TOP-LEVEL DOMAIN", tld),
-        ("SUBDOMAINS", subdomains),
+        ("THREAT RISK", f"{report_data.get('risk_score', 0)}/100"),
+        ("SECURITY POSTURE", f"{posture.get('score', 0)}/100 - {posture.get('grade', 'Unknown')}"),
+        ("CONTENT CONTEXT", warning.get("title") or "No warning detected"),
         ("VT MALICIOUS", vt_malicious),
     ]:
         card = Table([
@@ -651,10 +647,14 @@ def build_detection_rows(analysis):
     keyword_data = get_section(analysis, "keywords")
     keyword_count = keyword_data.get("count", 0)
     keyword_matches = keyword_data.get("matches", [])
+    probability = float(keyword_data.get("probability", 0) or 0)
     if keyword_count:
-        keyword_result = f"{keyword_count} suspicious keyword(s): {format_list(keyword_matches)}"
+        keyword_result = (
+            f"{probability * 100:.1f}% model probability; "
+            f"evidence: {format_list(keyword_matches)}"
+        )
     else:
-        keyword_result = "No suspicious keywords detected"
+        keyword_result = f"{probability * 100:.1f}% model probability; no strong evidence tokens"
 
     domain_age = get_section(analysis, "domain_age")
     domain_age_result = domain_age.get("message") or domain_age.get("status") or "Not Checked"
@@ -662,15 +662,15 @@ def build_detection_rows(analysis):
     module_keys = [
         ("HTTPS", "https"),
         ("IP Address", "ip_address"),
-        ("Suspicious Keywords", None),
+        ("URL-Language Model", None),
         ("URL Length", "url_length"),
         ("Subdomains", "subdomains"),
         ("At Symbol", "at_symbol"),
-        ("URL Shortener", "shortener"),
+        ("Compact Redirect", "shortener"),
         ("Hyphens", "hyphens"),
-        ("Top-Level Domain", "tld"),
+        ("Domain Suffix", "tld"),
         ("Domain Age", None),
-        ("Domain Similarity", "domain_similarity"),
+        ("URL-Language Evidence", "domain_similarity"),
         ("Typosquatting", "typosquatting"),
         ("Homograph", "homograph"),
         ("Punycode", "punycode"),
@@ -697,15 +697,30 @@ def build_detection_rows(analysis):
         ("Threat Intelligence", "threat_intelligence"),
     ]
 
+    threat_modules = {
+        "IP Address", "URL-Language Model", "At Symbol", "Hyphens",
+        "Domain Age", "Typosquatting", "Homograph", "Punycode",
+        "Domain Entropy", "Port", "File Extension", "Redirects",
+        "JavaScript", "Forms", "Mixed Content", "Threat Intelligence",
+    }
+    posture_modules = {
+        "HTTPS", "Security Headers", "Response Headers", "HTTP Methods",
+        "Cookie Security", "CORS", "Technology", "Sensitive File Exposure",
+    }
     rows = []
     for label, key in module_keys:
-        if label == "Suspicious Keywords":
-            rows.append((label, keyword_result, keyword_data.get("score", 0)))
+        role = (
+            "Threat context" if label in threat_modules
+            else "Security posture" if label in posture_modules
+            else "Informational"
+        )
+        if label == "URL-Language Model":
+            rows.append((label, keyword_result, role))
         elif label == "Domain Age":
-            rows.append((label, domain_age_result, domain_age.get("score", 0)))
+            rows.append((label, domain_age_result, role))
         else:
             section = get_section(analysis, key)
-            rows.append((label, section.get("status", "Not Checked"), section.get("score", 0)))
+            rows.append((label, section.get("status", "Not Checked"), role))
     return rows
 
 
@@ -715,7 +730,8 @@ def build_detection_rows(analysis):
 
 def get_recommendations(score):
     score = normalize_score(score)
-    if score > 75:
+    band = score_band(score)
+    if band == "Critical":
         return [
             "Do not open or continue using this website.",
             "Do not enter passwords, OTPs, banking or payment information.",
@@ -723,7 +739,7 @@ def get_recommendations(score):
             "Report the URL to your browser, organization or security team.",
             "Use the organization's official website or mobile application instead.",
         ]
-    if score > 50:
+    if band == "High Risk":
         return [
             "Avoid entering personal, financial or authentication information.",
             "Verify the registered domain and organization independently.",
@@ -731,7 +747,7 @@ def get_recommendations(score):
             "Use an official bookmark, application or trusted search result.",
             "Consider a second reputation source before continuing.",
         ]
-    if score > 30:
+    if band == "Medium Risk":
         return [
             "Proceed only after verifying the domain carefully.",
             "Check WHOIS, certificate and organization details.",
@@ -739,7 +755,7 @@ def get_recommendations(score):
             "Confirm the link through an official source.",
             "Be cautious of redirects, login forms and payment requests.",
         ]
-    if score > 15:
+    if band == "Low Risk":
         return [
             "Only minor risk indicators were detected.",
             "Verify the URL spelling before entering sensitive information.",
@@ -816,14 +832,19 @@ def generate_pdf(report_data, output_path):
     add_summary_cards(story, report_data, analysis, styles)
 
     add_section_title(story, "Executive Summary", styles, "Assessment")
+    posture = report_data.get("posture", {})
+    content_warning = report_data.get("content_warning", {})
     add_information_table(story, [
         ["Analyzed URL", url],
-        ["Risk Score", f"{risk_score}/100"],
-        ["Final Verdict", verdict],
+        ["Threat Risk", f"{risk_score}/100 - {verdict}"],
+        ["Security Posture", f"{posture.get('score', 0)}/100 - {posture.get('grade', 'Unknown')}"],
+        ["Content Classification", content_warning.get("title") or "No content warning detected"],
+        ["Content Classification Note", content_warning.get("not_threat_verdict", "Content classification is separate from malicious-threat scoring.")],
         ["Threat Band", score_band(risk_score)],
         ["Report Generated", generated_time],
-        ["Scanner Version", REPORT_VERSION],
+        ["Report Version", REPORT_VERSION],
         ["Detection Engine", ENGINE_NAME],
+        ["Engine Policy", report_data.get("policy_version", "Unknown")],
     ], styles)
     add_evidence_summary(story, report_data.get("reasons", []), styles)
     story.append(PageBreak())
@@ -833,13 +854,13 @@ def generate_pdf(report_data, output_path):
     add_information_table(story, [
         ["HTTPS", report_data.get("https_status", "Not Checked")],
         ["IP Address", report_data.get("ip_status", "Not Checked")],
-        ["Suspicious Keywords", f"{report_data.get('keyword_count', 0)} detected - {format_list(report_data.get('keywords', []))}"],
+        ["URL-Language Evidence", f"{report_data.get('keyword_count', 0)} token(s) - {format_list(report_data.get('keywords', []))}"],
         ["URL Length", f"{report_data.get('url_length', 'Unknown')} characters - {report_data.get('length_category', 'Unknown')}"],
         ["Subdomains", f"{report_data.get('subdomain_count', 0)} - {report_data.get('subdomain_status', 'Unknown')}"],
         ["At Symbol", report_data.get("at_status", "Not Checked")],
-        ["URL Shortener", report_data.get("shortener_status", "Not Checked")],
+        ["Compact Redirect", report_data.get("shortener_status", "Not Checked")],
         ["Hyphens", f"{report_data.get('hyphen_count', 0)} - {report_data.get('hyphen_status', 'Unknown')}"],
-        ["Top-Level Domain", f"{report_data.get('tld', 'Unknown')} - {report_data.get('tld_status', 'Unknown')}"],
+        ["Domain Suffix", f"{report_data.get('tld', 'Unknown')} - {report_data.get('tld_status', 'Unknown')}"],
     ], styles)
 
     domain_age = report_data.get("domain_age", {})
@@ -853,10 +874,10 @@ def generate_pdf(report_data, output_path):
     ], styles)
 
     if analysis:
-        add_section_title(story, "Domain Identity Checks", styles, "Impersonation Signals")
+        add_section_title(story, "Domain Identity Checks", styles, "Contextual Signals")
         add_information_table(story, [
-            ["Domain Similarity", get_nested(analysis, "domain_similarity", "status")],
-            ["Similarity Matches", format_list(get_nested(analysis, "domain_similarity", "matches", []))],
+            ["URL-Language Context", get_nested(analysis, "domain_similarity", "status")],
+            ["Model Evidence", format_list(get_nested(analysis, "domain_similarity", "matches", []))],
             ["Typosquatting", get_nested(analysis, "typosquatting", "status")],
             ["Homograph", get_nested(analysis, "homograph", "status")],
             ["Punycode", get_nested(analysis, "punycode", "status")],
@@ -913,7 +934,7 @@ def generate_pdf(report_data, output_path):
     detection_rows = build_detection_rows(analysis)
     add_detection_table(story, detection_rows, styles)
     story.append(Paragraph(
-        "Check scores shown above are raw module outputs. The final risk score applies category caps, weighting, corroboration and threat-intelligence rules, so module scores are not added directly.",
+        "Scoring roles show how each observation is used. Security-posture and informational checks do not become phishing or malware points.",
         styles["Disclaimer"],
     ))
     story.append(Spacer(1, 8))
@@ -935,9 +956,9 @@ def generate_pdf(report_data, output_path):
         ["Missing Security Headers", format_list(headers.get("missing", headers.get("missing_headers", [])))],
         ["JavaScript Patterns", format_list(javascript.get("patterns", javascript.get("matches", [])))],
         ["Form Issues", format_list(forms.get("issues", forms.get("patterns", [])))],
-        ["Content Patterns", format_list(content.get("patterns", content.get("matches", [])))],
+        ["Visible Content", content.get("status", "Not Checked")],
         ["Favicon URL", favicon.get("url", favicon.get("favicon_url", "Unknown"))],
-        ["Suspicious Query Parameters", format_list(query_parameters.get("matches", query_parameters.get("suspicious", [])))],
+        ["Query Parameters", format_list(query_parameters.get("matches", []))],
         ["Email Addresses in URL", format_list(email_address.get("matches", email_address.get("emails", [])))],
     ], styles)
 
@@ -1026,9 +1047,9 @@ def generate_pdf(report_data, output_path):
     add_recommendations(story, risk_score, styles)
 
     disclaimer = Table([[Paragraph(
-        "<b>Important:</b> This report is generated using automated heuristics, technical checks and available threat-intelligence data. "
-        "A low score does not guarantee that a website is safe, and an unavailable reputation result should not be treated as proof of safety. "
-        "Use this report as supporting security evidence rather than an absolute guarantee.",
+        "<b>Important:</b> This complete report uses a versioned URL-language model, technical checks and available threat intelligence. "
+        "Threat risk, security posture and content classification are independent outcomes. A low threat score does not guarantee that a website is safe. "
+        "Use this report as supporting evidence rather than an absolute guarantee.",
         styles["Disclaimer"],
     )]], colWidths=[180 * mm])
     disclaimer.setStyle(TableStyle([

@@ -1,0 +1,35 @@
+{
+  "policy_version": "2026.08.30",
+  "categories": [
+    {
+      "id": "adult",
+      "priority": 100,
+      "label": "Adult / 18+ Content",
+      "icon": "18+",
+      "message": "This website may contain adult or sexually explicit material. Continue only if you are of legal age and expect this content.",
+      "category_terms": ["adult content", "pornography", "sexually explicit", "nudity", "mature content"],
+      "metadata_terms": ["rating:adult", "porn", "xxx", "nsfw", "sexually explicit", "adults only", "18+"],
+      "url_tokens": ["porn", "pornography", "xxx", "hentai", "nsfw"]
+    },
+    {
+      "id": "gambling",
+      "priority": 80,
+      "label": "Gambling Content",
+      "icon": "!",
+      "message": "This website may offer gambling or betting services. Age restrictions and financial-loss risks may apply.",
+      "category_terms": ["gambling", "betting", "casino", "lottery", "sportsbook", "bookmaking"],
+      "metadata_terms": ["gambling", "betting", "casino", "sportsbook", "poker", "slots", "lottery"],
+      "url_tokens": ["gambling", "bet", "betting", "casino", "sportsbook", "poker", "slots", "lottery"]
+    },
+    {
+      "id": "financial",
+      "priority": 40,
+      "label": "Financial Activity",
+      "icon": "$",
+      "message": "This website may involve payments, banking, investments, cryptocurrency, or wallets. Verify the destination before entering financial information.",
+      "category_terms": ["financial services", "banking", "investment", "cryptocurrency", "digital currency", "digital wallet"],
+      "metadata_terms": ["banking", "investment", "trading", "cryptocurrency", "crypto wallet", "digital wallet"],
+      "url_tokens": ["banking", "investment", "investing", "trading", "cryptocurrency", "crypto", "wallet"]
+    }
+  ]
+}

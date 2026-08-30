@@ -1,125 +1,36 @@
+"""Detect compact cross-site redirects without a provider allowlist."""
+
+import re
 from urllib.parse import urlparse
 
 
-
-SHORTENERS = {
-
-    "bit.ly",
-    "tinyurl.com",
-    "t.co",
-    "goo.gl",
-    "is.gd",
-    "ow.ly",
-    "buff.ly",
-    "rebrand.ly",
-    "cutt.ly",
-    "shorturl.at",
-    "tiny.cc",
-    "rb.gy",
-    "lnkd.in",
-    "trib.al",
-    "shorte.st",
-    "adf.ly",
-    "tiny.one",
-    "t.ly",
-    "s.id",
-    "v.gd",
-    "clck.ru"
-
-}
+def _host(value):
+    return (urlparse(value).hostname or "").lower().removeprefix("www.")
 
 
-
-
-def check_shortener(url):
-    """
-    Detects known URL shortening services.
-
-    Returns:
-
-        found
-        status
-        score
-
-    """
-
+def check_shortener(url, response=None):
+    """Return an informational compact-link signal from the captured redirect."""
     try:
+        if response is None or not response.history:
+            return False, "No compact cross-site redirect detected", 0
 
-
-        hostname = urlparse(url).hostname
-
-
-
-        if not hostname:
-
-
-            return (
-
-                False,
-
-                "Not Checked",
-
-                0
-
-            )
-
-
-
-
-        hostname = hostname.lower()
-
-
-
-        # Remove www
-
-        if hostname.startswith("www."):
-
-            hostname = hostname[4:]
-
-
-
-
-
-        if hostname in SHORTENERS:
-
-
-            return (
-
-                True,
-
-                f"⚠️ URL Shortener Detected ({hostname})",
-
-                20
-
-            )
-
-
-
-
-
-        return (
-
-            False,
-
-            "✅ No URL Shortener",
-
-            0
-
+        original = urlparse(url)
+        original_host = _host(url)
+        final_host = _host(response.url)
+        cross_site = bool(
+            original_host
+            and final_host
+            and original_host != final_host
+            and not original_host.endswith("." + final_host)
+            and not final_host.endswith("." + original_host)
         )
+        path_token = original.path.strip("/").split("/", 1)[0]
+        compact_token = bool(re.fullmatch(r"[A-Za-z0-9_-]{2,16}", path_token))
 
-
-
-
-
-    except Exception:
-
-
-        return (
-
-            False,
-
-            "Not Checked",
-
-            0
-
-        )
+        if cross_site and compact_token:
+            return True, "Compact cross-site redirect observed", 0
+        if cross_site:
+            return False, "Cross-site redirect observed", 0
+        return False, "No compact cross-site redirect detected", 0
+    except (TypeError, ValueError):
+        return False, "Not checked", 0

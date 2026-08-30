@@ -1,302 +1,142 @@
 # URL Security Analyzer
 
-URL Security Analyzer is a Flask-based cybersecurity web application that analyzes URLs for phishing indicators, suspicious domain behavior, insecure configurations, and malicious reputation signals.
+URL Security Analyzer is a defensive Flask application that produces three independent outcomes for a public URL:
 
-It combines multiple security checks into a final **Risk Score from 0–100** and provides detailed analysis results, private scan history, and downloadable PDF security reports.
+- **Threat Risk (0–100):** corroborated phishing, malware, deceptive structure, behavior, and reputation evidence.
+- **Security Posture (0–100):** TLS, response headers, cookies, CORS, mixed content, and server-hardening observations.
+- **Content Warning:** adult/18+, gambling, or financial context. A content label does not by itself mean a site is malicious.
 
-## Live Demo
+The analyzer either returns a complete assessment or returns no score, history entry, or PDF. There is no partial-analysis result.
 
-https://url-security-analyzer-1oky.onrender.com
+## What changed in engine 4
 
-> The application is hosted on Render's free tier, so the first request after inactivity may take a short time to load.
+- Every page-level module consumes one captured response, eliminating conflicting results from repeated page downloads during a scan.
+- A versioned URL-language model replaces the fixed suspicious-keyword and brand lists.
+- Normal terms such as `login`, `account`, or `payment` do not add points on their own.
+- TLDs and ordinary query-parameter names are reported factually, not treated as reputation evidence.
+- A single isolated VirusTotal classification is recorded as inconclusive and does not change the score.
+- Missing headers, cookie settings, and CORS findings affect Security Posture rather than malicious-threat risk.
+- Required-module failures raise a complete-analysis error instead of silently becoming zero points.
+- Engine, policy, content-policy, model, and page-snapshot versions are shown in each result.
 
----
+No automated classifier can be perfectly accurate. The scoring policy reduces false positives by requiring corroboration, preserving evidence provenance, and keeping non-threat observations out of the threat score.
 
-## Features
-
-- HTTPS detection
-- IP address detection
-- Suspicious keyword detection
-- URL length analysis
-- Subdomain analysis
-- Hyphen and `@` symbol detection
-- URL shortener detection
-- Query parameter analysis
-- Suspicious file extension detection
-- Domain age analysis
-- WHOIS lookup
-- DNS record analysis
-- SSL certificate inspection
-- TLD risk analysis
-- URL entropy analysis
-- Typosquatting detection
-- Domain similarity detection
-- Punycode detection
-- Unicode homograph detection
-- Redirect analysis
-- JavaScript behavior inspection
-- Form analysis
-- Page content analysis
-- Security header analysis
-- Response header analysis
-- Cookie security checks
-- CORS security checks
-- Mixed-content detection
-- robots.txt analysis
-- Sitemap analysis
-- Sensitive file exposure detection
-- HTTP method analysis
-- Technology detection
-- VirusTotal threat intelligence
-- Risk score calculation
-- Private browser-based scan history
-- Downloadable PDF security reports
-- SSRF protection
-- CSRF protection
-- Detailed URL validation errors
-
----
-
-## Risk Levels
+## Scoring bands
 
 | Score | Verdict |
-|---|---|
-| 0–15 | Safe |
-| 16–30 | Low Risk |
-| 31–50 | Medium Risk |
+|---:|---|
+| 0 | Safe |
+| 1–24 | Low Risk |
+| 25–49 | Medium Risk |
 | 51–75 | High Risk |
 | 76–100 | Critical |
 
-The final score is calculated from multiple categories of evidence instead of relying on a single indicator.
+`Safe` means no corroborated malicious evidence was observed during this completed scan; it is not a guarantee.
 
----
+The versioned policy lives in [`analyzer/data/scoring_policy.json`](analyzer/data/scoring_policy.json). Runtime code never adds every checker score together. It groups threat evidence into lexical, structural, domain, behavior, and reputation categories, applies category caps, and adds only documented corroboration bonuses.
 
-## Tech Stack
+## Data-driven URL language model
 
-### Backend
+The packaged model is generated from:
 
-- Python
-- Flask
-- Gunicorn
+- verified phishing URLs from [PhishTank](https://www.phishtank.net/developer_info.php), and
+- high-ranking benign domains from [Tranco](https://tranco-list.eu/).
 
-### Frontend
+Dataset files are intentionally not committed. The model stores source hashes, sample counts, model version, and holdout metrics. Rebuild it with:
 
-- HTML
-- CSS
-- JavaScript
-- Bootstrap 5
+```bash
+python scripts/train_url_language_model.py \
+  --phishtank /path/to/verified_online.csv \
+  --tranco /path/to/tranco-list.zip \
+  --tranco-id YOUR_LIST_ID \
+  --output analyzer/data/url_language_model.json.gz
+```
 
-### Database
+Training uses a fixed seed, hostname-group holdout split, and deterministic gzip metadata.
 
-- SQLite
+## Main checks
 
-### Security & Analysis
+- public-target validation and redirect SSRF protection
+- URL-language, structure, entropy, homograph, punycode, and typosquatting signals
+- domain age, WHOIS, DNS, TLS, and redirect analysis
+- form and JavaScript behavior
+- security and response headers, cookies, CORS, and mixed content
+- robots.txt, sitemap, file-exposure, HTTP-method, and technology observations
+- VirusTotal reputation and category data
+- private per-session history and downloadable PDF reports
 
-- Requests
-- python-whois
-- dnspython
-- BeautifulSoup
-- VirusTotal API
-
-### Reports
-
-- ReportLab
-
-### Testing
-
-- pytest
-
-### Deployment
-
-- Render
-
----
-
-## Project Structure
+## Project structure
 
 ```text
 URL-Security-Analyzer/
-│
 ├── analyzer/
+│   ├── data/                         # versioned model and policies
+│   ├── detection_manager.py          # complete-only orchestration
+│   ├── risk_engine.py                # calibrated threat and posture logic
+│   └── ...                           # focused checkers
 ├── database/
-├── templates/
+├── scripts/train_url_language_model.py
 ├── static/
+├── templates/
 ├── tests/
-├── manual_tests/
-├── reports/
-│
 ├── app.py
-├── requirements.txt
-├── .env.example
-├── .gitignore
-└── README.md
+└── requirements.txt
 ```
 
----
-
-## Installation
-
-Clone the repository:
+## Install and run
 
 ```bash
 git clone https://github.com/abhianitha2007-dotcom/URL-Security-Analyzer.git
-```
-
-Move into the project:
-
-```bash
 cd URL-Security-Analyzer
+python -m venv .venv
 ```
 
-Create a virtual environment:
+Activate the environment, then install dependencies:
 
 ```bash
-python -m venv venv
+python -m pip install -r requirements.txt
 ```
 
-Activate it on Windows:
-
-```powershell
-venv\Scripts\activate
-```
-
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
-## Environment Variables
-
-Create a `.env` file in the project root:
+Copy `.env.example` to `.env` and replace every placeholder:
 
 ```env
-SECRET_KEY=your-secret-key
-VIRUSTOTAL_API_KEY=your-virustotal-api-key
-
-FLASK_DEBUG=true
+SECRET_KEY=replace-with-a-long-random-value
+VIRUSTOTAL_API_KEY=replace-with-your-virustotal-api-key
+FLASK_DEBUG=false
 SESSION_COOKIE_SECURE=false
 ```
 
-Never upload your real `.env` file or API keys to GitHub.
+Use `SESSION_COOKIE_SECURE=true` behind production HTTPS.
 
-For production deployment:
-
-```env
-FLASK_DEBUG=false
-SESSION_COOKIE_SECURE=true
-```
-
----
-
-## Run Locally
-
-Start the application:
+Start locally:
 
 ```bash
 python app.py
 ```
 
-Then open:
-
-```text
-http://127.0.0.1:5000
-```
-
----
-
-## Testing
-
-Run the automated test suite:
+Production command:
 
 ```bash
-python -m pytest tests -v
+gunicorn app:app
 ```
 
-Current automated test result:
+## Test
 
-```text
-42 passed
+```bash
+python -m pytest tests -q
 ```
 
-The automated tests cover areas including:
+The suite covers deterministic snapshot reuse, complete-only failures, scoring regressions, content-warning separation, model repeatability, Flask routes, CSRF, SSRF defenses, history isolation, and PDF routes.
 
-- Flask routes
-- SSRF protection
-- Private and local address blocking
-- Safe redirect handling
-- CSRF protection
-- Scan history isolation
-- PDF report routes
-- Request-size limits
-- URL validation
-- DNS failure handling
-- Embedded credential blocking
-- Validation error messages
+## Security notes
 
----
-
-## Security
-
-The application includes multiple protections for safely analyzing user-supplied URLs:
-
-- Private and local IP blocking
-- DNS-based public target validation
-- Redirect SSRF protection
-- Safe HTTP request handling
-- Bounded network timeouts
-- Environment proxy isolation
-- CSRF protection
-- Secure browser sessions
-- Request-size limits
-- Security response headers
-- Environment-based secret management
-
-Network requests are validated before being sent to reduce the risk of Server-Side Request Forgery attacks.
-
----
-
-## Performance
-
-The analyzer uses:
-
-- HTTP connection reuse
-- Shared WHOIS lookup caching
-- Concurrent network analysis
-- Parallel sitemap processing
-- Bounded worker pools
-
-These optimizations reduce scan time while keeping the security checks and scoring system intact.
-
----
-
-## Validation
-
-The application distinguishes between different URL validation failures, including:
-
-- Invalid URL format
-- Unsupported URL scheme
-- Private or local network targets
-- Invalid ports
-- Embedded usernames or passwords
-- DNS resolution failures
-
-A valid but unavailable domain is reported separately from an incorrectly formatted URL.
-
----
-
-## Disclaimer
-
-This project is intended for educational and defensive cybersecurity purposes.
-
-The generated risk score is a security indicator and should not be treated as a guarantee that a website is completely safe or malicious.
-
-External threat-intelligence results may change over time as security vendors update their classifications.
-
----
+- Never commit `.env`, API keys, or generated reports.
+- Submitted URLs may be looked up or submitted to VirusTotal for reputation analysis.
+- If a credential has ever been committed, deleting it from the current file is not sufficient; revoke and rotate it.
+- Outbound requests validate the original host and every redirect target against public-address rules.
+- The app sends a restrictive Content Security Policy and other browser security headers.
+- This project is intended for defensive and educational use.
 
 ## License
 
-MIT License
+MIT

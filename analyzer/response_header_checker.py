@@ -69,7 +69,7 @@ def detect_outdated_software(value):
     )
 
 
-def check_response_headers(url):
+def check_response_headers(url, response=None):
     """
     Analyzes HTTP response headers.
 
@@ -109,17 +109,18 @@ def check_response_headers(url):
 
     try:
 
-        response = safe_requests.get(
-            url,
-            timeout=8,
-            allow_redirects=True,
-            headers={
-                "User-Agent": (
-                    "Mozilla/5.0 "
-                    "(compatible; URLSecurityAnalyzer/2.0)"
-                )
-            }
-        )
+        if response is None:
+            response = safe_requests.get(
+                url,
+                timeout=8,
+                allow_redirects=True,
+                headers={
+                    "User-Agent": (
+                        "Mozilla/5.0 "
+                        "(compatible; URLSecurityAnalyzer/2.0)"
+                    )
+                }
+            )
 
         result["status_code"] = (
             response.status_code

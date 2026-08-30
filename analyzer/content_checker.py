@@ -1,149 +1,40 @@
-import re
+"""Analyze page text availability without a hardcoded phishing phrase list."""
 
 import requests
-from analyzer.safe_http import safe_requests
 from bs4 import BeautifulSoup
 
-
-SUSPICIOUS_TEXT_PATTERNS = {
-    "urgent_action": [
-        "act immediately",
-        "urgent action required",
-        "verify now",
-        "confirm immediately"
-    ],
-    "account_warning": [
-        "account suspended",
-        "account locked",
-        "account blocked",
-        "unusual activity"
-    ],
-    "credential_request": [
-        "enter your password",
-        "confirm your password",
-        "verify your identity",
-        "update your credentials"
-    ],
-    "financial_request": [
-        "bank details",
-        "credit card details",
-        "payment required",
-        "confirm payment"
-    ]
-}
+from analyzer.safe_http import safe_requests
 
 
-def fetch_page_text(url):
-
-    try:
+def fetch_page_text(url, response=None):
+    if response is None:
         response = safe_requests.get(
             url,
             timeout=8,
             allow_redirects=True,
-            headers={
-                "User-Agent": (
-                    "Mozilla/5.0 "
-                    "(Windows NT 10.0; Win64; x64) "
-                    "AppleWebKit/537.36 "
-                    "Chrome/120.0 Safari/537.36"
-                )
-            }
+            headers={"User-Agent": "Mozilla/5.0 URLSecurityAnalyzer/4.0"},
         )
 
-        content_type = response.headers.get(
-            "Content-Type",
-            ""
-        ).lower()
+    content_type = response.headers.get("Content-Type", "").lower()
+    if "text/html" not in content_type and "application/xhtml+xml" not in content_type:
+        return None
 
-        if "text/html" not in content_type:
-            return ""
-
-        soup = BeautifulSoup(
-            response.text[:1_000_000],
-            "html.parser"
-        )
-
-        for element in soup([
-            "script",
-            "style",
-            "noscript"
-        ]):
-            element.decompose()
-
-        return soup.get_text(
-            " ",
-            strip=True
-        ).lower()
-
-    except requests.RequestException:
-        return ""
-
-    except Exception:
-        return ""
+    soup = BeautifulSoup(response.text[:1_000_000], "html.parser")
+    for element in soup(["script", "style", "noscript", "template"]):
+        element.decompose()
+    return " ".join(soup.stripped_strings).lower()
 
 
-def check_content(url):
-
-    """
-    Checks visible webpage text for
-    common phishing language.
-
-    Returns:
-        detected_patterns,
-        status,
-        score
-    """
-
+def check_content(url, response=None):
+    """Return display metadata; page wording is not direct threat evidence."""
     try:
-        text = fetch_page_text(url)
-
+        text = fetch_page_text(url, response=response)
+        if text is None:
+            return [], "Not applicable — response is not HTML", 0
         if not text:
-            return (
-                [],
-                "Not Checked",
-                0
-            )
-
-        detected = []
-
-        for category, phrases in SUSPICIOUS_TEXT_PATTERNS.items():
-            for phrase in phrases:
-                pattern = rf"\b{re.escape(phrase)}\b"
-
-                if re.search(
-                    pattern,
-                    text,
-                    re.IGNORECASE
-                ):
-                    detected.append(category)
-                    break
-
-        detected = sorted(set(detected))
-
-        score = len(detected) * 6
-        score = min(score, 24)
-
-        if score >= 18:
-            status = "🔴 Strong Phishing Language Detected"
-
-        elif score >= 8:
-            status = "🟠 Suspicious Page Content"
-
-        elif detected:
-            status = "🟡 Potentially Suspicious Language"
-
-        else:
-            status = "🟢 No Suspicious Page Content"
-
-        return (
-            detected,
-            status,
-            score
-        )
-
+            return [], "HTML page contains no visible text", 0
+        return [], "Visible page text analyzed without keyword rules", 0
+    except requests.RequestException:
+        return [], "Not checked — request failed", 0
     except Exception:
-        return (
-            [],
-            "Not Checked",
-            0
-        )
+        return [], "Not checked — page parsing failed", 0

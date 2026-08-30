@@ -201,7 +201,7 @@ def test_flask_displays_private_target_message():
     )
 
 
-def test_flask_allows_dns_unavailable_url(
+def test_flask_rejects_incomplete_dns_analysis(
     monkeypatch
 ):
     monkeypatch.setattr(
@@ -225,17 +225,16 @@ def test_flask_allows_dns_unavailable_url(
         as_text=True
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 503
 
     assert (
-        "Security Report | URL Security Analyzer"
+        "Analysis could not be completed"
         in page
     )
 
     assert (
-        "The domain could not be resolved. "
-        "It may be offline or unavailable."
-        not in page
+        "No risk score was produced"
+        in page
     )
 
 

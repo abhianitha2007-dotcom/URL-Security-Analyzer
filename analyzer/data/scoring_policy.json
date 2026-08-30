@@ -1,0 +1,104 @@
+{
+  "engine_version": "4.0.0",
+  "policy_version": "2026.08.30",
+  "verdict_bands": [
+    {"maximum": 0, "verdict": "Safe"},
+    {"maximum": 24, "verdict": "Low Risk"},
+    {"maximum": 49, "verdict": "Medium Risk"},
+    {"maximum": 75, "verdict": "High Risk"},
+    {"maximum": 100, "verdict": "Critical"}
+  ],
+  "lexical": {
+    "elevated_probability": 0.65,
+    "high_probability": 0.85,
+    "elevated_score": 18,
+    "high_score": 20,
+    "minimum_support": 2
+  },
+  "thresholds": {
+    "dangerous_file": 20,
+    "high_javascript": 10,
+    "homograph": 20,
+    "nonstandard_port": 12,
+    "suspicious_redirect": 10,
+    "typosquatting": 7,
+    "unusual_entropy": 8
+  },
+  "weights": {
+    "structure": {
+      "ip_host": 15,
+      "at_symbol_cap": 18,
+      "port_cap": 12,
+      "dangerous_file_cap": 20,
+      "email_cap": 5,
+      "homograph_cap": 25,
+      "corroborated_http": 5
+    },
+    "domain": {
+      "typosquatting_cap": 12,
+      "entropy_cap": 10,
+      "new_domain_cap": 15,
+      "multiple_hyphens": 10
+    },
+    "behavior": {
+      "cross_domain_form": 15,
+      "password_get": 15,
+      "javascript_cap": 12,
+      "redirect_cap": 10,
+      "https_downgrade": 15
+    },
+    "reputation": {
+      "ten_malicious": 50,
+      "five_malicious": 45,
+      "three_malicious": 40,
+      "two_malicious": 35,
+      "one_malicious_two_suspicious": 20,
+      "one_malicious_one_suspicious": 8,
+      "five_suspicious": 20,
+      "two_suspicious": 12
+    }
+  },
+  "category_caps": {
+    "structure": 35,
+    "domain": 35,
+    "behavior": 30,
+    "reputation": 50
+  },
+  "corroboration_bonus": {
+    "minimum_category_score": 10,
+    "two_categories": 8,
+    "three_categories": 12
+  },
+  "reputation_floors": {
+    "two_malicious": 55,
+    "three_malicious": 60,
+    "five_malicious": 70,
+    "ten_malicious": 80
+  },
+  "minimum_risk": {
+    "https_downgrade": 20
+  },
+  "posture": {
+    "deductions": {
+      "http": 30,
+      "invalid_tls": 20,
+      "missing_header_each": 3,
+      "missing_header_cap": 18,
+      "cookie_issue_each": 3,
+      "cookie_issue_cap": 9,
+      "cors_reflection": 10,
+      "cors_reflection_credentials": 20,
+      "https_downgrade": 20,
+      "active_mixed_base": 5,
+      "active_mixed_cap": 15,
+      "outdated_software_each": 5,
+      "outdated_software_cap": 15
+    },
+    "grades": [
+      {"minimum": 90, "grade": "Excellent"},
+      {"minimum": 75, "grade": "Good"},
+      {"minimum": 55, "grade": "Fair"},
+      {"minimum": 0, "grade": "Poor"}
+    ]
+  }
+}

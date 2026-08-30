@@ -1,0 +1,14 @@
+{% macro status_row(label, status, detail=None) -%}
+<div class="signal-row">
+    <dt>{{ label }}</dt>
+    <dd>
+        <span>{{ status or 'No observation' }}</span>
+        {% if detail is not none and detail != '' %}<small>{{ detail }}</small>{% endif %}
+    </dd>
+</div>
+{%- endmacro %}
+
+{% macro verdict_class(verdict) -%}
+{%- set value = (verdict or '')|lower -%}
+{%- if 'critical' in value -%}critical{%- elif 'high' in value -%}high{%- elif 'medium' in value -%}medium{%- elif 'low' in value -%}low{%- else -%}safe{%- endif -%}
+{%- endmacro %}

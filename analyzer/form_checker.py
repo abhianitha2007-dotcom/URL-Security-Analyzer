@@ -25,7 +25,7 @@ def is_cross_domain_action(page_url, action_url):
     return page_host != action_host
 
 
-def check_forms(url):
+def check_forms(url, response=None):
 
     """
     Checks HTML forms for phishing indicators.
@@ -37,19 +37,18 @@ def check_forms(url):
     """
 
     try:
-        response = safe_requests.get(
-            url,
-            timeout=8,
-            allow_redirects=True,
-            headers={
-                "User-Agent": (
-                    "Mozilla/5.0 "
-                    "(Windows NT 10.0; Win64; x64) "
-                    "AppleWebKit/537.36 "
-                    "Chrome/120.0 Safari/537.36"
-                )
-            }
-        )
+        if response is None:
+            response = safe_requests.get(
+                url,
+                timeout=8,
+                allow_redirects=True,
+                headers={
+                    "User-Agent": (
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                        "AppleWebKit/537.36 Chrome/120.0 Safari/537.36"
+                    )
+                }
+            )
 
         content_type = response.headers.get(
             "Content-Type",
@@ -59,7 +58,7 @@ def check_forms(url):
         if "text/html" not in content_type:
             return (
                 [],
-                "Not Checked",
+                "Not applicable — response is not HTML",
                 0
             )
 
@@ -158,13 +157,13 @@ def check_forms(url):
     except requests.RequestException:
         return (
             [],
-            "Not Checked",
+            "Not checked — request failed",
             0
         )
 
     except Exception:
         return (
             [],
-            "Not Checked",
+            "Not checked — form parsing failed",
             0
         )

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Deterministic URL threat, security-posture, and content analysis.">
+    <title>{% block title %}URL Security Analyzer{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script defer src="{{ url_for('static', filename='js/app.js') }}"></script>
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <header class="site-header">
+        <div class="shell nav-shell">
+            <a class="brand" href="{{ url_for('home') }}" aria-label="URL Security Analyzer home">
+                <span class="brand-mark" aria-hidden="true">UA</span>
+                <span>
+                    <strong>URL Security</strong>
+                    <small>Analyzer</small>
+                </span>
+            </a>
+            <nav aria-label="Primary navigation">
+                <a class="nav-link{% if request.endpoint == 'home' %} is-active{% endif %}" href="{{ url_for('home') }}">Analyze</a>
+                <a class="nav-link{% if request.endpoint == 'history' %} is-active{% endif %}" href="{{ url_for('history') }}">History</a>
+            </nav>
+        </div>
+    </header>
+
+    <main id="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="shell footer-shell">
+            <p>Evidence-based URL analysis. A Safe verdict is not a guarantee.</p>
+            <p>Complete checks only · No partial scores</p>
+        </div>
+    </footer>
+
+    <div class="scan-overlay" data-scan-overlay hidden>
+        <div class="scan-dialog" role="status" aria-live="polite">
+            <span class="scanner" aria-hidden="true"></span>
+            <strong>Running complete analysis</strong>
+            <p>Capturing one page snapshot and verifying every required check.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -278,7 +278,7 @@ def classify_technologies(technologies):
     }
 
 
-def check_technology(url):
+def check_technology(url, response=None):
     """
     Detects technologies used by a website.
 
@@ -315,17 +315,18 @@ def check_technology(url):
 
     try:
 
-        response = safe_requests.get(
-            url,
-            timeout=8,
-            allow_redirects=True,
-            headers={
-                "User-Agent": (
-                    "Mozilla/5.0 "
-                    "(compatible; URLSecurityAnalyzer/2.0)"
-                )
-            }
-        )
+        if response is None:
+            response = safe_requests.get(
+                url,
+                timeout=8,
+                allow_redirects=True,
+                headers={
+                    "User-Agent": (
+                        "Mozilla/5.0 "
+                        "(compatible; URLSecurityAnalyzer/2.0)"
+                    )
+                }
+            )
 
         headers = response.headers
 

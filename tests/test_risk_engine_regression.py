@@ -1,6 +1,8 @@
 import unittest
 
-from analyzer.risk_engine import calculate_risk
+from analyzer.detection_manager import _offline_checks
+from analyzer.exceptions import AnalysisIncompleteError
+from analyzer.risk_engine import calculate_posture, calculate_risk
 
 
 def clean_results():
@@ -42,6 +44,28 @@ def clean_results():
 
 class RiskEngineRegressionTests(unittest.TestCase):
 
+    @staticmethod
+    def complete_url_results(url, newly_registered=False):
+        results = _offline_checks(url)
+        results.update({
+            "scan_status": {"complete": True},
+            "domain_age": {
+                "confirmed_new": newly_registered,
+                "score": 20 if newly_registered else 0,
+            },
+            "forms": {"issues": [], "score": 0},
+            "redirects": {"score": 0},
+            "javascript": {"score": 0},
+            "mixed_content": {"downgraded_to_http": False},
+            "threat_intelligence": {
+                "checked": True,
+                "report_found": False,
+                "malicious": 0,
+                "suspicious": 0,
+            },
+        })
+        return results
+
     def test_clean_url_is_safe(self):
         results = clean_results()
 
@@ -50,7 +74,7 @@ class RiskEngineRegressionTests(unittest.TestCase):
         self.assertEqual(risk_score, 0)
         self.assertEqual(verdict, "Safe")
         self.assertIn(
-            "No major suspicious indicators were detected.",
+            "No corroborated phishing or malware evidence was detected.",
             reasons
         )
 
@@ -71,7 +95,7 @@ class RiskEngineRegressionTests(unittest.TestCase):
 
         risk_score, verdict, reasons = calculate_risk(results)
 
-        self.assertEqual(risk_score, 5)
+        self.assertEqual(risk_score, 0)
         self.assertEqual(verdict, "Safe")
 
         self.assertTrue(
@@ -98,7 +122,7 @@ class RiskEngineRegressionTests(unittest.TestCase):
 
         risk_score, verdict, reasons = calculate_risk(results)
 
-        self.assertEqual(risk_score, 3)
+        self.assertEqual(risk_score, 0)
         self.assertEqual(verdict, "Safe")
 
     def test_one_malicious_with_multiple_suspicious_signals(self):
@@ -120,6 +144,29 @@ class RiskEngineRegressionTests(unittest.TestCase):
 
         self.assertGreaterEqual(risk_score, 35)
         self.assertEqual(verdict, "Medium Risk")
+
+    def test_one_malicious_and_one_suspicious_is_not_called_safe(self):
+        results = clean_results()
+        results["threat_intelligence"] = {
+            "checked": True,
+            "report_found": True,
+            "malicious": 1,
+            "suspicious": 1,
+        }
+
+        risk_score, verdict, _ = calculate_risk(results)
+
+        self.assertEqual(risk_score, 8)
+        self.assertEqual(verdict, "Low Risk")
+
+    def test_email_in_url_alone_does_not_create_threat_risk(self):
+        results = clean_results()
+        results["email_address"] = {"score": 10}
+
+        risk_score, verdict, _ = calculate_risk(results)
+
+        self.assertEqual(risk_score, 0)
+        self.assertEqual(verdict, "Safe")
 
     def test_two_malicious_engines_force_high_risk(self):
         results = clean_results()
@@ -181,20 +228,47 @@ class RiskEngineRegressionTests(unittest.TestCase):
         self.assertGreaterEqual(risk_score, 80)
         self.assertEqual(verdict, "Critical")
 
-    def test_http_url_is_not_safe(self):
+    def test_http_is_a_posture_issue_without_threat_evidence(self):
         results = clean_results()
 
         results["https"]["detected"] = False
 
         risk_score, verdict, reasons = calculate_risk(results)
 
-        self.assertGreaterEqual(risk_score, 20)
-        self.assertEqual(verdict, "Low Risk")
+        self.assertEqual(risk_score, 0)
+        self.assertEqual(verdict, "Safe")
 
+        posture = calculate_posture(results)
+        self.assertLess(posture["score"], 100)
         self.assertIn(
-            "The URL does not use HTTPS.",
-            reasons
+            "The connection does not use HTTPS.",
+            posture["issues"]
         )
+
+    def test_lexical_probability_requires_corroboration(self):
+        results = clean_results()
+        results["keywords"] = {
+            "probability": 0.75,
+            "matches": ["login"],
+            "count": 1,
+            "score": 0,
+        }
+
+        risk_score, verdict, _ = calculate_risk(results)
+
+        self.assertEqual(risk_score, 0)
+        self.assertEqual(verdict, "Safe")
+
+    def test_incomplete_analysis_never_returns_a_score(self):
+        results = clean_results()
+        results["scan_status"] = {
+            "complete": False,
+            "message": "Analysis could not be completed.",
+            "failed_checks": ["dns"],
+        }
+
+        with self.assertRaises(AnalysisIncompleteError):
+            calculate_risk(results)
 
     def test_https_downgrade_has_minimum_risk(self):
         results = clean_results()
@@ -210,6 +284,39 @@ class RiskEngineRegressionTests(unittest.TestCase):
 
         self.assertGreaterEqual(risk_score, 20)
         self.assertEqual(verdict, "Low Risk")
+
+    def test_official_login_path_is_not_a_threat_by_keyword(self):
+        results = self.complete_url_results(
+            "https://ssp.postmatric.karnataka.gov.in/2324/signin.aspx"
+        )
+
+        risk_score, verdict, _ = calculate_risk(results)
+
+        self.assertEqual(risk_score, 0)
+        self.assertEqual(verdict, "Safe")
+
+    def test_contextual_phishing_domain_is_high_risk(self):
+        results = self.complete_url_results(
+            "https://paypal-login-security.xyz/",
+            newly_registered=True,
+        )
+
+        risk_score, verdict, _ = calculate_risk(results)
+
+        self.assertGreaterEqual(risk_score, 51)
+        self.assertEqual(verdict, "High Risk")
+
+    def test_sensitive_content_domain_is_not_malicious_by_itself(self):
+        results = self.complete_url_results("https://xhamster.com/")
+        results["content_warning"] = {
+            "show": True,
+            "type": "adult",
+        }
+
+        risk_score, verdict, _ = calculate_risk(results)
+
+        self.assertEqual(risk_score, 0)
+        self.assertEqual(verdict, "Safe")
 
 
 if __name__ == "__main__":

@@ -34,21 +34,20 @@ INFORMATIONAL_PATTERNS = {
 }
 
 
-def fetch_page(url):
+def fetch_page(url, response=None):
     try:
-        response = safe_requests.get(
-            url,
-            timeout=8,
-            allow_redirects=True,
-            headers={
-                "User-Agent": (
-                    "Mozilla/5.0 "
-                    "(Windows NT 10.0; Win64; x64) "
-                    "AppleWebKit/537.36 "
-                    "Chrome/120.0 Safari/537.36"
-                )
-            }
-        )
+        if response is None:
+            response = safe_requests.get(
+                url,
+                timeout=8,
+                allow_redirects=True,
+                headers={
+                    "User-Agent": (
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                        "AppleWebKit/537.36 Chrome/120.0 Safari/537.36"
+                    )
+                }
+            )
 
         content_type = response.headers.get(
             "Content-Type",
@@ -133,14 +132,14 @@ def find_patterns(text, patterns):
     return found
 
 
-def check_javascript(url):
+def check_javascript(url, response=None):
     try:
-        html = fetch_page(url)
+        html = fetch_page(url, response=response)
 
         if html is None:
             return (
                 [],
-                "Not Checked",
+                "Not applicable — response is not HTML",
                 0
             )
 
@@ -211,6 +210,6 @@ def check_javascript(url):
     except Exception:
         return (
             [],
-            "Not Checked",
+            "Not checked — JavaScript parsing failed",
             0
         )

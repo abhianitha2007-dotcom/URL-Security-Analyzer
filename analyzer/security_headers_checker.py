@@ -12,7 +12,7 @@ SECURITY_HEADERS = {
 }
 
 
-def check_security_headers(url):
+def check_security_headers(url, response=None):
 
     """
     Returns:
@@ -22,14 +22,13 @@ def check_security_headers(url):
     """
 
     try:
-        response = safe_requests.get(
-            url,
-            timeout=8,
-            allow_redirects=True,
-            headers={
-                "User-Agent": "Mozilla/5.0"
-            }
-        )
+        if response is None:
+            response = safe_requests.get(
+                url,
+                timeout=8,
+                allow_redirects=True,
+                headers={"User-Agent": "Mozilla/5.0"}
+            )
 
         missing_headers = [
             header

@@ -15,7 +15,7 @@ def get_hostname(url):
         return ""
 
 
-def check_favicon(url):
+def check_favicon(url, response=None):
 
     """
     Returns:
@@ -25,14 +25,13 @@ def check_favicon(url):
     """
 
     try:
-        response = safe_requests.get(
-            url,
-            timeout=8,
-            allow_redirects=True,
-            headers={
-                "User-Agent": "Mozilla/5.0"
-            }
-        )
+        if response is None:
+            response = safe_requests.get(
+                url,
+                timeout=8,
+                allow_redirects=True,
+                headers={"User-Agent": "Mozilla/5.0"}
+            )
 
         content_type = response.headers.get(
             "Content-Type",
@@ -42,7 +41,7 @@ def check_favicon(url):
         if "text/html" not in content_type:
             return (
                 None,
-                "Not Checked",
+                "Not applicable — response is not HTML",
                 0
             )
 
@@ -123,13 +122,13 @@ def check_favicon(url):
     except requests.RequestException:
         return (
             None,
-            "Not Checked",
+            "Not checked — request failed",
             0
         )
 
     except Exception:
         return (
             None,
-            "Not Checked",
+            "Not checked — favicon parsing failed",
             0
         )

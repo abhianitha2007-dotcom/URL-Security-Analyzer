@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis incomplete · URL Security Analyzer{% endblock %}
+
+{% block content %}
+<section class="state-page shell">
+    <div class="state-card error-state">
+        <span class="state-code">NO SCORE</span>
+        <div class="state-icon" aria-hidden="true">!</div>
+        <p class="eyebrow">Analysis could not be completed</p>
+        <h1>No risk score was produced.</h1>
+        <p>{{ message }}</p>
+        <div class="url-chip" title="{{ url }}">{{ url }}</div>
+        {% if failed_checks %}
+        <div class="failed-checks">
+            <strong>Checks that did not complete</strong>
+            <ul>
+                {% for check in failed_checks %}<li>{{ check|replace('_', ' ')|title }}</li>{% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        <form class="retry-form" action="{{ url_for('analyze') }}" method="post" data-scan-form>
+            <input type="hidden" name="url" value="{{ url }}">
+            <button class="button primary" type="submit">Retry complete analysis</button>
+            <a class="button secondary" href="{{ url_for('home') }}">Use another URL</a>
+        </form>
+    </div>
+</section>
+{% endblock %}
