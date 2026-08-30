@@ -49,13 +49,13 @@
         </div>
     </div>
 
-    <article class="risk-terminal {{ risk_tone }}">
+    <article class="risk-terminal {{ risk_tone }}" data-tilt>
         <div class="terminal-scan" aria-hidden="true"></div>
         <div class="terminal-header"><strong>Threat Risk / Output 01</strong><span><i></i> ACTIVE</span></div>
         <div class="risk-data">
             <div class="risk-score-side">
                 <span>CALCULATED RISK</span>
-                <div class="risk-number">{{ risk_score }}<small>/100</small></div>
+                <div class="risk-number"><span data-counter>{{ risk_score }}</span><small>/100</small></div>
                 <strong>{{ verdict }}</strong>
                 <div class="risk-meter" style="--risk-score: {{ risk_score }}"><span></span></div>
             </div>
@@ -75,7 +75,7 @@
 <section class="shell assessment-grid supporting-assessments" aria-label="Independent assessment summary">
     <article class="assessment-card posture-summary">
         <div class="assessment-label"><span>Security Posture</span><small>Independent grade</small></div>
-        <div class="posture-score"><strong>{{ posture.score }}</strong><span>/100</span></div>
+        <div class="posture-score"><strong data-counter>{{ posture.score }}</strong><span>/100</span></div>
         <div class="assessment-result"><strong>{{ posture.grade }}</strong><p>TLS, headers, cookies, CORS, and mixed content.</p></div>
     </article>
 
@@ -200,10 +200,10 @@
             <p class="eyebrow"><span></span> Reputation</p>
             <h2>VirusTotal</h2>
             <div class="vendor-grid">
-                <div><strong>{{ threat.get('malicious', 0) }}</strong><span>Malicious</span></div>
-                <div><strong>{{ threat.get('suspicious', 0) }}</strong><span>Suspicious</span></div>
-                <div><strong>{{ threat.get('harmless', 0) }}</strong><span>Harmless</span></div>
-                <div><strong>{{ threat.get('total_engines', 0) }}</strong><span>Engines</span></div>
+                <div><strong data-counter>{{ threat.get('malicious', 0) }}</strong><span>Malicious</span></div>
+                <div><strong data-counter>{{ threat.get('suspicious', 0) }}</strong><span>Suspicious</span></div>
+                <div><strong data-counter>{{ threat.get('harmless', 0) }}</strong><span>Harmless</span></div>
+                <div><strong data-counter>{{ threat.get('total_engines', 0) }}</strong><span>Engines</span></div>
             </div>
             <p class="side-status">{{ threat.get('status', 'No reputation result') }}</p>
         </article>

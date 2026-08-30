@@ -15,10 +15,10 @@
 
 <section class="shell history-content">
     <div class="metric-grid history-metrics">
-        <article><span>Total scans</span><strong>{{ total_scans or 0 }}</strong></article>
-        <article><span>Average risk</span><strong>{{ average_risk or 0 }}</strong><small>/ 100</small></article>
-        <article><span>Highest risk</span><strong>{{ highest_risk or 0 }}</strong><small>/ 100</small></article>
-        <article><span>Lowest risk</span><strong>{{ lowest_risk or 0 }}</strong><small>/ 100</small></article>
+        <article><span>Total scans</span><strong data-counter>{{ total_scans or 0 }}</strong></article>
+        <article><span>Average risk</span><strong data-counter>{{ average_risk or 0 }}</strong><small>/ 100</small></article>
+        <article><span>Highest risk</span><strong data-counter>{{ highest_risk or 0 }}</strong><small>/ 100</small></article>
+        <article><span>Lowest risk</span><strong data-counter>{{ lowest_risk or 0 }}</strong><small>/ 100</small></article>
     </div>
 
     {% if scans %}

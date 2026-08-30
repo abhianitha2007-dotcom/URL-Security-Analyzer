@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urljoin, urlparse
 
 import requests
@@ -35,6 +36,8 @@ CHECK_PATHS = {
         "severity": 6
     }
 }
+
+MAX_WORKERS = 3
 
 
 ENV_MARKERS = {
@@ -211,6 +214,37 @@ def is_real_exposure(
     return False
 
 
+def check_path(base_url, name, config):
+    target_url = urljoin(base_url, config["path"])
+    entry = {
+        "name": name,
+        "path": config["path"],
+        "url": target_url,
+        "status_code": None,
+        "exposed": False,
+    }
+    checked = False
+    try:
+        response = safe_requests.get(
+            target_url,
+            timeout=4,
+            allow_redirects=False,
+            headers={
+                "User-Agent": "Mozilla/5.0 (compatible; URLSecurityAnalyzer/2.0)"
+            },
+        )
+        entry["status_code"] = response.status_code
+        entry["exposed"] = is_real_exposure(name, response)
+        checked = True
+    except requests.Timeout:
+        entry["status_code"] = "Timeout"
+    except requests.RequestException:
+        entry["status_code"] = "Request Failed"
+    except Exception:
+        entry["status_code"] = "Unknown Error"
+    return entry, checked
+
+
 def check_file_exposure(url):
     """
     Checks a small fixed list of common
@@ -247,86 +281,23 @@ def check_file_exposure(url):
         return result
 
     total_score = 0
+    checks = list(CHECK_PATHS.items())
+    with ThreadPoolExecutor(max_workers=min(MAX_WORKERS, len(checks))) as executor:
+        futures = [
+            executor.submit(check_path, base_url, name, config)
+            for name, config in checks
+        ]
+        outcomes = [future.result() for future in futures]
 
-    for name, config in CHECK_PATHS.items():
-
-        target_url = urljoin(
-            base_url,
-            config["path"]
-        )
-
-        entry = {
-            "name": name,
-            "path": config["path"],
-            "url": target_url,
-
-            "status_code": None,
-            "exposed": False
-        }
-
-        try:
-            response = safe_requests.get(
-                target_url,
-
-                timeout=4,
-
-                allow_redirects=False,
-
-                headers={
-                    "User-Agent": (
-                        "Mozilla/5.0 "
-                        "(compatible; URLSecurityAnalyzer/2.0)"
-                    )
-                }
-            )
-
-            entry["status_code"] = (
-                response.status_code
-            )
-
+    for (name, config), (entry, checked) in zip(checks, outcomes):
+        result["results"].append(entry)
+        if checked:
             result["checked_count"] += 1
-
-            exposed = is_real_exposure(
-                name,
-                response
+        if entry["exposed"]:
+            result["exposed_files"].append(
+                {"name": name, "path": config["path"], "url": entry["url"]}
             )
-
-            entry["exposed"] = exposed
-
-            if exposed:
-                result["exposed_files"].append(
-                    {
-                        "name": name,
-                        "path": config["path"],
-                        "url": target_url
-                    }
-                )
-
-                total_score += config[
-                    "severity"
-                ]
-
-        except requests.Timeout:
-
-            entry["status_code"] = (
-                "Timeout"
-            )
-
-        except requests.RequestException:
-
-            entry["status_code"] = (
-                "Request Failed"
-            )
-
-        except Exception:
-
-            entry["status_code"] = (
-                "Unknown Error"
-            )
-
-        result["results"].append(
-            entry
-        )
+            total_score += config["severity"]
 
     result["exposed_count"] = len(
         result["exposed_files"]
@@ -337,7 +308,13 @@ def check_file_exposure(url):
         20
     )
 
-    if result["exposed_count"] == 0:
+    if result["checked_count"] < len(checks):
+        result["status"] = (
+            f"Not Checked — {result['checked_count']} of {len(checks)} "
+            "Exposure Probes Completed"
+        )
+
+    elif result["exposed_count"] == 0:
 
         result["status"] = (
             "🟢 No Sensitive File Exposure Detected"

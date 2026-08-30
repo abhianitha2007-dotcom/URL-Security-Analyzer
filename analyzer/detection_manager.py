@@ -150,7 +150,7 @@ def _validate_complete_network_results(url, results):
         failed.append("robots")
 
     sitemap = results["sitemap"]
-    if sitemap.get("errors"):
+    if not sitemap.get("checked", False):
         failed.append("sitemap")
 
     exposure = results["file_exposure"]

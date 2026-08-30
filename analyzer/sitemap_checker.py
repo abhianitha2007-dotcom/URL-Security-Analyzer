@@ -230,9 +230,11 @@ def check_sitemap(
     discovered_sitemaps=None
 ):
     result = {
+        "checked": False,
         "found": False,
         "status": "Not Checked",
         "score": 0,
+        "attempted_count": 0,
         "sitemap_files": [],
         "url_count": 0,
         "suspicious_urls": [],
@@ -354,6 +356,9 @@ def check_sitemap(
                     final_url
                 ) = response_data
 
+                if status_code is not None:
+                    result["checked"] = True
+
                 if content is None:
 
                     if status_code not in (
@@ -467,6 +472,8 @@ def check_sitemap(
                             entry
                         )
 
+    result["attempted_count"] = len(visited)
+
     result["url_count"] = len(
         all_page_urls
     )
@@ -488,10 +495,18 @@ def check_sitemap(
     )
 
     if not result["found"]:
-
-        result["status"] = (
-            "🟢 Sitemap Not Found"
-        )
+        error_codes = [
+            entry.get("status_code")
+            for entry in result["errors"]
+        ]
+        if not result["checked"]:
+            result["status"] = "Not Checked — Sitemap Request Failed"
+        elif any(code in (401, 403) for code in error_codes):
+            result["status"] = "⚪ Sitemap Access Restricted"
+        elif any(isinstance(code, int) and code >= 500 for code in error_codes):
+            result["status"] = "⚪ Sitemap Endpoint Unavailable"
+        else:
+            result["status"] = "🟢 Sitemap Not Found"
 
         return result
 

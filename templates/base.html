@@ -19,7 +19,11 @@
         <span class="world-beam beam-one"></span>
         <span class="world-beam beam-two"></span>
         <span class="world-scanline"></span>
+        <span class="world-orbit orbit-one"><i></i></span>
+        <span class="world-orbit orbit-two"><i></i></span>
+        <span class="world-pointer"></span>
     </div>
+    <div class="page-progress" data-page-progress aria-hidden="true"></div>
 
     <header class="site-header">
         <div class="shell nav-shell">
@@ -51,9 +55,12 @@
         <div class="scan-dialog" role="status" aria-live="polite">
             <div class="scan-dialog-head"><span>SECURITY SCAN / ACTIVE</span><i></i></div>
             <span class="scanner" aria-hidden="true"><b></b></span>
-            <strong>Running complete analysis</strong>
-            <p>Capturing one immutable page snapshot and verifying every required security layer.</p>
-            <div class="scan-progress" aria-hidden="true"><span></span></div>
+            <strong data-scan-title>Validating public destination</strong>
+            <p data-scan-message>Confirming that the URL resolves to a safe public network target.</p>
+            <div class="scan-stages" aria-hidden="true">
+                <i data-scan-stage></i><i data-scan-stage></i><i data-scan-stage></i><i data-scan-stage></i>
+            </div>
+            <div class="scan-progress" aria-hidden="true"><span data-scan-progress></span></div>
         </div>
     </div>
 </body>

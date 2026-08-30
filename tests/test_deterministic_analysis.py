@@ -64,6 +64,50 @@ def test_blocked_or_unavailable_page_never_becomes_a_score(
     assert "no score" in captured.value.message.lower()
 
 
+def test_page_snapshot_follows_safe_html_refresh(monkeypatch):
+    redirect_html = (
+        '<html><head><meta http-equiv="refresh" '
+        'content="0; url=https://portal.example/home"></head></html>'
+    )
+    responses = iter([
+        SimpleNamespace(
+            url="https://legacy.example/",
+            status_code=200,
+            history=[],
+            headers={"Content-Type": "text/html"},
+            content=redirect_html.encode(),
+            text=redirect_html,
+            cookies=[],
+        ),
+        SimpleNamespace(
+            url="https://portal.example/home",
+            status_code=200,
+            history=[],
+            headers={"Content-Type": "text/html"},
+            content=b"<html><p>Portal home</p></html>",
+            text="<html><p>Portal home</p></html>",
+            cookies=[],
+        ),
+    ])
+    requested = []
+
+    def fake_get(url, **kwargs):
+        requested.append(url)
+        return next(responses)
+
+    monkeypatch.setattr(page_snapshot.safe_requests, "get", fake_get)
+
+    snapshot = page_snapshot.capture_page("https://legacy.example/")
+
+    assert requested == [
+        "https://legacy.example/",
+        "https://portal.example/home",
+    ]
+    assert snapshot.url == "https://portal.example/home"
+    assert snapshot.history == (200,)
+    assert "Portal home" in snapshot.text
+
+
 def test_page_modules_share_one_snapshot(monkeypatch):
     page = PageResponse()
     captures = []
@@ -116,7 +160,11 @@ def test_page_modules_share_one_snapshot(monkeypatch):
     monkeypatch.setattr(
         manager,
         "check_sitemap",
-        lambda url, discovered_sitemaps=None: {"status": "Sitemap not found", "errors": []},
+        lambda url, discovered_sitemaps=None: {
+            "checked": True,
+            "status": "Sitemap not found",
+            "errors": [],
+        },
     )
     monkeypatch.setattr(
         manager,
