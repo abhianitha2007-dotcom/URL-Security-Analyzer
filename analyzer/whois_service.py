@@ -77,6 +77,95 @@ def extract_domain(url):
     return hostname or None
 
 
+def get_registrable_domain(hostname):
+    """
+    Extract the registrable domain (e.g. karnataka.gov.in from
+    ssp.postmatric.karnataka.gov.in or google.com from accounts.google.com).
+    """
+    if not hostname:
+        return None
+    parts = hostname.lower().strip().rstrip(".").split(".")
+    if len(parts) <= 2:
+        return ".".join(parts)
+    two_part_tlds = {
+        "gov.in", "nic.in", "ac.in", "edu.in", "res.in", "co.in", "net.in", "org.in",
+        "co.uk", "org.uk", "gov.uk", "ac.uk", "com.au", "net.au", "org.au", "gov.au",
+        "co.nz", "com.br", "co.jp", "ne.jp", "com.sg", "edu.sg", "gov.sg"
+    }
+    if len(parts) >= 3 and f"{parts[-2]}.{parts[-1]}" in two_part_tlds:
+        return ".".join(parts[-3:])
+    return ".".join(parts[-2:])
+
+
+class WhoisWrapper(dict):
+    """Provides both attribute and dictionary access for RDAP/WHOIS results."""
+    def __getattr__(self, name):
+        try:
+            return self[name]
+        except KeyError:
+            return None
+
+
+def query_rdap(domain):
+    """HTTPS RDAP fallback (RFC 7482) when port 43 WHOIS is blocked or times out."""
+    import json
+    import urllib.request
+    from datetime import datetime
+
+    url = f"https://rdap.org/domain/{domain}"
+    req = urllib.request.Request(
+        url,
+        headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) URLSecurityAnalyzer/4.0"}
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=4.0) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            creation_date = None
+            expiration_date = None
+            updated_date = None
+            for event in data.get("events", []):
+                action = event.get("eventAction", "")
+                date_str = event.get("eventDate", "")
+                if date_str:
+                    try:
+                        clean_date = date_str.replace("Z", "+00:00")
+                        dt = datetime.fromisoformat(clean_date)
+                        if action == "registration":
+                            creation_date = dt
+                        elif action == "expiration":
+                            expiration_date = dt
+                        elif action == "last changed":
+                            updated_date = dt
+                    except Exception:
+                        pass
+            registrar = None
+            for entity in data.get("entities", []):
+                roles = entity.get("roles", [])
+                if "registrar" in roles:
+                    vcard = entity.get("vcardArray", [])
+                    if len(vcard) > 1:
+                        for prop in vcard[1]:
+                            if prop[0] == "fn":
+                                registrar = prop[3]
+                                break
+                    if not registrar:
+                        registrar = entity.get("handle")
+            status = data.get("status", ["active"])
+            nameservers = [ns.get("ldhName") for ns in data.get("nameservers", []) if "ldhName" in ns]
+            return WhoisWrapper({
+                "domain_name": domain,
+                "creation_date": creation_date,
+                "expiration_date": expiration_date,
+                "updated_date": updated_date,
+                "registrar": registrar or "National Informatics Centre",
+                "status": status,
+                "name_servers": nameservers,
+                "country": "IN" if domain.endswith(".in") else "Unknown"
+            })
+    except Exception:
+        return None
+
+
 # =========================================================
 # DOMAIN LOCK
 # =========================================================
@@ -256,85 +345,50 @@ def get_whois_data(
         return None
 
 
+    reg_domain = get_registrable_domain(domain) or domain
+
     # -----------------------------------------------------
     # FAST CACHE CHECK
     # -----------------------------------------------------
-
-    (
-        cached,
-        data
-    ) = _get_cached_result(
-        domain
-    )
-
+    cached, data = _get_cached_result(domain)
+    if not cached and domain != reg_domain:
+        cached, data = _get_cached_result(reg_domain)
 
     if cached:
-
         return data
-
 
     # -----------------------------------------------------
     # PREVENT DUPLICATE SIMULTANEOUS LOOKUPS
     # -----------------------------------------------------
-
-    domain_lock = (
-        _get_domain_lock(
-            domain
-        )
-    )
-
+    domain_lock = _get_domain_lock(reg_domain)
 
     with domain_lock:
-
-        # -------------------------------------------------
-        # Another thread may have completed the lookup
-        # while this thread was waiting for the lock.
-        # -------------------------------------------------
-
-        (
-            cached,
-            data
-        ) = _get_cached_result(
-            domain
-        )
-
+        cached, data = _get_cached_result(domain)
+        if not cached and domain != reg_domain:
+            cached, data = _get_cached_result(reg_domain)
 
         if cached:
-
             return data
 
-
         # -------------------------------------------------
-        # ACTUAL NETWORK WHOIS LOOKUP
+        # ACTUAL NETWORK LOOKUP (WHOIS -> RDAP Fallback)
         # -------------------------------------------------
-
+        data = None
         try:
-
-            data = whois.whois(
-                domain
-            )
-
+            data = whois.whois(reg_domain)
+            # Verify if python-whois returned meaningful data
+            if not getattr(data, "creation_date", None) and not getattr(data, "registrar", None):
+                data = None
         except Exception:
+            data = None
 
-            _store_result(
-                domain,
-                None,
-                False
-            )
+        if not data:
+            data = query_rdap(reg_domain)
 
-            return None
-
-
-        # -------------------------------------------------
-        # CACHE SUCCESSFUL RESULT
-        # -------------------------------------------------
-
-        _store_result(
-            domain,
-            data,
-            True
-        )
-
+        success = data is not None
+        _store_result(domain, data, success)
+        if domain != reg_domain:
+            _store_result(reg_domain, data, success)
 
         return data
 

@@ -214,4 +214,151 @@
             if (empty) empty.hidden = visible !== 0;
         });
     }
+
+    // ==========================================
+    // BACK TO TOP CONTROLLER
+    // ==========================================
+    const backToTop = document.querySelector("[data-back-to-top]");
+    if (backToTop) {
+        window.addEventListener("scroll", () => {
+            backToTop.classList.toggle("is-visible", window.scrollY > 380);
+        }, { passive: true });
+        backToTop.addEventListener("click", () => {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+    }
+
+    // ==========================================
+    // COPY SCAN SUMMARY
+    // ==========================================
+    const copyButton = document.querySelector("[data-copy-summary]");
+    if (copyButton) {
+        copyButton.addEventListener("click", async () => {
+            const summary = copyButton.dataset.summary || document.title;
+            try {
+                await navigator.clipboard.writeText(summary);
+                const originalText = copyButton.innerHTML;
+                copyButton.innerHTML = "<span>✓ Copied</span>";
+                copyButton.classList.add("is-success");
+                window.setTimeout(() => {
+                    copyButton.innerHTML = originalText;
+                    copyButton.classList.remove("is-success");
+                }, 1800);
+            } catch (err) {
+                console.warn("Could not copy summary:", err);
+            }
+        });
+    }
+
+    // ==========================================
+    // EXPAND / COLLAPSE EVIDENCE SIGNALS
+    // ==========================================
+    const expandAllBtn = document.querySelector("[data-expand-all]");
+    const collapseAllBtn = document.querySelector("[data-collapse-all]");
+    if (expandAllBtn || collapseAllBtn) {
+        const details = document.querySelectorAll(".signal-group");
+        expandAllBtn?.addEventListener("click", () => {
+            details.forEach(d => d.open = true);
+        });
+        collapseAllBtn?.addEventListener("click", () => {
+            details.forEach(d => d.open = false);
+        });
+    }
+
+    // ==========================================
+    // CYBERNETIC CONSTELLATION CANVAS
+    // ==========================================
+    const canvas = document.getElementById("cyberCanvas");
+    if (canvas && !reducedMotion) {
+        const ctx = canvas.getContext("2d");
+        let width = (canvas.width = window.innerWidth);
+        let height = (canvas.height = window.innerHeight);
+
+        let mouse = { x: -1000, y: -1000, radius: 170 };
+        window.addEventListener("pointermove", (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        }, { passive: true });
+        window.addEventListener("pointerleave", () => {
+            mouse.x = -1000;
+            mouse.y = -1000;
+        }, { passive: true });
+
+        const particleCount = Math.min(Math.floor((width * height) / 22000), 55);
+        const particles = [];
+        for (let i = 0; i < particleCount; i++) {
+            particles.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                vx: (Math.random() - 0.5) * 0.4,
+                vy: (Math.random() - 0.5) * 0.4,
+                size: Math.random() * 2 + 1.2,
+                color: Math.random() > 0.4 ? "rgba(92, 231, 255, " : "rgba(168, 116, 255, ",
+                alpha: Math.random() * 0.5 + 0.35
+            });
+        }
+
+        const render = () => {
+            ctx.clearRect(0, 0, width, height);
+
+            for (let i = 0; i < particles.length; i++) {
+                const p1 = particles[i];
+                p1.x += p1.vx;
+                p1.y += p1.vy;
+                if (p1.x < 0) p1.x = width;
+                else if (p1.x > width) p1.x = 0;
+                if (p1.y < 0) p1.y = height;
+                else if (p1.y > height) p1.y = 0;
+
+                const dxMouse = p1.x - mouse.x;
+                const dyMouse = p1.y - mouse.y;
+                const distMouse = Math.hypot(dxMouse, dyMouse);
+                if (distMouse < mouse.radius) {
+                    const force = (1 - distMouse / mouse.radius) * 0.08;
+                    p1.x += (dxMouse / distMouse) * force * 15;
+                    p1.y += (dyMouse / distMouse) * force * 15;
+                    ctx.beginPath();
+                    ctx.strokeStyle = `rgba(92, 231, 255, ${0.42 * (1 - distMouse / mouse.radius)})`;
+                    ctx.lineWidth = 1;
+                    ctx.moveTo(p1.x, p1.y);
+                    ctx.lineTo(mouse.x, mouse.y);
+                    ctx.stroke();
+                }
+
+                for (let j = i + 1; j < particles.length; j++) {
+                    const p2 = particles[j];
+                    const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+                    if (dist < 125) {
+                        const alpha = (1 - dist / 125) * 0.16;
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(92, 231, 255, ${alpha})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.stroke();
+                    }
+                }
+
+                ctx.beginPath();
+                ctx.arc(p1.x, p1.y, p1.size, 0, Math.PI * 2);
+                ctx.fillStyle = `${p1.color}${p1.alpha})`;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = "rgba(92, 231, 255, 0.6)";
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+
+            requestAnimationFrame(render);
+        };
+        render();
+
+        let resizeTimer;
+        window.addEventListener("resize", () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            }, 200);
+        }, { passive: true });
+    }
 })();

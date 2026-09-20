@@ -13,6 +13,8 @@
     <a class="skip-link" href="#main-content">Skip to content</a>
 
     <div class="cyber-world" aria-hidden="true">
+        <canvas id="cyberCanvas" class="cyber-canvas"></canvas>
+        <span class="world-radar"></span>
         <span class="world-grid"></span>
         <span class="world-glow glow-one"></span>
         <span class="world-glow glow-two"></span>
@@ -23,6 +25,7 @@
         <span class="world-orbit orbit-two"><i></i></span>
         <span class="world-pointer"></span>
     </div>
+    <div class="cursor-glow" data-cursor-glow aria-hidden="true"></div>
     <div class="page-progress" data-page-progress aria-hidden="true"></div>
 
     <header class="site-header">
@@ -63,5 +66,9 @@
             <div class="scan-progress" aria-hidden="true"><span data-scan-progress></span></div>
         </div>
     </div>
+
+    <button class="back-to-top" data-back-to-top type="button" aria-label="Back to top">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+    </button>
 </body>
 </html>

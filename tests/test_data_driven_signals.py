@@ -52,3 +52,19 @@ def test_below_threshold_tokens_are_not_shown_as_suspicious():
     assert result["probability"] < 0.65
     assert result["matches"] == []
     assert result["count"] == 0
+
+
+def test_authoritative_subdomains_do_not_produce_lexical_alarms():
+    result = analyze_url_language("https://accounts.google.com/")
+
+    assert result["probability"] < 0.65
+    assert result["matches"] == []
+    assert "Elevated" not in result["status"]
+
+
+def test_registrable_domain_extraction_handles_cc_tlds():
+    from analyzer.whois_service import get_registrable_domain
+
+    assert get_registrable_domain("ssp.postmatric.karnataka.gov.in") == "karnataka.gov.in"
+    assert get_registrable_domain("accounts.google.com") == "google.com"
+    assert get_registrable_domain("sub.domain.co.uk") == "domain.co.uk"

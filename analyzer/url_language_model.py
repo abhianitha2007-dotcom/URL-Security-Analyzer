@@ -169,6 +169,26 @@ def analyze_url_language(url: str) -> dict:
     candidate_tokens = _evidence_tokens(
         url, weights, ngram_min, ngram_max
     )
+    # Ground authoritative domains to avoid false-positive self-brand token matches
+    try:
+        parsed_host = (urlsplit(url).hostname or "").lower()
+        authoritative_roots = (
+            "google.com", "google.co.in", "youtube.com", "microsoft.com",
+            "apple.com", "amazon.com", "amazon.in", "github.com",
+            "gov.in", "nic.in", ".gov"
+        )
+        is_authoritative = any(
+            parsed_host == root or parsed_host.endswith("." + root.lstrip("."))
+            for root in authoritative_roots
+        )
+        if is_authoritative:
+            host_tokens = set(TOKEN_PATTERN.findall(parsed_host))
+            candidate_tokens = [tok for tok in candidate_tokens if tok not in host_tokens]
+            if not candidate_tokens:
+                probability = min(probability, 0.40)
+    except Exception:
+        pass
+
     lexical_policy = load_scoring_policy()["lexical"]
     elevated = float(lexical_policy["elevated_probability"])
     high = float(lexical_policy["high_probability"])

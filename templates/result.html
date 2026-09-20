@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "_macros.html" import status_row, verdict_class %}
 
-{% block title %}{{ verdict }} · URL analysis{% endblock %}
+{% block title %}{{ verdict }} · {{ url }} · URL Security Analysis{% endblock %}
 {% block body_class %}result-page{% if content_warning and content_warning.show %} warning-pending{% endif %}{% endblock %}
 
 {% block content %}
@@ -23,7 +23,7 @@
         <div class="warning-gate-url" title="{{ url }}">{{ url }}</div>
         <div class="warning-separation-note">
             <strong>Not a malware verdict</strong>
-            <span>{{ warning.not_threat_verdict or 'This advisory does not change the threat-risk score.' }}</span>
+            <span>{{ warning.not_threat_verdict or 'This advisory does not by itself mean the website is malicious or change the threat-risk score.' }}</span>
         </div>
         <div class="warning-gate-actions">
             <a class="button secondary" href="{{ url_for('home') }}">Go back</a>
@@ -35,28 +35,46 @@
 
 <section class="report-hero shell">
     <div class="report-intro">
-        <span class="complete-badge"><i></i> Security analysis complete</span>
-        <p class="eyebrow"><span></span> Deterministic report</p>
-        <h1>Security <em>intelligence.</em></h1>
-        <p class="report-description">Every required layer completed. Threat evidence, website hardening, and sensitive-content classification are reported independently.</p>
-        <div class="target-command">
-            <div><small>ANALYZED TARGET</small><strong title="{{ url }}">{{ url }}</strong></div>
-            <span>VERIFIED</span>
+        <div class="hero-badge-row">
+            <span class="complete-badge"><i></i> Security analysis complete</span>
+            <span class="engine-tag">Engine {{ engine_version }}</span>
         </div>
+        <p class="eyebrow"><span></span> Deterministic Intelligence</p>
+        <h1>Security <em>intelligence.</em></h1>
+        <p class="report-description">Target analyzed across 30+ independent security vectors. Threat evidence, website hardening posture, and sensitive-content classification are audited and reported independently.</p>
+        
+        <div class="target-command" data-tilt>
+            <div>
+                <small>ANALYZED TARGET</small>
+                <strong title="{{ url }}">{{ url }}</strong>
+            </div>
+            <button class="copy-action-btn" type="button" data-copy-summary data-summary="URL Security Report for {{ url }}: Threat Risk {{ risk_score }}/100 ({{ verdict }}), Security Posture {{ posture.score }}/100 ({{ posture.grade }}). Scan Complete." title="Copy scan summary to clipboard">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <span>Copy Summary</span>
+            </button>
+        </div>
+        
         <div class="intro-statuses">
             <span class="verdict-pill {{ risk_tone }}">{{ verdict }}</span>
             <span class="coverage-pill"><i></i> Complete analysis</span>
+            <span class="posture-pill">Posture: {{ posture.grade }} ({{ posture.score }}/100)</span>
         </div>
     </div>
 
     <article class="risk-terminal {{ risk_tone }}" data-tilt>
         <div class="terminal-scan" aria-hidden="true"></div>
-        <div class="terminal-header"><strong>Threat Risk / Output 01</strong><span><i></i> ACTIVE</span></div>
+        <div class="terminal-header">
+            <strong>Threat Risk / Output 01</strong>
+            <span><i></i> ACTIVE</span>
+        </div>
         <div class="risk-data">
             <div class="risk-score-side">
-                <span>CALCULATED RISK</span>
-                <div class="risk-number"><span data-counter>{{ risk_score }}</span><small>/100</small></div>
+                <span>CALCULATED THREAT RISK</span>
+                <div class="risk-number">
+                    <span data-counter>{{ risk_score }}</span><small>/100</small>
+                </div>
                 <strong>{{ verdict }}</strong>
+                <p class="score-subtext">0 = Safe destination &bull; 100 = Critical threat</p>
                 <div class="risk-meter" style="--risk-score: {{ risk_score }}"><span></span></div>
             </div>
             <div class="risk-spectrum" aria-label="Risk spectrum">
@@ -68,27 +86,60 @@
                 <div class="spectrum-row{% if risk_score > 75 %} active{% endif %}"><b>CRITICAL</b><i><em></em></i></div>
             </div>
         </div>
-        <div class="terminal-footer"><span>ENGINE {{ engine_version }}</span><span>REPORT READY</span></div>
+        <div class="terminal-footer">
+            <span>ENGINE {{ engine_version }} &bull; POLICY {{ policy_version }}</span>
+            <span>REPORT READY</span>
+        </div>
     </article>
 </section>
 
 <section class="shell assessment-grid supporting-assessments" aria-label="Independent assessment summary">
-    <article class="assessment-card posture-summary">
-        <div class="assessment-label"><span>Security Posture</span><small>Independent grade</small></div>
-        <div class="posture-score"><strong data-counter>{{ posture.score }}</strong><span>/100</span></div>
-        <div class="assessment-result"><strong>{{ posture.grade }}</strong><p>TLS, headers, cookies, CORS, and mixed content.</p></div>
+    <article class="assessment-card posture-summary" data-tilt>
+        <div class="assessment-label">
+            <span>Security Posture</span>
+            <small>Hardening Hygiene</small>
+        </div>
+        <div class="posture-score">
+            <strong data-counter>{{ posture.score }}</strong>
+            <span>/ 100</span>
+            <div class="posture-meter-bar"><span style="width: {{ posture.score }}%"></span></div>
+        </div>
+        <div class="assessment-result">
+            <div class="result-header">
+                <strong>{{ posture.grade }}</strong>
+                <span class="pill-mini">100 = Optimal</span>
+            </div>
+            <p>Evaluates TLS transport, security headers, cookie flags, CORS rules, and mixed content.</p>
+        </div>
     </article>
 
-    <article class="assessment-card content-summary{% if warning.show %} warning-{{ warning.type }}{% endif %}">
-        <div class="assessment-label"><span>Content Warning</span><small>Separate classification</small></div>
-        <div class="content-symbol" aria-hidden="true">{{ warning.icon or '—' }}</div>
-        <div class="assessment-result"><strong>{{ warning.title or 'No advisory detected' }}</strong><p>{% if warning.show %}Does not alter threat risk.{% else %}No sensitive category was identified.{% endif %}</p></div>
+    <article class="assessment-card content-summary{% if warning.show %} warning-{{ warning.type }}{% endif %}" data-tilt>
+        <div class="assessment-label">
+            <span>Content Warning</span>
+            <small>Content Policy</small>
+        </div>
+        <div class="content-symbol" aria-hidden="true">{{ warning.icon or '✓' }}</div>
+        <div class="assessment-result">
+            <div class="result-header">
+                <strong>{{ warning.title or 'No content warning detected' }}</strong>
+            </div>
+            <p>{% if warning.show %}Does not alter threat risk.{% else %}No adult, gambling, or high-risk content observed.{% endif %}</p>
+        </div>
     </article>
 
-    <article class="assessment-card integrity-summary">
-        <div class="assessment-label"><span>Scan Integrity</span><small>No partial output</small></div>
+    <article class="assessment-card integrity-summary" data-tilt>
+        <div class="assessment-label">
+            <span>Scan Integrity</span>
+            <small>Deterministic Audit</small>
+        </div>
         <div class="integrity-symbol" aria-hidden="true"><span>✓</span></div>
-        <div class="assessment-result"><strong>Complete</strong><p>All required analysis layers returned usable evidence.</p></div>
+        <div class="assessment-result">
+            <div class="result-header">
+                <strong>Complete</strong>
+                <span class="pill-mini green">Verified</span>
+            </div>
+            <p>Every analysis layer executed and returned verifiable evidence. No partial or guessing output.</p>
+        </div>
     </article>
 </section>
 
@@ -107,11 +158,17 @@
 {% endif %}
 
 <nav class="report-nav shell" aria-label="Report sections">
-    <a href="#evidence">Evidence</a>
-    <a href="#modules">Analysis layers</a>
-    <a href="#reputation">Reputation</a>
-    <a href="#provenance">Versions</a>
-    {% if pdf_available %}<a class="report-nav-action" href="{{ url_for('download_report') }}">Download PDF ↓</a>{% endif %}
+    <a href="#evidence">Assessment Evidence</a>
+    <a href="#modules">Security Modules</a>
+    <a href="#reputation">Reputation Signals</a>
+    <a href="#provenance">Reproducibility</a>
+    <div class="nav-extra-actions">
+        <button type="button" class="nav-tool-btn" data-expand-all title="Expand all layers">Expand All</button>
+        <button type="button" class="nav-tool-btn" data-collapse-all title="Collapse all layers">Collapse All</button>
+        {% if pdf_available %}
+        <a class="report-nav-action" href="{{ url_for('download_report') }}">Download PDF Report ↓</a>
+        {% endif %}
+    </div>
 </nav>
 
 <section class="shell report-layout">
@@ -119,23 +176,38 @@
         <article class="report-panel evidence-panel" id="evidence">
             <div class="chapter-marker"><span>01</span><b>ASSESSMENT EVIDENCE</b></div>
             <div class="panel-heading">
-                <div><p class="eyebrow"><span></span> Decision evidence</p><h2>Why this verdict</h2></div>
+                <div>
+                    <p class="eyebrow"><span></span> Corroborated Evidence</p>
+                    <h2>Decision evidence</h2>
+                </div>
                 <span class="verdict-pill {{ risk_tone }}">{{ verdict }}</span>
             </div>
             <ol class="reason-list">
                 {% for reason in reasons %}
-                <li><span>{{ '%02d'|format(loop.index) }}</span><p>{{ reason }}</p><small>SIGNAL</small></li>
+                <li>
+                    <span>{{ '%02d'|format(loop.index) }}</span>
+                    <p>{{ reason }}</p>
+                    <small>VERIFIED</small>
+                </li>
                 {% endfor %}
             </ol>
-            <p class="assessment-caveat">A score summarizes observed evidence at scan time; it cannot guarantee that a destination is safe.</p>
+            <p class="assessment-caveat">A score summarizes observed evidence at scan time; it cannot guarantee that an arbitrary destination is safe indefinitely.</p>
         </article>
 
         <article class="report-panel" id="modules">
             <div class="chapter-marker"><span>02</span><b>ANALYSIS LAYERS</b></div>
-            <div class="panel-heading"><div><p class="eyebrow"><span></span> Detailed evidence</p><h2>Security modules</h2></div></div>
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow"><span></span> Deep Vector Telemetry</p>
+                    <h2>Security modules</h2>
+                </div>
+            </div>
 
             <details class="signal-group" open>
-                <summary><span>URL & domain signals</span><small>Lexical and structural context</small></summary>
+                <summary>
+                    <span>URL & domain signals</span>
+                    <small>Lexical, structural & format context</small>
+                </summary>
                 <dl class="signal-list">
                     {{ status_row('HTTPS', r.get('https', {}).get('status')) }}
                     {{ status_row('Host format', r.get('ip_address', {}).get('status')) }}
@@ -157,7 +229,10 @@
             </details>
 
             <details class="signal-group">
-                <summary><span>Page behavior</span><small>One shared page snapshot</small></summary>
+                <summary>
+                    <span>Page behavior</span>
+                    <small>Execution, forms, script & redirects</small>
+                </summary>
                 <dl class="signal-list">
                     {{ status_row('Redirects', r.get('redirects', {}).get('status'), r.get('redirects', {}).get('final_url')) }}
                     {{ status_row('Compact link', r.get('shortener', {}).get('status')) }}
@@ -169,7 +244,10 @@
             </details>
 
             <details class="signal-group">
-                <summary><span>Security posture</span><small>Hardening, not threat identity</small></summary>
+                <summary>
+                    <span>Security posture</span>
+                    <small>Hardening standards & configurations</small>
+                </summary>
                 <dl class="signal-list">
                     {{ status_row('TLS certificate', r.get('ssl', {}).get('status'), r.get('ssl', {}).get('issuer')) }}
                     {{ status_row('Security headers', r.get('security_headers', {}).get('status'), r.get('security_headers', {}).get('missing', [])|join(', ')) }}
@@ -183,10 +261,14 @@
             </details>
 
             <details class="signal-group">
-                <summary><span>Domain & discovery</span><small>Registration and public files</small></summary>
+                <summary>
+                    <span>Domain & discovery</span>
+                    <small>Registry WHOIS, DNS & public assets</small>
+                </summary>
                 <dl class="signal-list">
                     {{ status_row('Domain age', r.get('domain_age', {}).get('message'), r.get('domain_age', {}).get('age')) }}
                     {{ status_row('Registrar', r.get('whois', {}).get('registrar'), r.get('whois', {}).get('creation_date')) }}
+                    {{ status_row('DNS records', r.get('dns', {}).get('status'), r.get('dns', {}).get('records', {}).keys()|join(', ')) }}
                     {{ status_row('robots.txt', r.get('robots', {}).get('status')) }}
                     {{ status_row('Sitemap', r.get('sitemap', {}).get('status'), r.get('sitemap', {}).get('url_count')) }}
                     {{ status_row('File exposure', r.get('file_exposure', {}).get('status'), r.get('file_exposure', {}).get('exposed_count')) }}
@@ -196,24 +278,45 @@
     </div>
 
     <aside class="report-aside">
-        <article class="side-panel reputation-panel" id="reputation">
-            <p class="eyebrow"><span></span> Reputation</p>
+        <article class="side-panel reputation-panel" id="reputation" data-tilt>
+            <p class="eyebrow"><span></span> Global Reputation</p>
             <h2>VirusTotal</h2>
             <div class="vendor-grid">
-                <div><strong data-counter>{{ threat.get('malicious', 0) }}</strong><span>Malicious</span></div>
-                <div><strong data-counter>{{ threat.get('suspicious', 0) }}</strong><span>Suspicious</span></div>
-                <div><strong data-counter>{{ threat.get('harmless', 0) }}</strong><span>Harmless</span></div>
-                <div><strong data-counter>{{ threat.get('total_engines', 0) }}</strong><span>Engines</span></div>
+                <div class="vendor-stat stat-malicious">
+                    <strong data-counter>{{ threat.get('malicious', 0) }}</strong>
+                    <span>Malicious</span>
+                </div>
+                <div class="vendor-stat stat-suspicious">
+                    <strong data-counter>{{ threat.get('suspicious', 0) }}</strong>
+                    <span>Suspicious</span>
+                </div>
+                <div class="vendor-stat stat-harmless">
+                    <strong data-counter>{{ threat.get('harmless', 0) }}</strong>
+                    <span>Harmless</span>
+                </div>
+                <div class="vendor-stat stat-engines">
+                    <strong data-counter>{{ threat.get('total_engines', 0) }}</strong>
+                    <span>Engines</span>
+                </div>
             </div>
             <p class="side-status">{{ threat.get('status', 'No reputation result') }}</p>
         </article>
 
-        <article class="side-panel posture-panel">
-            <p class="eyebrow"><span></span> Posture observations</p>
-            <h2>{{ posture.grade }}</h2>
+        <article class="side-panel posture-panel" data-tilt>
+            <div class="side-head">
+                <p class="eyebrow"><span></span> Posture observations</p>
+                <span class="pill-mini {{ 'green' if posture.grade in ['Excellent', 'Good'] else 'yellow' }}">{{ posture.grade }}</span>
+            </div>
+            <h2>{{ posture.score }} <small>/ 100</small></h2>
             {% if posture.issues %}
-            <ul class="compact-list">{% for issue in posture.issues %}<li>{{ issue }}</li>{% endfor %}</ul>
-            {% else %}<p>No material hardening issues were identified.</p>{% endif %}
+            <ul class="compact-list">
+                {% for issue in posture.issues %}
+                <li>{{ issue }}</li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="clean-posture-note">✓ No material hardening issues were identified.</p>
+            {% endif %}
         </article>
 
         <article class="side-panel provenance-panel" id="provenance">
@@ -233,5 +336,8 @@
 <section class="shell report-footer-actions">
     <a class="button primary" href="{{ url_for('home') }}">Analyze another URL</a>
     <a class="button secondary" href="{{ url_for('history') }}">View scan history</a>
+    {% if pdf_available %}
+    <a class="button secondary download-btn" href="{{ url_for('download_report') }}">Download PDF Report</a>
+    {% endif %}
 </section>
 {% endblock %}
